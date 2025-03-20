@@ -96,7 +96,7 @@ class dp_profile(object):
 
 	def load_from_path(self, path):
 		folder_name = os.path.basename(os.path.normpath(path))
-		if not (folder_name.startswith('profile') and folder_name[7].isnumeric() and '_' in folder_name):
+		if not folder_name.startswith('profile_'):
 			print("invalid profile folder:", folder_name)
 			return
 		self.path = path
@@ -134,17 +134,46 @@ class dp_profile(object):
 		self.dim_unused = True
 		self.is_landscape = False
 
+def read_profile_order_file(txt_path, dp_descrip):
+	profile_num_dict = {}
+	with open(txt_path) as fff:
+		for line in fff:
+			line = line.strip(" \r\n")
+			line_split = line.split(" ", 1)
+			try:
+				pf_number = int(line_split[0])
+				pf_name = line_split[1]
+			except Exception as e:
+				continue
+			if pf_number >= dp_descrip.MAX_PROFILE_COUNT:
+				continue
+			profile_num_dict[pf_name] = pf_number
+	profile_info_list = []
+	for key in profile_num_dict:
+		profile_info_list.append((profile_num_dict[key], key))
+	profile_info_list.sort(key=lambda tup: tup[0])
+	return profile_info_list
+
 def build_profile(root_dir_path, dp_descrip):
 	my_dirs = [d for d in os.listdir(root_dir_path) if os.path.isdir(os.path.join(root_dir_path, d))]
-	my_dirs = [x for x in my_dirs if x.startswith('profile') and x[7].isnumeric() and '_' in x]
-	my_dirs.sort(key=lambda s: int(s[7:].split("_")[0]))
-	my_dirs = [os.path.join(root_dir_path, d) for d in my_dirs if d.startswith("profile")]
-	my_dirs = my_dirs[:dp_descrip.MAX_PROFILE_COUNT]
+	my_dirs = [x for x in my_dirs if x.startswith('profile_')]
+	profile_info_txt_path = os.path.join(root_dir_path, "profile_info.txt")
+	profile_info_list = read_profile_order_file(profile_info_txt_path, dp_descrip)
+
 	profile_list = []
-	for item in my_dirs:
+
+	for item in profile_info_list:
+		pf_number = item[0]
+		pf_name = item[1]
+		this_profile_folder_name = f"profile_{pf_name}"
+		if this_profile_folder_name not in my_dirs:
+			continue
+		this_profile_folder_path = os.path.join(root_dir_path, this_profile_folder_name)
+		print(this_profile_folder_path)
 		this_profile = dp_profile(dp_descrip)
-		this_profile.load_from_path(item)
+		this_profile.load_from_path(this_profile_folder_path)
 		profile_list.append(this_profile)
+
 	return profile_list
 
 def import_profile_single(root_dir_path, dp_descrip):
@@ -167,3 +196,29 @@ def import_profile(root_dir_path, dp_descrip):
 
 # fff = import_profile("sample_profiles/profile1_windows")
 # print(fff)
+
+"""
+build_profile()
+
+
+
+
+SW_MATRIX_NUM_COLS = 4
+SW_MATRIX_NUM_ROWS = 5
+MECH_OBSW_COUNT = (SW_MATRIX_NUM_COLS * SW_MATRIX_NUM_ROWS)
+ROTARY_ENCODER_SW_COUNT = 6
+ONBOARD_SPARE_GPIO_COUNT = 10
+
+dpp_descriptor = dp_descriptor()
+dpp_descriptor.MECH_OBSW_COUNT = MECH_OBSW_COUNT
+dpp_descriptor.ROTARY_ENCODER_SW_COUNT = ROTARY_ENCODER_SW_COUNT
+dpp_descriptor.MAX_EXPANSION_CHANNEL = MAX_EXPANSION_CHANNEL
+dpp_descriptor.ONBOARD_SPARE_GPIO_COUNT = ONBOARD_SPARE_GPIO_COUNT
+dpp_descriptor.MAX_PROFILE_COUNT = 64
+
+
+profile_list = build_profile("./sample_profiles", dpp_descriptor)
+
+print(profile_list)
+
+"""
