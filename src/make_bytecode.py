@@ -2,7 +2,7 @@ import sys
 import ds3_preprocessor
 import ast
 import myast
-from keywords import *
+from shared import *
 import traceback
 
 """

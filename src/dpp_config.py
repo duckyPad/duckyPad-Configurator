@@ -19,8 +19,48 @@ import hid_op
 import make_bytecode
 from shared import *
 import my_compare
-from keywords import *
 import traceback
+
+# ----- DPP specific ----
+
+
+"""
+0 to 19: mechanical switches
+20 to 25: rotary encoders
+26 to 35: spare gpio pins, unused
+36 to 65: expansion channels
+"""
+
+BUTTON_RE1_CW = 20
+BUTTON_RE1_CCW = 21
+BUTTON_RE1_PUSH = 22
+BUTTON_RE2_CW = 23
+BUTTON_RE2_CCW = 24
+BUTTON_RE2_PUSH = 25
+
+EXP_BUTTON_START = 36
+
+def is_rotary_encoder_button(key_index_start_from_0):
+    return BUTTON_RE1_CW <= key_index_start_from_0 <= BUTTON_RE2_PUSH
+
+def is_expansion_button(key_index_start_from_0):
+    return EXP_BUTTON_START <= key_index_start_from_0 <= EXP_BUTTON_START + MAX_EXPANSION_CHANNEL
+
+KEY_NAME_MAX_CHAR_PER_LINE = 5
+
+SW_MATRIX_NUM_COLS = 4
+SW_MATRIX_NUM_ROWS = 5
+MECH_OBSW_COUNT = (SW_MATRIX_NUM_COLS * SW_MATRIX_NUM_ROWS)
+ROTARY_ENCODER_SW_COUNT = 6
+ONBOARD_SPARE_GPIO_COUNT = 10
+
+dpp_descriptor = dp_descriptor()
+dpp_descriptor.MECH_OBSW_COUNT = MECH_OBSW_COUNT
+dpp_descriptor.ROTARY_ENCODER_SW_COUNT = ROTARY_ENCODER_SW_COUNT
+dpp_descriptor.MAX_EXPANSION_CHANNEL = MAX_EXPANSION_CHANNEL
+dpp_descriptor.ONBOARD_SPARE_GPIO_COUNT = ONBOARD_SPARE_GPIO_COUNT
+
+# ---------
 
 """
 0.13.5
@@ -295,7 +335,7 @@ def select_root_folder(root_path=None, is_msc=False):
     dp_root_folder_path = root_path
     dp_root_folder_display.set("Selected: " + root_path)
     root_folder_path_label.config(foreground='navy')
-    profile_list = duck_objs.build_profile(root_path)
+    profile_list = duck_objs.build_profile(root_path, dpp_descriptor)
 
     ui_reset()
     update_profile_display()
@@ -1511,7 +1551,7 @@ def import_profile_click():
     import_path = filedialog.askdirectory()
     if len(import_path) <= 0:
         return
-    is_success, content = duck_objs.import_profile(import_path)
+    is_success, content = duck_objs.import_profile(import_path, dpp_descriptor)
     if is_success is False:
         messagebox.showinfo("Import", f"Import failed:\n\n{content}")
         return
@@ -1657,7 +1697,7 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-# select_root_folder("sample_profiles")
+select_root_folder("sample_profiles")
 my_compare.tk_root = root
 my_compare.tk_strvar = dp_root_folder_display
 root.mainloop()

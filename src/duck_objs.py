@@ -126,17 +126,17 @@ class dp_profile(object):
 		# ret += str('----------------------') + '\n'
 		return ret
 
-	def __init__(self):
+	def __init__(self, dp_descrip):
 		super(dp_profile, self).__init__()
 		self.path = None
 		self.name = None
-		self.keylist = [None] * (MECH_OBSW_COUNT + ROTARY_ENCODER_SW_COUNT + ONBOARD_SPARE_GPIO_COUNT + MAX_EXPANSION_CHANNEL)
+		self.keylist = [None] * (dp_descrip.MECH_OBSW_COUNT + dp_descrip.ROTARY_ENCODER_SW_COUNT + dp_descrip.ONBOARD_SPARE_GPIO_COUNT + dp_descrip.MAX_EXPANSION_CHANNEL)
 		self.bg_color = (84,22,180)
 		self.kd_color = None
 		self.dim_unused = True
 		self.is_landscape = False
 
-def build_profile(root_dir_path):
+def build_profile(root_dir_path, dp_descrip):
 	my_dirs = [d for d in os.listdir(root_dir_path) if os.path.isdir(os.path.join(root_dir_path, d))]
 	my_dirs = [x for x in my_dirs if x.startswith('profile') and x[7].isnumeric() and '_' in x]
 	my_dirs.sort(key=lambda s: int(s[7:].split("_")[0]))
@@ -144,21 +144,21 @@ def build_profile(root_dir_path):
 	my_dirs = my_dirs[:MAX_PROFILE_COUNT]
 	profile_list = []
 	for item in my_dirs:
-		this_profile = dp_profile()
+		this_profile = dp_profile(dp_descrip)
 		this_profile.load_from_path(item)
 		profile_list.append(this_profile)
 	return profile_list
 
-def import_profile_single(root_dir_path):
-	this_profile = dp_profile()
+def import_profile_single(root_dir_path, dp_descrip):
+	this_profile = dp_profile(dp_descrip)
 	this_profile.load_from_path(root_dir_path)
 	return this_profile
 
-def import_profile(root_dir_path):
+def import_profile(root_dir_path, dp_descrip):
 	try:
 		key_file_list = [x for x in os.listdir(root_dir_path) if x.endswith('.txt') and x.startswith('key') and x[3].isnumeric()]
 		if len(key_file_list) != 0:
-			return True, [import_profile_single(root_dir_path)]
+			return True, [import_profile_single(root_dir_path, dp_descrip)]
 	except Exception as e:
 		return False, str(e)
 	try:

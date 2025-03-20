@@ -1,7 +1,7 @@
 # https://docs.hak5.org/hak5-usb-rubber-ducky/operators-conditions-loops-and-functions/functions
 
 import ds_syntax_check
-from keywords import *
+from shared import *
 
 # ---------------------- LINE PARSER ----------------------
 

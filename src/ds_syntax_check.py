@@ -1,5 +1,5 @@
 import os
-from keywords import *
+from shared import *
 
 valid_chars = ['!', '"', '#', '$', '%', '&', "'", '(',
 ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7',
