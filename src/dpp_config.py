@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from shared import *
 import copy
 import shutil
 from datetime import datetime
@@ -13,17 +14,13 @@ from tkinter import simpledialog
 from tkinter.colorchooser import askcolor
 from tkinter import messagebox
 import urllib.request
-from platformdirs import *
 import subprocess
 import hid_op
 import make_bytecode
-from shared import *
 import my_compare
 import traceback
 
 # ----- DPP specific ----
-
-
 """
 0 to 19: mechanical switches
 20 to 25: rotary encoders
@@ -63,128 +60,6 @@ dpp_descriptor.MAX_PROFILE_COUNT = 64
 
 # ---------
 
-"""
-0.13.5
-changed old HOLD to EMUK command
-
-0.13.6
-Added japanese IME keys "KATAKANAHIRAGANA", "HENKAN", "MUHENKAN", "KATAKANA", "HIRAGANA", "ZENKAKUHANKAKU"
-
-0.14.0
-added EMUK replacement
-only show last 50 characters when deleting folders
-fixed syntax check bug where MMOUSE isnt recognized
-script checking now provides error details
-defaultdelay and defaultchardelay now resets correctly when running a new script in pc test-run
-ask to confirm if trying to quit while saving data
-
-0.15.0 2023 01 23
-working on adding DSB support
-
-1.0.0 2023 02 06
-duckyScript 3 public beta
-
-1.0.1 2023 02 13
-minor bug fixes
-better handles saving when code contains errors
-removed unused code
-fixed a function detection bug
-
-1.1.0 2023 02 14
-updated dsb binary format to allow banked loading
-cleaned up opcode values
-
-1.1.1 2023 02 16
-changed loop break command to LBREAK to avoid conflict with BREAK keyboard key
-
-1.2.0 2023 02 17
-added profile import function
-script display now hidden if no key is selected
-automatically selects first profile after loading
-added color to key apply and remove button
-added minimum firmware version check
-
-1.2.1 2023 02 21
-added hid busy check
-
-1.2.2 2023 03 01
-fixed HID busy detection bug
-
-1.3.0 2023 05 02
-Fixed a firmware version parse bug
-getting ready for public release
-added firmware version compatibility check with upper and lower bound, both HID and file based.
-
-1.3.5 2023 05 12
-fixed a bug where it tries to load junk macOS files
-added back COMMAND key 
-
-1.4.0 2023 07 01
-added _TIME_S read-only variable
-Updated colour pickers to provide an appropriate initial colour and title for the dialog window. (PR#135)
-
-1.4.1 2023 07 01
-Fixed a crash when typing EMUK command too slowly
-
-1.4.2 2023 09 12
-added REM_BLOCK and REM_END
-
-1.5.0 2023 09 18
-added STRINGLN_BLOCK and STRINGLN_END
-added STRING_BLOCK and STRING_END
-adjust INJECT_MOD behaviour
-
-1.5.1 2023 09 20
-STRINGLN_BLOCK and STRING_BLOCK now preserves empty lines and white spaces
-
-1.6.1 2023 10 10
-automatically expands MOUSE_MOVE is value is more than 127
-checks if duckypad is busy before trying to connect
-
-1.6.2 2023 11 11
-increased max profile to 64
-
-1.6.3 2023 11 30
-automatically splits STRING/STRINGLN commands if too long
-
-1.6.4 2024 01 22
-Fixed a bug where TRUE and FALSE is replaced with 1 and 0 inside STRING statements
-
-2.0.0 2024 11 21
-New for duckyPad Pro
-
-2.0.1 2024 11 22
-Fixed off-by-1 error in GOTO_PROFILE
-
-2.0.2 2024 12 17
-Fixed press-anykey-to-abort not working
-Fixed text parsed as comments in STRING blocks
-
-2.0.3 2024 12 19
-Adjusted text visibility for macOS dark mode
-Adjusted GOTO_PROFILE parsing order
-Increased default USB MSC timeout
-Adjusted macOS additional instruction warnings
-updated linux "need sudo" text box
-
-2.0.4 2024 12 26
-Updated mac and linux unmount command
-
-2.1.0 2025 01 06
-Persistent global variables $_GV0 to $_GV15
-Fixed variables name parsing bug
-
-2.2.0
-2025 01 17
-Updated preprocessor with improved line numbering memory
-Fixed a bug in preprocessing long STRINGLN commands
-
-2.2.1
-2025 03 11
-fixed a bug where whitespace at end of KEYUP and KEYDOWN causes an syntax error
-"""
-
-THIS_VERSION_NUMBER = '2.2.0'
 MIN_DUCKYPAD_FIRMWARE_VERSION = "1.0.0"
 MAX_DUCKYPAD_FIRMWARE_VERSION = "1.5.0"
 
@@ -192,16 +67,9 @@ UI_SCALE = float(os.getenv("DUCKYPAD_UI_SCALE", default=1))
 USB_MSC_MOUNTPOINT = os.getenv("DUCKYPAD_MS_MOUNTPOINT", default=None)
 USB_MSC_SECONDS_TO_WAIT = int(os.getenv("DUCKYPAD_MS_TIMEOUT", default=15))
 
-def ensure_dir(dir_path):
-    os.makedirs(dir_path, exist_ok=1)
-
 def scaled_size(size: int) -> int:
     return int(size * UI_SCALE)
 
-appname = 'duckypad_config'
-appauthor = 'dekuNukem'
-app_save_path = user_data_dir(appname, appauthor, roaming=True)
-backup_path = os.path.join(app_save_path, 'profile_backups')
 ensure_dir(app_save_path)
 ensure_dir(backup_path)
 
@@ -220,13 +88,6 @@ PADDING = scaled_size(10)
 HEIGHT_ROOT_FOLDER_LF = scaled_size(50)
 INVALID_ROOT_FOLDER_STRING = "<-- Press to connect to duckyPad"
 last_rgb = (238,130,238)
-discord_link_url = "https://raw.githubusercontent.com/dekuNukem/duckyPad/master/resources/discord_link.txt"
-
-def open_discord_link():
-    try:
-        webbrowser.open(str(urllib.request.urlopen(discord_link_url).read().decode('latin-1')).split('\n')[0])
-    except Exception as e:
-        messagebox.showerror("Error", "I can't find the discord link...\n"+str(e))
 
 def open_duckypad_user_manual_url():
     webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/blob/master/doc/getting_started.md')
@@ -234,21 +95,9 @@ def open_duckypad_user_manual_url():
 def open_duckypad_troubleshooting_url():
     webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/blob/master/doc/troubleshooting.md')
 
-def app_update_click(event):
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/releases/latest')
-
 def reset_key_button_relief():
     for item in key_button_list:
         item.config(borderwidth=1, relief="solid")
-
-def rgb_to_hex(rgb_tuple):
-    return '#%02x%02x%02x' % rgb_tuple
-
-def make_list_of_ds_line_obj_from_str_listing(pgm_listing):
-    obj_list = []
-    for index, item in enumerate(pgm_listing):
-        obj_list.append(ds_line(item, index+1))
-    return obj_list
 
 def ui_reset():
     global selected_key
@@ -723,15 +572,6 @@ def validate_data_objs(save_path):
             this_key.path_on_release = os.path.join(this_profile.path, 'key'+str(key_index+1)+'-release.txt')
             this_key.index = key_index + 1
 
-def make_final_script(ds_key, pgm_listing):
-    final_listing = []
-    if ds_key.allow_abort:
-        final_listing.append("$_ALLOW_ABORT = 1")
-    if ds_key.dont_repeat:
-        final_listing.append("$_DONT_REPEAT = 1")
-    final_listing += pgm_listing
-    return final_listing
-
 def compile_all_scripts():
     try:
         for this_profile in profile_list:
@@ -774,7 +614,7 @@ def save_everything(save_path):
         my_dirs = [os.path.join(save_path, d) for d in my_dirs if d.startswith("profile")]
         for item in my_dirs:
             try:
-                status_message = f"Deleting {item}..."
+                status_message = f"Deleting {last_two_levels(item)}..."
                 print(status_message)
                 dp_root_folder_display.set(status_message)
                 root.update()
@@ -811,7 +651,7 @@ def save_everything(save_path):
                 # newline='' is important, it forces python to not write \r, only \n
                 # otherwise it will read back as double \n
                 with open(this_key.path, 'w', encoding='utf8', newline='') as key_file:
-                    status_message = f"Writing {this_key.path}..."
+                    status_message = f"Writing {last_two_levels(this_key.path)}..."
                     print(status_message)
                     dp_root_folder_display.set(status_message)
                     root.update()
@@ -819,7 +659,7 @@ def save_everything(save_path):
                 
                 if this_key.path_on_release is not None and len(this_key.script_on_release) > 0:
                     with open(this_key.path_on_release, 'w', encoding='utf8', newline='') as key_file:
-                        status_message = "Writing {this_key.path_on_release}..."
+                        status_message = "Writing {last_two_levels(this_key.path_on_release)}..."
                         print(status_message)
                         dp_root_folder_display.set(status_message)
                         root.update()
@@ -831,14 +671,14 @@ def save_everything(save_path):
                 dsb_path_onrelease = pre + "-release.dsb"
 
                 with open(dsb_path, 'wb') as dsb_file:
-                    status_message = f"Writing {dsb_path}..."
+                    status_message = f"Writing {last_two_levels(dsb_path)}..."
                     print(status_message)
                     dp_root_folder_display.set(status_message)
                     root.update()
                     dsb_file.write(this_key.binary_array)
                 if this_key.binary_array_on_release is not None:
                     with open(dsb_path_onrelease, 'wb') as dsb_file:
-                        status_message = f"Writing {dsb_path_onrelease}..."
+                        status_message = f"Writing {last_two_levels(dsb_path_onrelease)}..."
                         print(status_message)
                         dp_root_folder_display.set(status_message)
                         root.update()
@@ -1543,9 +1383,6 @@ else:
 dp_fw_update_label = Label(master=updates_lf, text="Firmware: Unknown")
 dp_fw_update_label.place(x=scaled_size(5), y=scaled_size(25))
 
-def open_profile_autoswitcher_url():
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-profile-autoswitcher/blob/master/README.md')
-
 def import_profile_click():
     global profile_list
     # messagebox.showinfo("Import", f"Select a folder containing the profiles")
@@ -1558,9 +1395,6 @@ def import_profile_click():
         return
     profile_list += content
     update_profile_display()
-
-def open_tindie_store():
-    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/store_links.html')
 
 user_manual_button = Button(resources_lf, text="User\nManual", command=open_duckypad_user_manual_url)
 user_manual_button.place(x=scaled_size(10), y=scaled_size(0), width=scaled_size(100))

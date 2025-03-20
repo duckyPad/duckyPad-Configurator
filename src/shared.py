@@ -1,3 +1,139 @@
+import os
+import sys
+import time
+from platformdirs import *
+
+
+
+"""
+0.13.5
+changed old HOLD to EMUK command
+
+0.13.6
+Added japanese IME keys "KATAKANAHIRAGANA", "HENKAN", "MUHENKAN", "KATAKANA", "HIRAGANA", "ZENKAKUHANKAKU"
+
+0.14.0
+added EMUK replacement
+only show last 50 characters when deleting folders
+fixed syntax check bug where MMOUSE isnt recognized
+script checking now provides error details
+defaultdelay and defaultchardelay now resets correctly when running a new script in pc test-run
+ask to confirm if trying to quit while saving data
+
+0.15.0 2023 01 23
+working on adding DSB support
+
+1.0.0 2023 02 06
+duckyScript 3 public beta
+
+1.0.1 2023 02 13
+minor bug fixes
+better handles saving when code contains errors
+removed unused code
+fixed a function detection bug
+
+1.1.0 2023 02 14
+updated dsb binary format to allow banked loading
+cleaned up opcode values
+
+1.1.1 2023 02 16
+changed loop break command to LBREAK to avoid conflict with BREAK keyboard key
+
+1.2.0 2023 02 17
+added profile import function
+script display now hidden if no key is selected
+automatically selects first profile after loading
+added color to key apply and remove button
+added minimum firmware version check
+
+1.2.1 2023 02 21
+added hid busy check
+
+1.2.2 2023 03 01
+fixed HID busy detection bug
+
+1.3.0 2023 05 02
+Fixed a firmware version parse bug
+getting ready for public release
+added firmware version compatibility check with upper and lower bound, both HID and file based.
+
+1.3.5 2023 05 12
+fixed a bug where it tries to load junk macOS files
+added back COMMAND key 
+
+1.4.0 2023 07 01
+added _TIME_S read-only variable
+Updated colour pickers to provide an appropriate initial colour and title for the dialog window. (PR#135)
+
+1.4.1 2023 07 01
+Fixed a crash when typing EMUK command too slowly
+
+1.4.2 2023 09 12
+added REM_BLOCK and REM_END
+
+1.5.0 2023 09 18
+added STRINGLN_BLOCK and STRINGLN_END
+added STRING_BLOCK and STRING_END
+adjust INJECT_MOD behaviour
+
+1.5.1 2023 09 20
+STRINGLN_BLOCK and STRING_BLOCK now preserves empty lines and white spaces
+
+1.6.1 2023 10 10
+automatically expands MOUSE_MOVE is value is more than 127
+checks if duckypad is busy before trying to connect
+
+1.6.2 2023 11 11
+increased max profile to 64
+
+1.6.3 2023 11 30
+automatically splits STRING/STRINGLN commands if too long
+
+1.6.4 2024 01 22
+Fixed a bug where TRUE and FALSE is replaced with 1 and 0 inside STRING statements
+
+2.0.0 2024 11 21
+New for duckyPad Pro
+
+2.0.1 2024 11 22
+Fixed off-by-1 error in GOTO_PROFILE
+
+2.0.2 2024 12 17
+Fixed press-anykey-to-abort not working
+Fixed text parsed as comments in STRING blocks
+
+2.0.3 2024 12 19
+Adjusted text visibility for macOS dark mode
+Adjusted GOTO_PROFILE parsing order
+Increased default USB MSC timeout
+Adjusted macOS additional instruction warnings
+updated linux "need sudo" text box
+
+2.0.4 2024 12 26
+Updated mac and linux unmount command
+
+2.1.0 2025 01 06
+Persistent global variables $_GV0 to $_GV15
+Fixed variables name parsing bug
+
+2.2.0
+2025 01 17
+Updated preprocessor with improved line numbering memory
+Fixed a bug in preprocessing long STRINGLN commands
+
+2.2.1
+2025 03 11
+fixed a bug where whitespace at end of KEYUP and KEYDOWN causes an syntax error
+
+2.3.0
+2025 03 20
+Started working on unified configurator
+decoupling version-specific constants
+"""
+
+THIS_VERSION_NUMBER = '2.3.0'
+
+
 cmd_REPEAT = "REPEAT"
 cmd_REM = "REM"
 cmd_C_COMMENT = "//"
@@ -466,3 +602,44 @@ class dp_descriptor(object):
         self.ONBOARD_SPARE_GPIO_COUNT = None
         self.MAX_EXPANSION_CHANNEL = None
         self.MAX_PROFILE_COUNT = None
+
+def ensure_dir(dir_path):
+    os.makedirs(dir_path, exist_ok=1)
+
+appname = 'duckypad_config'
+appauthor = 'dekuNukem'
+app_save_path = user_data_dir(appname, appauthor, roaming=True)
+backup_path = os.path.join(app_save_path, 'profile_backups')
+
+def open_discord_link():
+    webbrowser.open("https://discord.gg/4sJCBx5")
+
+def app_update_click(event):
+    webbrowser.open('https://github.com/dekuNukem/duckyPad-Configurator/releases/latest')
+
+def open_profile_autoswitcher_url():
+    webbrowser.open('https://github.com/dekuNukem/duckyPad-profile-autoswitcher/blob/master/README.md')
+
+def open_tindie_store():
+    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/store_links.html')
+
+def rgb_to_hex(rgb_tuple):
+    return '#%02x%02x%02x' % rgb_tuple
+
+def make_list_of_ds_line_obj_from_str_listing(pgm_listing):
+    obj_list = []
+    for index, item in enumerate(pgm_listing):
+        obj_list.append(ds_line(item, index+1))
+    return obj_list
+
+def make_final_script(ds_key, pgm_listing):
+    final_listing = []
+    if ds_key.allow_abort:
+        final_listing.append("$_ALLOW_ABORT = 1")
+    if ds_key.dont_repeat:
+        final_listing.append("$_DONT_REPEAT = 1")
+    final_listing += pgm_listing
+    return final_listing
+
+def last_two_levels(full_path):
+    return os.path.join(*full_path.split(os.sep)[-2:])
