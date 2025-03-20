@@ -609,6 +609,13 @@ def save_everything(save_path):
     try:
         validate_data_objs(save_path)
         ensure_dir(save_path)
+
+        pf_info_file_path = os.path.join(save_path, profile_info_dot_txt)
+        pf_info_file = open(pf_info_file_path, "w")
+        for index, this_profile in enumerate(profile_list):
+            pf_info_file.write(f"{index+1} {this_profile.name}\n")
+        pf_info_file.close()
+
         for this_profile in profile_list:
             os.mkdir(this_profile.path)
             time.sleep(0.05)
@@ -673,7 +680,6 @@ def save_everything(save_path):
                 if this_key.color is not None:
                     config_file.write('SWCOLOR_%d %d %d %d\n' % (this_key.index, this_key.color[0], this_key.color[1], this_key.color[2]))
             config_file.close()
-        
         return True
     except Exception as e:
         error_msg = f"Save Failed:\n\n{e}"
@@ -703,6 +709,7 @@ def save_click():
         dp_root_folder_display.set("Done!")
     except Exception as e:
         print('save_click:',e)
+        print(str(traceback.format_exc()))
         messagebox.showinfo("save_click", str(e))
 
 def backup_button_click():

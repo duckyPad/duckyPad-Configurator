@@ -3,6 +3,7 @@ import sys
 import hashlib
 import shutil
 from pathlib import Path
+from shared import *
 
 tk_root = None
 tk_strvar = None
@@ -67,7 +68,7 @@ def delete_path(path):
         return
     if 'dpp_config.txt' in path:
         return
-    if 'profile_info.txt' in path:
+    if profile_info_dot_txt in path:
         return
     
     this_msg = f"deleting {path}"

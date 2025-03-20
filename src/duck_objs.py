@@ -158,7 +158,7 @@ def read_profile_order_file(txt_path, dp_descrip):
 def build_profile(root_dir_path, dp_descrip):
 	my_dirs = [d for d in os.listdir(root_dir_path) if os.path.isdir(os.path.join(root_dir_path, d))]
 	my_dirs = [x for x in my_dirs if x.startswith('profile_')]
-	profile_info_txt_path = os.path.join(root_dir_path, "profile_info.txt")
+	profile_info_txt_path = os.path.join(root_dir_path, profile_info_dot_txt)
 	profile_info_list = read_profile_order_file(profile_info_txt_path, dp_descrip)
 
 	profile_list = []

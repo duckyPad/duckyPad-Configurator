@@ -643,3 +643,6 @@ def make_final_script(ds_key, pgm_listing):
 
 def last_two_levels(full_path):
     return os.path.join(*full_path.split(os.sep)[-2:])
+
+
+profile_info_dot_txt = "profile_info.txt"
