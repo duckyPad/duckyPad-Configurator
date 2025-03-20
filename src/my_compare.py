@@ -13,6 +13,7 @@ duckypad_file_whitelist = [
 	"dpkm_",
 	"config",
 	"key",
+    "profile_info"
 ]
 
 duckypad_file_blacklist = [
@@ -27,12 +28,6 @@ def is_duckypad_file(name):
 		if item.lower().strip() in name.lower().strip():
 			return True
 	return False
-
-def get_short_path(text):
-    if len(str(text)) <= 70:
-        return text
-    text = Path(text)
-    return str(Path(*text.parts[-2:]))
 
 def is_file_different(file1, file2):
     hash1 = hashlib.md5(open(file1,'rb').read()).hexdigest()
@@ -72,10 +67,12 @@ def delete_path(path):
         return
     if 'dpp_config.txt' in path:
         return
+    if 'profile_info.txt' in path:
+        return
     
     this_msg = f"deleting {path}"
     print(this_msg)
-    this_msg = f"deleting {get_short_path(path)}"
+    this_msg = f"deleting {last_two_levels(path)}"
     tk_strvar.set(this_msg)
     tk_root.update()
 
@@ -133,7 +130,7 @@ def duckypad_file_sync(sd_dir, modified_dir):
         for source_file in source_subdir_file_list:
             this_msg = f"copying {source_file} to {to_copy_destination_path}"
             print(this_msg)
-            this_msg = f"copying {get_short_path(source_file)} to {get_short_path(to_copy_destination_path)}"
+            this_msg = f"copying {last_two_levels(source_file)} to {last_two_levels(to_copy_destination_path)}"
             tk_strvar.set(this_msg)
             tk_root.update()
             shutil.copy2(source_file, to_copy_destination_path)
@@ -177,7 +174,7 @@ def duckypad_file_sync(sd_dir, modified_dir):
             copy_to_path = os.path.join(copy_to_path, item)
             this_msg = f"copying from {copy_from_path} to {copy_to_path}"
             print(this_msg)
-            this_msg = f"copying from {get_short_path(copy_from_path)} to {get_short_path(copy_to_path)}"
+            this_msg = f"copying from {last_two_levels(copy_from_path)} to {last_two_levels(copy_to_path)}"
             tk_strvar.set(this_msg)
             tk_root.update()
             copy_file_if_exist(copy_from_path, copy_to_path)
@@ -185,4 +182,4 @@ def duckypad_file_sync(sd_dir, modified_dir):
 
 # filepath = Path("C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups\\duckyPad_backup_2024-08-23T18-24-33\\profile7_Firefox\\key9.txt")
 
-# print(get_short_path(filepath))
+# print(last_two_levels(filepath))

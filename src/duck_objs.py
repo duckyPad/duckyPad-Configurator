@@ -108,6 +108,7 @@ class dp_profile(object):
 				on_release_path = os.path.join(path, f'key{this_key.index+1}-release.txt')
 				this_key.script = get_script(on_press_path)
 				this_key.script_on_release = get_script(on_release_path)
+		print("dfsdfsdf", self.path)
 
 	def __str__(self):
 		ret = ""
@@ -161,7 +162,6 @@ def build_profile(root_dir_path, dp_descrip):
 	profile_info_list = read_profile_order_file(profile_info_txt_path, dp_descrip)
 
 	profile_list = []
-
 	for item in profile_info_list:
 		pf_number = item[0]
 		pf_name = item[1]

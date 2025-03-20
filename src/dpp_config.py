@@ -560,7 +560,7 @@ def profile_rename_click():
 def validate_data_objs(save_path):
     # update path and indexs of profile and keys
     for profile_index, this_profile in enumerate(profile_list):
-        this_profile.path = os.path.join(save_path, f"profile{profile_index + 1}_{this_profile.name}")
+        this_profile.path = os.path.join(save_path, f"profile_{this_profile.name}")
         for key_index, this_key in enumerate(this_profile.keylist):
             if this_key is None:
                 continue
@@ -646,7 +646,7 @@ def save_everything(save_path):
                 
                 if this_key.path_on_release is not None and len(this_key.script_on_release) > 0:
                     with open(this_key.path_on_release, 'w', encoding='utf8', newline='') as key_file:
-                        status_message = "Writing {last_two_levels(this_key.path_on_release)}..."
+                        status_message = f"Writing {last_two_levels(this_key.path_on_release)}..."
                         print(status_message)
                         dp_root_folder_display.set(status_message)
                         root.update()
