@@ -465,3 +465,4 @@ class dp_descriptor(object):
         self.ROTARY_ENCODER_SW_COUNT = None
         self.ONBOARD_SPARE_GPIO_COUNT = None
         self.MAX_EXPANSION_CHANNEL = None
+        self.MAX_PROFILE_COUNT = None
