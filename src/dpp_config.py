@@ -609,19 +609,6 @@ def save_everything(save_path):
     try:
         validate_data_objs(save_path)
         ensure_dir(save_path)
-        my_dirs = [d for d in os.listdir(save_path) if os.path.isdir(os.path.join(save_path, d))]
-        my_dirs = [x for x in my_dirs if x.startswith('profile') and x[7].isnumeric() and '_' in x]
-        my_dirs = [os.path.join(save_path, d) for d in my_dirs if d.startswith("profile")]
-        for item in my_dirs:
-            try:
-                status_message = f"Deleting {last_two_levels(item)}..."
-                print(status_message)
-                dp_root_folder_display.set(status_message)
-                root.update()
-                shutil.rmtree(item)
-                time.sleep(0.05)
-            except FileNotFoundError:
-                continue
         for this_profile in profile_list:
             os.mkdir(this_profile.path)
             time.sleep(0.05)
