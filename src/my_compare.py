@@ -73,59 +73,28 @@ def compare_dir(orig_path, new_path):
     result_dict["dir_in_both_not_checked"] = [x for x in dir_in_both_not_checked if is_duckypad_file(x)]
     return result_dict
 
-"""
-Files in new but not old: add to duckypad
-Files in old but not new: delete from duckypad
-Files in both but different content: delete from duckypad then write new version
-"""
-
 def delete_path(path):
     if os.path.exists(path) is False:
         return
-    # if 'dpp_config.txt' in path:
-    #     return
-    # if profile_info_dot_txt in path:
-    #     return
-    
-    this_msg = f"deleting {path}"
-    print(this_msg)
-    this_msg = f"deleting {last_two_levels(path)}"
-    tk_strvar.set(this_msg)
-    tk_root.update()
-
     if os.path.isfile(path):
         os.remove(path)
     elif os.path.isdir(path):
         shutil.rmtree(path)
 
-def get_file_content(file_path):
-    this_file = open(file_path, 'rb')
-    content = this_file.read()
-    this_file.close()
-    return content
-
-def copy_file_if_exist(from_path, to_path):
-    if os.path.exists(from_path):
-        shutil.copy2(from_path, to_path)
-
 class dp_file_op(object):
     def __str__(self):
-        return (f"dp_file_op("
+        return (f"file_op("
                 f"type={self.type}, "
-                f"source_root={self.source_root}, "
-                f"source_path={self.source_path}, "
-                f"destination_root={self.destination_root}, "
-                f"destination_path={self.destination_path})")
+                f"src_path={self.source_path}, "
+                f"dest_path={self.destination_path})")
     
     def __init__(self):
         self.mkdir = "mkdir"
         self.rmdir = "rmdir"
-        self.copy_file = "copy_file"
-        self.delete_file = "delete_file"
+        self.copy_file = "cpf"
+        self.delete_file = "rmf"
         self.type = None
-        self.source_root = None
         self.source_path = None
-        self.destination_root = None
         self.destination_path = None
         
 def make_file_op(diff_dict):
@@ -133,48 +102,75 @@ def make_file_op(diff_dict):
     for item in diff_dict["files_to_delete"]:
         this_op = dp_file_op()
         this_op.type = this_op.delete_file
-        this_op.source_root = diff_dict['orig_path']
-        this_op.source_path = item
+        this_op.source_path = os.path.join(diff_dict['orig_path'], item)
         op_list.append(this_op)
     
     for item in diff_dict["files_to_add"]:
         this_op = dp_file_op()
         this_op.type = this_op.copy_file
-        this_op.source_root = diff_dict['new_path']
-        this_op.source_path = item
-        this_op.destination_root = diff_dict['orig_path']
-        this_op.destination_path = item
+        this_op.source_path = os.path.join(diff_dict['new_path'], item)
+        this_op.destination_path = os.path.join(diff_dict['orig_path'], item)
         op_list.append(this_op)
 
     for item in diff_dict["dirs_to_delete"]:
         this_op = dp_file_op()
         this_op.type = this_op.rmdir
-        this_op.source_root = diff_dict['orig_path']
-        this_op.source_path = item
+        this_op.source_path = os.path.join(diff_dict['orig_path'], item)
         op_list.append(this_op)
 
     for item in diff_dict["dirs_to_create"]:
         this_op = dp_file_op()
         this_op.type = this_op.mkdir
-        this_op.source_root = diff_dict['orig_path']
-        this_op.source_path = item
+        this_op.source_path = os.path.join(diff_dict['orig_path'], item)
         op_list.append(this_op)
     
-    for item in op_list:
-        print(item)
+    return op_list
 
-def duckypad_find_difference(original_dir_root, modified_dir_root):
+def get_file_sync_ops(original_dir_root, modified_dir_root):
+    file_ops_all = []
     result_dict_top_lvl = compare_dir(original_dir_root, modified_dir_root)
-    for key in result_dict_top_lvl:
-        print(key, result_dict_top_lvl[key])
-    make_file_op(result_dict_top_lvl)
-    # for item in result_dict_top_lvl["dir_in_both_not_checked"]:
-    #     subdir_orig_path = os.path.join(original_dir_root, item)
-    #     subdir_modified_path = os.path.join(modified_dir_root, item)
-    #     subdir_diff_dict = compare_dir(subdir_orig_path, subdir_modified_path)
-    #     for key in subdir_diff_dict:
-    #         print(key, subdir_diff_dict[key])
+    # for key in result_dict_top_lvl:
+    #     print(key, result_dict_top_lvl[key])
+    file_ops_all += make_file_op(result_dict_top_lvl)
+
+    for this_dir in result_dict_top_lvl["dirs_to_create"]:
+        subdir_modified_path = os.path.join(modified_dir_root, this_dir)
+        for this_file in os.listdir(subdir_modified_path):
+            this_op = dp_file_op()
+            this_op.type = this_op.copy_file
+            this_op.source_path = os.path.join(result_dict_top_lvl['new_path'], this_dir, this_file)
+            this_op.destination_path = os.path.join(result_dict_top_lvl['orig_path'], this_dir, this_file)
+            file_ops_all.append(this_op)
+
+    for this_dir in result_dict_top_lvl["dir_in_both_not_checked"]:
+        subdir_orig_path = os.path.join(original_dir_root, this_dir)
+        subdir_modified_path = os.path.join(modified_dir_root, this_dir)
+        subdir_diff_dict = compare_dir(subdir_orig_path, subdir_modified_path)
+        subdir_diff_dict["dirs_to_add"] = []
+        subdir_diff_dict["dirs_to_delete"] = []
+        subdir_diff_dict["dir_in_both_not_checked"] = []
+
+        # for key in subdir_diff_dict:
+        #     print(key, subdir_diff_dict[key])
+        
+        file_ops_all += make_file_op(subdir_diff_dict)
+    
+    return file_ops_all
+
+
+def execute_sync_ops_msc(op_list):
+    for item in sync_ops:
+        if item.type == item.mkdir:
+            print("mkdir", item.source_path)
+        elif item.type == item.rmdir:
+            print("rmdir", item.source_path)
+        elif item.type == item.delete_file:
+            print("delete file", item.source_path)
+        elif item.type == item.copy_file:
+            print("copy file", item.source_path, item.destination_path)
 
 sd_path = "./sd_files"
 modified_path = "./new_files"
-duckypad_find_difference(sd_path, modified_path)
+sync_ops = get_file_sync_ops(sd_path, modified_path)
+
+execute_sync_ops_msc(sync_ops)
