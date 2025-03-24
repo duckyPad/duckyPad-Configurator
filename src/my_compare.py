@@ -31,31 +31,46 @@ def is_duckypad_file(name):
 	return False
 
 def is_file_different(file1, file2):
-    hash1 = hashlib.md5(open(file1,'rb').read()).hexdigest()
-    hash2 = hashlib.md5(open(file2,'rb').read()).hexdigest()
+    with open(file1, 'rb') as f1, open(file2, 'rb') as f2:
+        hash1 = hashlib.md5(f1.read()).hexdigest()
+        hash2 = hashlib.md5(f2.read()).hexdigest()
     return hash1 != hash2
 
-def compare(old_path, new_path):
-    old_files = set([x for x in os.listdir(old_path) if is_duckypad_file(x)])
-    new_files = set([x for x in os.listdir(new_path) if is_duckypad_file(x)])
+def compare_dir(old_path, new_path):
+    old_items = set(os.listdir(old_path))
+    new_items = set(os.listdir(new_path))
 
-    # files in new but not old
-    files_to_add = new_files - old_files
-    # files in old but not new
-    files_to_delete = old_files - new_files
+    # items in new but not old
+    items_to_add = new_items - old_items
+    # items in old but not new
+    items_to_delete = old_items - new_items
 
-    files_in_both = new_files.intersection(old_files)
-    files_with_difference = set()
+    files_to_add = set([x for x in items_to_add if os.path.isdir(os.path.join(new_path, x)) is False])
+    dirs_to_add = set([x for x in items_to_add if os.path.isdir(os.path.join(new_path, x))])
 
-    for item in files_in_both:
+    files_to_delete = set([x for x in items_to_delete if os.path.isdir(os.path.join(old_path, x)) is False])
+    dirs_to_delete = set([x for x in items_to_delete if os.path.isdir(os.path.join(old_path, x))])
+    items_in_both = new_items.intersection(old_items)
+    dir_in_both_not_checked = set()
+
+    for item in items_in_both:
         new_full_path = os.path.join(new_path, item)
         old_full_path = os.path.join(old_path, item)
-        if os.path.isdir(new_full_path):
-            continue
-        if is_file_different(old_full_path, new_full_path):
-            files_with_difference.add(item)
 
-    return files_to_add, files_to_delete, files_with_difference, files_in_both
+        if os.path.isdir(new_full_path) or os.path.isdir(old_full_path):
+            dir_in_both_not_checked.add(item)
+        else:
+            files_to_delete.add(item)
+            files_to_add.add(item)
+    
+    result_dict = {}
+    result_dict["files_to_add"] = files_to_add
+    result_dict["files_to_delete"] = files_to_delete
+    result_dict["dirs_to_add"] = dirs_to_add
+    result_dict["dirs_to_delete"] = dirs_to_delete
+    result_dict["dir_in_both_not_checked"] = dir_in_both_not_checked
+    print(result_dict)
+
     
 """
 Files in new but not old: add to duckypad
@@ -66,10 +81,10 @@ Files in both but different content: delete from duckypad then write new version
 def delete_path(path):
     if os.path.exists(path) is False:
         return
-    if 'dpp_config.txt' in path:
-        return
-    if profile_info_dot_txt in path:
-        return
+    # if 'dpp_config.txt' in path:
+    #     return
+    # if profile_info_dot_txt in path:
+    #     return
     
     this_msg = f"deleting {path}"
     print(this_msg)
@@ -88,99 +103,37 @@ def get_file_content(file_path):
     this_file.close()
     return content
 
-def ensure_dir(dir_path):
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-
 def copy_file_if_exist(from_path, to_path):
     if os.path.exists(from_path):
         shutil.copy2(from_path, to_path)
 
-def duckypad_file_sync(sd_dir, modified_dir):
+def duckypad_find_difference(sd_dir, modified_dir):
     # top level dirs
-    top_level_item_to_add, top_level_item_to_delete, top_level_item_with_difference, common_dirs = compare(sd_dir, modified_dir)
-    # pxrint("top_level_item_to_add:", top_level_item_to_add)
-    # pxrint("top_level_item_to_delete:", top_level_item_to_delete)
-    # pxrint("top_level_item_with_difference:", top_level_item_with_difference)
-    # pxrint("common_dirs:", common_dirs)
+    top_level_item_to_add, top_level_item_to_delete, top_level_item_with_difference, common_items = compare_dir(sd_dir, modified_dir)
+    print("top_level_item_to_add:", top_level_item_to_add)
+    print("top_level_item_to_delete:", top_level_item_to_delete)
+    print("top_level_item_with_difference:", top_level_item_with_difference)
+    print("common_items:", common_items)
+
+    exit()
+    # common_items has BOTH FILES AND DIR
     top_level_to_copy = top_level_item_to_add | top_level_item_with_difference
     top_level_to_remove = top_level_item_to_delete | top_level_to_copy
+    print('----------------')
+    print("top_level_to_copy", top_level_to_copy)
+    print("top_level_to_remove", top_level_to_remove)
 
-    # pxrint('----------------')
-    # pxrint("top_level_to_copy", top_level_to_copy)
-    # pxrint("top_level_to_remove", top_level_to_remove)
-
-    for item in top_level_to_remove:
-        item_path = os.path.join(sd_dir, item)
-        # pxrint("removing...", item_path)
-        delete_path(item_path)
-    
     for item in top_level_to_copy:
         to_copy_source_path = os.path.join(modified_dir, item)
         to_copy_destination_path = os.path.join(sd_dir, item)
-        # pxrint("to_copy_source_path:", to_copy_source_path)
-        # pxrint("to_copy_destination_path:", to_copy_destination_path)
-        # nothing on top level is worth copying
+        print("to_copy_source_path:", to_copy_source_path)
+        print("to_copy_destination_path:", to_copy_destination_path)
         if os.path.isfile(to_copy_source_path):
             continue
-        # this is a dir, create a new dir first
-        # pxrint("creating dir:", to_copy_destination_path)
-        ensure_dir(to_copy_destination_path)
-        source_subdir_file_list = [os.path.join(to_copy_source_path, x) for x in os.listdir(to_copy_source_path)]
-        source_subdir_file_list = [d for d in source_subdir_file_list if os.path.isfile(d)]
-        for source_file in source_subdir_file_list:
-            this_msg = f"copying {source_file} to {to_copy_destination_path}"
-            print(this_msg)
-            this_msg = f"copying {last_two_levels(source_file)} to {last_two_levels(to_copy_destination_path)}"
-            tk_strvar.set(this_msg)
-            tk_root.update()
-            shutil.copy2(source_file, to_copy_destination_path)
 
-    for common_dir_name in common_dirs:
-        files_to_add, files_to_delete, files_with_difference, common_files = compare(os.path.join(sd_dir, common_dir_name), os.path.join(modified_dir, common_dir_name))
-        # pxrint('===========', common_dir_name, '===========')
-        # pxrint("files_to_add", files_to_add)
-        # pxrint("files_to_delete", files_to_delete)
-        # pxrint("files_with_difference", files_with_difference)
-        # pxrint("common_files", common_files)
-
-        subdir_file_to_remove = files_to_delete | files_with_difference
-        subdir_file_to_remove.add("state.sps")
-        subdir_file_to_remove.add("state_dpp.sps")
-
-        for item in list(subdir_file_to_remove):
-            if item.startswith("key"):
-                subdir_file_to_remove.add(item.replace('.txt', '.dsb'))
-
-        # pxrint("subdir_file_to_remove:", subdir_file_to_remove)
-
-        for item in subdir_file_to_remove:
-            to_delete_path = os.path.join(sd_dir, common_dir_name)
-            to_delete_path = os.path.join(to_delete_path, item)
-            # pxrint("\tdeleting...", to_delete_path)
-            delete_path(to_delete_path)
-
-        subdir_file_to_copy = files_to_add | files_with_difference
-
-        for item in list(subdir_file_to_copy):
-            if item.startswith("key"):
-                subdir_file_to_copy.add(item.replace('.txt', '.dsb'))
-
-        # pxrint("subdir_file_to_copy:", subdir_file_to_copy)
-
-        for item in subdir_file_to_copy:
-            copy_from_path = os.path.join(modified_dir, common_dir_name)
-            copy_from_path = os.path.join(copy_from_path, item)
-            copy_to_path = os.path.join(sd_dir, common_dir_name)
-            copy_to_path = os.path.join(copy_to_path, item)
-            this_msg = f"copying from {copy_from_path} to {copy_to_path}"
-            print(this_msg)
-            this_msg = f"copying from {last_two_levels(copy_from_path)} to {last_two_levels(copy_to_path)}"
-            tk_strvar.set(this_msg)
-            tk_root.update()
-            copy_file_if_exist(copy_from_path, copy_to_path)
-
+         
 
 sd_path = "./sd_files"
-new_path = "./new_files"
-duckypad_file_sync(sd_path, new_path)
+modified_path = "./new_files"
+# duckypad_find_difference(sd_path, modified_path)
+compare_dir(sd_path, modified_path)
