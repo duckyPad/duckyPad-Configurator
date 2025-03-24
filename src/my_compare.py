@@ -74,13 +74,15 @@ def compare_dir(orig_path, new_path):
     return result_dict
 
 def delete_path(path):
-    if os.path.exists(path) is False:
-        return
-    if os.path.isfile(path):
-        os.remove(path)
-    elif os.path.isdir(path):
-        shutil.rmtree(path)
-
+    path = Path(path)
+    try:
+        if path.is_dir():
+            shutil.rmtree(path)
+        elif path.is_file():
+            path.unlink()
+    except Exception as e:
+        print("delete_path:", e)
+    
 class dp_file_op(object):
     def __str__(self):
         return (f"file_op("
@@ -157,17 +159,23 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
     
     return file_ops_all
 
-
 def execute_sync_ops_msc(op_list):
     for item in sync_ops:
         if item.type == item.mkdir:
             print("mkdir", item.source_path)
+            this_path = Path(item.source_path)
+            this_path.mkdir(parents=True, exist_ok=True)
         elif item.type == item.rmdir:
             print("rmdir", item.source_path)
+            delete_path(item.source_path)
         elif item.type == item.delete_file:
             print("delete file", item.source_path)
+            delete_path(item.source_path)
         elif item.type == item.copy_file:
             print("copy file", item.source_path, item.destination_path)
+            src = Path(item.source_path)
+            dst = Path(item.destination_path)
+            shutil.copy(src, dst)
 
 sd_path = "./sd_files"
 modified_path = "./new_files"
