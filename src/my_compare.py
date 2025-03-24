@@ -59,7 +59,8 @@ def compare_dir(old_path, new_path):
 
         if os.path.isdir(new_full_path) or os.path.isdir(old_full_path):
             dir_in_both_not_checked.add(item)
-        else:
+            continue
+        if is_file_different(old_full_path, new_full_path):
             files_to_delete.add(item)
             files_to_add.add(item)
     
