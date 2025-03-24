@@ -1,0 +1,2 @@
+z14 hello
+BG_COLOR 128 128 128

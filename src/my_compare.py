@@ -181,6 +181,6 @@ def duckypad_file_sync(sd_dir, modified_dir):
             copy_file_if_exist(copy_from_path, copy_to_path)
 
 
-# filepath = Path("C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups\\duckyPad_backup_2024-08-23T18-24-33\\profile7_Firefox\\key9.txt")
-
-# print(last_two_levels(filepath))
+sd_path = "./sd_files"
+new_path = "./new_files"
+duckypad_file_sync(sd_path, new_path)
