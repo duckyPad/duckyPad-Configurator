@@ -1108,7 +1108,6 @@ def update_keyname_info_string(info_string):
         key_char_limit_label.config(text="")
     elif THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.dp20:
         key_char_limit_label.config(text=key_char_limit_dp20)
-        key_char_limit_label.place(x=scaled_size(17), y=scaled_size(8))
     else:
         key_char_limit_label.config(text=info_string)
 
@@ -1211,12 +1210,12 @@ name_editor_lf = LabelFrame(root, text="Key Config", width=scaled_size(300), hei
 name_editor_lf.place(x=profiles_lf.winfo_x() + profiles_lf.winfo_width() + PADDING, y=scaled_size(380))
 root.update()
 
-key_char_limit_portrait = "Name:\nMax 2 lines\n5 char per line"
-key_char_limit_landscape = "Name:\nMax 2 lines\n4 char per line"
-key_char_limit_dp20 = "Key Name:\nMax 7 letters"
+key_char_limit_portrait = "Key Name:\n5 Letters/2 Lines"
+key_char_limit_landscape = "Key Name:\n4 Letters/2 Lines"
+key_char_limit_dp20 = "Key Name:\n7 Letters/1 Line"
 
 key_char_limit_label = Label(master=name_editor_lf)
-key_char_limit_label.place(x=scaled_size(17), y=scaled_size(0))
+key_char_limit_label.place(x=scaled_size(5), y=scaled_size(7))
 root.update()
 
 def keyname_textbox_modified_event(event):
