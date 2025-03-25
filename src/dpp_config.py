@@ -438,9 +438,10 @@ def update_profile_display():
     bg_color_button.config(background=bg_color_hex)
 
     if profile_list[index].kd_color is None:
+        keydown_color_checkbox.deselect()
         kd_color_button.config(background=default_button_color)
     else:
-        custom_key_color_checkbox.select()
+        keydown_color_checkbox.select()
         kd_color_button.config(background=rgb_to_hex(profile_list[index].kd_color))
 
     if profile_list[index].dim_unused:

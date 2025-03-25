@@ -160,7 +160,7 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
     return file_ops_all
 
 def execute_sync_ops_msc(op_list):
-    for item in sync_ops:
+    for item in op_list:
         if item.type == item.mkdir:
             print("mkdir", item.source_path)
             this_path = Path(item.source_path)
@@ -176,6 +176,11 @@ def execute_sync_ops_msc(op_list):
             src = Path(item.source_path)
             dst = Path(item.destination_path)
             shutil.copy(src, dst)
+
+def duckypad_file_sync(orig_path, modified_path):
+    sync_ops = get_file_sync_ops(orig_path, modified_path)
+    execute_sync_ops_msc(sync_ops)
+
 
 # sd_path = "./sd_files"
 # modified_path = "./new_files"
