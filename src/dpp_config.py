@@ -852,7 +852,7 @@ profile_dupe_button = Button(profiles_lf, text="Duplicate", command=profile_dupe
 profile_dupe_button.place(x=PADDING * 2.5 + BUTTON_WIDTH, y=BUTTON_Y_POS, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
 
 profile_rename_button = Button(profiles_lf, text="Rename", command=profile_rename_click, state=DISABLED)
-profile_rename_button.place(x=PADDING * 2.5 + BUTTON_WIDTH, y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
+profile_rename_button.place(x=PADDING * 2.5 + BUTTON_WIDTH + scaled_size(33), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
 bg_color_label = Label(master=profiles_lf, text="Background color:")
 bg_color_label.place(x=scaled_size(20), y=scaled_size(355))
@@ -906,7 +906,7 @@ is_in_landscape_var = IntVar()
 rotate_keys_checkbox = Checkbutton(keys_lf, text="Rotate", variable=is_in_landscape_var, command=rotate_keys_click, state=DISABLED)
 rotate_keys_checkbox.place(x=scaled_size(10), y=scaled_size(0))
 
-key_instruction_label = Label(master=keys_lf, text="click to edit, drag to rearrange")
+key_instruction_label = Label(master=keys_lf, text="Click to edit, drag to rearrange")
 root.update()
 key_instruction_label.place(x=scaled_size(100), y=scaled_size(0))
 
@@ -1399,14 +1399,17 @@ autoswitch_button.place(x=scaled_size(150), y=scaled_size(0), width=scaled_size(
 discord_button = Button(resources_lf, text="Discord\nChatroom", command=open_discord_link)
 discord_button.place(x=scaled_size(300), y=scaled_size(0), width=scaled_size(100))
 
-troubleshoot_button = Button(resources_lf, text="Troubleshooting\nGuide", command=open_duckypad_troubleshooting_url)
+troubleshoot_button = Button(resources_lf, text="Trouble-\nshooting", command=open_duckypad_troubleshooting_url)
 troubleshoot_button.place(x=scaled_size(445), y=scaled_size(0), width=scaled_size(110))
 
 tindie_button = Button(resources_lf, text="Accessories &\nUpgrades", command=open_tindie_store)
 tindie_button.place(x=scaled_size(600), y=scaled_size(0), width=scaled_size(100))
 
 profile_import_button = Button(profiles_lf, text="Import", command=import_profile_click, state=DISABLED)
-profile_import_button.place(x=PADDING * 2, y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
+profile_import_button.place(x=PADDING * 2, y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
+
+profile_export_button = Button(profiles_lf, text="Export", command=import_profile_click, state=DISABLED)
+profile_export_button.place(x=PADDING * 2 + scaled_size(70), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
 empty_script_label = Label(root, text="<-- Select a key")
 empty_script_label.place(x=scaled_size(800), y=scaled_size(200))
@@ -1526,7 +1529,7 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-select_root_folder("sample_profiles")
+# select_root_folder("sample_profiles")
 my_compare.tk_root = root
 my_compare.tk_strvar = dp_root_folder_display
 root.mainloop()
