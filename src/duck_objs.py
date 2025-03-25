@@ -124,17 +124,17 @@ class dp_profile(object):
 		# ret += str('----------------------') + '\n'
 		return ret
 
-	def __init__(self, dp_descrip):
+	def __init__(self):
 		super(dp_profile, self).__init__()
 		self.path = None
 		self.name = None
-		self.keylist = [None] * (dp_descrip.MECH_OBSW_COUNT + dp_descrip.ROTARY_ENCODER_SW_COUNT + dp_descrip.ONBOARD_SPARE_GPIO_COUNT + dp_descrip.MAX_EXPANSION_CHANNEL)
+		self.keylist = [None] * (MECH_OBSW_COUNT + ROTARY_ENCODER_SW_COUNT + ONBOARD_SPARE_GPIO_COUNT + MAX_EXPANSION_CHANNEL)
 		self.bg_color = (84,22,180)
 		self.kd_color = None
 		self.dim_unused = True
 		self.is_landscape = False
 
-def read_profile_order_file(txt_path, dp_descrip):
+def read_profile_order_file(txt_path):
 	profile_num_dict = {}
 	with open(txt_path) as fff:
 		for line in fff:
@@ -145,7 +145,7 @@ def read_profile_order_file(txt_path, dp_descrip):
 				pf_name = line_split[1]
 			except Exception as e:
 				continue
-			if pf_number >= dp_descrip.MAX_PROFILE_COUNT:
+			if pf_number >= MAX_PROFILE_COUNT:
 				continue
 			profile_num_dict[pf_name] = pf_number
 	profile_info_list = []
@@ -154,11 +154,11 @@ def read_profile_order_file(txt_path, dp_descrip):
 	profile_info_list.sort(key=lambda tup: tup[0])
 	return profile_info_list
 
-def build_profile(root_dir_path, dp_descrip):
+def build_profile(root_dir_path, ):
 	my_dirs = [d for d in os.listdir(root_dir_path) if os.path.isdir(os.path.join(root_dir_path, d))]
 	my_dirs = [x for x in my_dirs if x.startswith('profile_')]
 	profile_info_txt_path = os.path.join(root_dir_path, profile_info_dot_txt)
-	profile_info_list = read_profile_order_file(profile_info_txt_path, dp_descrip)
+	profile_info_list = read_profile_order_file(profile_info_txt_path)
 
 	profile_list = []
 	for item in profile_info_list:
@@ -168,55 +168,25 @@ def build_profile(root_dir_path, dp_descrip):
 		if this_profile_folder_name not in my_dirs:
 			continue
 		this_profile_folder_path = os.path.join(root_dir_path, this_profile_folder_name)
-		this_profile = dp_profile(dp_descrip)
+		this_profile = dp_profile()
 		this_profile.load_from_path(this_profile_folder_path)
 		profile_list.append(this_profile)
 
 	return profile_list
 
-def import_profile_single(root_dir_path, dp_descrip):
-	this_profile = dp_profile(dp_descrip)
+def import_profile_single(root_dir_path):
+	this_profile = dp_profile()
 	this_profile.load_from_path(root_dir_path)
 	return this_profile
 
-def import_profile(root_dir_path, dp_descrip):
+def import_profile(root_dir_path):
 	try:
 		key_file_list = [x for x in os.listdir(root_dir_path) if x.endswith('.txt') and x.startswith('key') and x[3].isnumeric()]
 		if len(key_file_list) != 0:
-			return True, [import_profile_single(root_dir_path, dp_descrip)]
+			return True, [import_profile_single(root_dir_path)]
 	except Exception as e:
 		return False, str(e)
 	try:
 		return True, build_profile(root_dir_path)
 	except Exception as e:
 		return False, str(e)
-	return False, "unknown error"
-
-# fff = import_profile("sample_profiles/profile1_windows")
-# print(fff)
-
-"""
-build_profile()
-
-
-
-
-SW_MATRIX_NUM_COLS = 4
-SW_MATRIX_NUM_ROWS = 5
-MECH_OBSW_COUNT = (SW_MATRIX_NUM_COLS * SW_MATRIX_NUM_ROWS)
-ROTARY_ENCODER_SW_COUNT = 6
-ONBOARD_SPARE_GPIO_COUNT = 10
-
-dpp_descriptor = dp_descriptor()
-dpp_descriptor.MECH_OBSW_COUNT = MECH_OBSW_COUNT
-dpp_descriptor.ROTARY_ENCODER_SW_COUNT = ROTARY_ENCODER_SW_COUNT
-dpp_descriptor.MAX_EXPANSION_CHANNEL = MAX_EXPANSION_CHANNEL
-dpp_descriptor.ONBOARD_SPARE_GPIO_COUNT = ONBOARD_SPARE_GPIO_COUNT
-dpp_descriptor.MAX_PROFILE_COUNT = 64
-
-
-profile_list = build_profile("./sample_profiles", dpp_descriptor)
-
-print(profile_list)
-
-"""

@@ -13,52 +13,143 @@ from tkinter import filedialog
 from tkinter import simpledialog
 from tkinter.colorchooser import askcolor
 from tkinter import messagebox
-import urllib.request
 import subprocess
 import hid_op
 import make_bytecode
 import my_compare
 import traceback
 
-# ----- DPP specific ----
 """
-0 to 19: mechanical switches
-20 to 25: rotary encoders
-26 to 35: spare gpio pins, unused
-36 to 65: expansion channels
+0.13.5
+changed old HOLD to EMUK command
+
+0.13.6
+Added japanese IME keys "KATAKANAHIRAGANA", "HENKAN", "MUHENKAN", "KATAKANA", "HIRAGANA", "ZENKAKUHANKAKU"
+
+0.14.0
+added EMUK replacement
+only show last 50 characters when deleting folders
+fixed syntax check bug where MMOUSE isnt recognized
+script checking now provides error details
+defaultdelay and defaultchardelay now resets correctly when running a new script in pc test-run
+ask to confirm if trying to quit while saving data
+
+0.15.0 2023 01 23
+working on adding DSB support
+
+1.0.0 2023 02 06
+duckyScript 3 public beta
+
+1.0.1 2023 02 13
+minor bug fixes
+better handles saving when code contains errors
+removed unused code
+fixed a function detection bug
+
+1.1.0 2023 02 14
+updated dsb binary format to allow banked loading
+cleaned up opcode values
+
+1.1.1 2023 02 16
+changed loop break command to LBREAK to avoid conflict with BREAK keyboard key
+
+1.2.0 2023 02 17
+added profile import function
+script display now hidden if no key is selected
+automatically selects first profile after loading
+added color to key apply and remove button
+added minimum firmware version check
+
+1.2.1 2023 02 21
+added hid busy check
+
+1.2.2 2023 03 01
+fixed HID busy detection bug
+
+1.3.0 2023 05 02
+Fixed a firmware version parse bug
+getting ready for public release
+added firmware version compatibility check with upper and lower bound, both HID and file based.
+
+1.3.5 2023 05 12
+fixed a bug where it tries to load junk macOS files
+added back COMMAND key 
+
+1.4.0 2023 07 01
+added _TIME_S read-only variable
+Updated colour pickers to provide an appropriate initial colour and title for the dialog window. (PR#135)
+
+1.4.1 2023 07 01
+Fixed a crash when typing EMUK command too slowly
+
+1.4.2 2023 09 12
+added REM_BLOCK and REM_END
+
+1.5.0 2023 09 18
+added STRINGLN_BLOCK and STRINGLN_END
+added STRING_BLOCK and STRING_END
+adjust INJECT_MOD behaviour
+
+1.5.1 2023 09 20
+STRINGLN_BLOCK and STRING_BLOCK now preserves empty lines and white spaces
+
+1.6.1 2023 10 10
+automatically expands MOUSE_MOVE is value is more than 127
+checks if duckypad is busy before trying to connect
+
+1.6.2 2023 11 11
+increased max profile to 64
+
+1.6.3 2023 11 30
+automatically splits STRING/STRINGLN commands if too long
+
+1.6.4 2024 01 22
+Fixed a bug where TRUE and FALSE is replaced with 1 and 0 inside STRING statements
+
+2.0.0 2024 11 21
+New for duckyPad Pro
+
+2.0.1 2024 11 22
+Fixed off-by-1 error in GOTO_PROFILE
+
+2.0.2 2024 12 17
+Fixed press-anykey-to-abort not working
+Fixed text parsed as comments in STRING blocks
+
+2.0.3 2024 12 19
+Adjusted text visibility for macOS dark mode
+Adjusted GOTO_PROFILE parsing order
+Increased default USB MSC timeout
+Adjusted macOS additional instruction warnings
+updated linux "need sudo" text box
+
+2.0.4 2024 12 26
+Updated mac and linux unmount command
+
+2.1.0 2025 01 06
+Persistent global variables $_GV0 to $_GV15
+Fixed variables name parsing bug
+
+2.2.0
+2025 01 17
+Updated preprocessor with improved line numbering memory
+Fixed a bug in preprocessing long STRINGLN commands
+
+2.2.1
+2025 03 11
+fixed a bug where whitespace at end of KEYUP and KEYDOWN causes an syntax error
+
+2.3.0
+2025 03 20
+Started working on unified configurator
+
 """
 
-BUTTON_RE1_CW = 20
-BUTTON_RE1_CCW = 21
-BUTTON_RE1_PUSH = 22
-BUTTON_RE2_CW = 23
-BUTTON_RE2_CCW = 24
-BUTTON_RE2_PUSH = 25
+THIS_VERSION_NUMBER = '2.3.0'
 
-EXP_BUTTON_START = 36
-
-def is_rotary_encoder_button(key_index_start_from_0):
-    return BUTTON_RE1_CW <= key_index_start_from_0 <= BUTTON_RE2_PUSH
-
-def is_expansion_button(key_index_start_from_0):
-    return EXP_BUTTON_START <= key_index_start_from_0 <= EXP_BUTTON_START + MAX_EXPANSION_CHANNEL
-
-KEY_NAME_MAX_CHAR_PER_LINE = 5
-
-SW_MATRIX_NUM_COLS = 4
-SW_MATRIX_NUM_ROWS = 5
-MECH_OBSW_COUNT = (SW_MATRIX_NUM_COLS * SW_MATRIX_NUM_ROWS)
-ROTARY_ENCODER_SW_COUNT = 6
-ONBOARD_SPARE_GPIO_COUNT = 10
-
-dpp_descriptor = dp_descriptor()
-dpp_descriptor.MECH_OBSW_COUNT = MECH_OBSW_COUNT
-dpp_descriptor.ROTARY_ENCODER_SW_COUNT = ROTARY_ENCODER_SW_COUNT
-dpp_descriptor.MAX_EXPANSION_CHANNEL = MAX_EXPANSION_CHANNEL
-dpp_descriptor.ONBOARD_SPARE_GPIO_COUNT = ONBOARD_SPARE_GPIO_COUNT
-dpp_descriptor.MAX_PROFILE_COUNT = 64
-
-# ---------
+CURRENT_DEVICE_TYPE = dp_type()
+CURRENT_DEVICE_TYPE.device_type = CURRENT_DEVICE_TYPE.dp20
+CURRENT_DEVICE_TYPE.connection_type = CURRENT_DEVICE_TYPE.local_dir
 
 MIN_DUCKYPAD_FIRMWARE_VERSION = "1.0.0"
 MAX_DUCKYPAD_FIRMWARE_VERSION = "1.5.0"
@@ -184,7 +275,7 @@ def select_root_folder(root_path=None, is_msc=False):
     dp_root_folder_path = root_path
     dp_root_folder_display.set("Selected: " + root_path)
     root_folder_path_label.config(foreground='navy')
-    profile_list = duck_objs.build_profile(root_path, dpp_descriptor)
+    profile_list = duck_objs.build_profile(root_path)
 
     ui_reset()
     update_profile_display()
@@ -862,7 +953,7 @@ def kd_color_checkbox_click():
     update_profile_display()
 
 kd_color_var = IntVar()
-keydown_color_checkbox = Checkbutton(profiles_lf, text="Custom Activation\nColor", variable=kd_color_var, command=kd_color_checkbox_click, state=DISABLED, anchor='w', justify='left')
+keydown_color_checkbox = Checkbutton(profiles_lf, text="Custom Key-down\nColor", variable=kd_color_var, command=kd_color_checkbox_click, state=DISABLED, anchor='w', justify='left')
 keydown_color_checkbox.place(x=scaled_size(20), y=scaled_size(385))
 
 # ------------- RE frame -----------------
@@ -1370,7 +1461,7 @@ def import_profile_click():
     import_path = filedialog.askdirectory()
     if len(import_path) <= 0:
         return
-    is_success, content = duck_objs.import_profile(import_path, dpp_descriptor)
+    is_success, content = duck_objs.import_profile(import_path)
     if is_success is False:
         messagebox.showinfo("Import", f"Import failed:\n\n{content}")
         return

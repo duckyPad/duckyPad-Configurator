@@ -1,5 +1,3 @@
 open_click: set global variable of current duckypad type (og or pro)
 
-if DPP, as usual
-if OG, apply a lookup table so the grid maps correctly?
-expansion channel needs to be mapped too
+just implement a lookup table in DP20 firmware to translate DPP numbers to DP numbers, dont mess around with configurator.
