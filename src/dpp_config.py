@@ -147,9 +147,9 @@ Started working on unified configurator
 
 THIS_VERSION_NUMBER = '2.3.0'
 
-CURRENT_DEVICE_TYPE = dp_type()
-CURRENT_DEVICE_TYPE.device_type = CURRENT_DEVICE_TYPE.dp20
-CURRENT_DEVICE_TYPE.connection_type = CURRENT_DEVICE_TYPE.local_dir
+THIS_DUCKYPAD = dp_type()
+THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp20
+THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.local_dir
 
 MIN_DUCKYPAD_FIRMWARE_VERSION = "1.0.0"
 MAX_DUCKYPAD_FIRMWARE_VERSION = "1.5.0"
@@ -1103,8 +1103,17 @@ for x in range(MECH_OBSW_COUNT):
     this_button.bind("<ButtonRelease-1>", button_drag_release)
     key_button_list.append(this_button)
 
+def update_keyname_info_string(info_string):
+    if THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.unknown:
+        key_char_limit_label.config(text="")
+    elif THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.dp20:
+        key_char_limit_label.config(text=key_char_limit_dp20)
+        key_char_limit_label.place(x=scaled_size(17), y=scaled_size(8))
+    else:
+        key_char_limit_label.config(text=info_string)
+
 def place_obsw_buttons_portrait():
-    key_char_limit_label.config(text=key_char_limit_portrait)
+    update_keyname_info_string(key_char_limit_portrait)
     for index in range(MECH_OBSW_COUNT):
         key_button_list[index].place(x=key_button_xy_list[index][0], y=key_button_xy_list[index][1], width=KEY_BUTTON_WIDTH, height=KEY_BUTTON_HEIGHT)
 
@@ -1113,7 +1122,7 @@ def place_obsw_buttons_landscape():
     ROTATED_BUTTON_GAP = 5
     ROTATED_BUTTON_Y_START = 45
 
-    key_char_limit_label.config(text=key_char_limit_landscape)
+    update_keyname_info_string(key_char_limit_landscape)
 
     key_button_list[3].place(x=scaled_size(ROTATED_BUTTON_GAP), y=scaled_size(ROTATED_BUTTON_Y_START), width=ROTATED_BUTTON_WIDTH_HEIGHT, height=ROTATED_BUTTON_WIDTH_HEIGHT)
     key_button_list[7].place(x=scaled_size(ROTATED_BUTTON_GAP*2 + ROTATED_BUTTON_WIDTH_HEIGHT), y=scaled_size(ROTATED_BUTTON_Y_START), width=ROTATED_BUTTON_WIDTH_HEIGHT, height=ROTATED_BUTTON_WIDTH_HEIGHT)
@@ -1202,8 +1211,9 @@ name_editor_lf = LabelFrame(root, text="Key Config", width=scaled_size(300), hei
 name_editor_lf.place(x=profiles_lf.winfo_x() + profiles_lf.winfo_width() + PADDING, y=scaled_size(380))
 root.update()
 
-key_char_limit_portrait = "Name:\nmax 2 lines\n5 char per line"
-key_char_limit_landscape = "Name:\nmax 2 lines\n4 char per line"
+key_char_limit_portrait = "Name:\nMax 2 lines\n5 char per line"
+key_char_limit_landscape = "Name:\nMax 2 lines\n4 char per line"
+key_char_limit_dp20 = "Key Name:\nMax 7 letters"
 
 key_char_limit_label = Label(master=name_editor_lf)
 key_char_limit_label.place(x=scaled_size(17), y=scaled_size(0))

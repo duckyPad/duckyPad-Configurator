@@ -534,7 +534,7 @@ def is_rotary_encoder_button(key_index_start_from_0):
 def is_expansion_button(key_index_start_from_0):
     return EXP_BUTTON_START <= key_index_start_from_0 <= EXP_BUTTON_START + MAX_EXPANSION_CHANNEL
 
-KEY_NAME_MAX_CHAR_PER_LINE = 5
+KEY_NAME_MAX_CHAR_PER_LINE = 7
 
 SW_MATRIX_NUM_COLS = 4
 SW_MATRIX_NUM_ROWS = 5
