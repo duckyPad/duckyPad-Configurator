@@ -646,3 +646,9 @@ def last_two_levels(full_path):
 
 
 profile_info_dot_txt = "profile_info.txt"
+
+device_type_dp20_hid = 0
+device_type_dp20_local_dir = 1
+device_type_dpp_msc = 2
+device_type_dpp_local_dir = 3
+device_type_unknown = 255
