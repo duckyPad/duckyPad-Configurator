@@ -108,8 +108,7 @@ def ui_reset():
     profile_down_button.config(state=DISABLED)
     profile_dupe_button.config(state=DISABLED)
     save_button.config(state=DISABLED)
-    kd_R1.config(state=DISABLED)
-    kd_R2.config(state=DISABLED)
+    keydown_color_checkbox.config(state=DISABLED)
     dim_unused_keys_checkbox.config(state=DISABLED)
     rotate_keys_checkbox.config(state=DISABLED)
     key_remove_button.config(state=DISABLED)
@@ -297,8 +296,7 @@ def enable_buttons():
     profile_dupe_button.config(state=NORMAL)
     save_button.config(state=NORMAL)
     backup_button.config(state=NORMAL)
-    kd_R1.config(state=NORMAL)
-    kd_R2.config(state=NORMAL)
+    keydown_color_checkbox.config(state=NORMAL)
     dim_unused_keys_checkbox.config(state=NORMAL)
     rotate_keys_checkbox.config(state=NORMAL)
     key_remove_button.config(state=NORMAL)
@@ -349,10 +347,9 @@ def update_profile_display():
     bg_color_button.config(background=bg_color_hex)
 
     if profile_list[index].kd_color is None:
-        kd_R1.select()
         kd_color_button.config(background=default_button_color)
     else:
-        kd_R2.select()
+        custom_key_color_checkbox.select()
         kd_color_button.config(background=rgb_to_hex(profile_list[index].kd_color))
 
     if profile_list[index].dim_unused:
@@ -411,22 +408,6 @@ def update_key_button_appearances(profile_index):
             key_button_list[key_index].config(text='', background=rgb_to_hex(profile_list[profile_index].bg_color))
         elif item is None and profile_list[profile_index].dim_unused:
             key_button_list[key_index].config(background=default_button_color, text='')
-
-def kd_radiobutton_auto_click():
-    global profile_list
-    selection = profile_lstbox.curselection()
-    if len(selection) <= 0:
-        return
-    profile_list[selection[0]].kd_color = None
-    update_profile_display()
-
-def kd_radiobutton_custom_click():
-    global profile_list
-    selection = profile_lstbox.curselection()
-    if len(selection) <= 0:
-        return
-    profile_list[selection[0]].kd_color = last_rgb
-    update_profile_display()
 
 def dim_unused_keys_click():
     global profile_list
@@ -854,29 +835,35 @@ profile_dupe_button.place(x=PADDING * 2.5 + BUTTON_WIDTH, y=BUTTON_Y_POS, width=
 profile_rename_button = Button(profiles_lf, text="Rename", command=profile_rename_click, state=DISABLED)
 profile_rename_button.place(x=PADDING * 2.5 + BUTTON_WIDTH + scaled_size(33), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
-bg_color_label = Label(master=profiles_lf, text="Background color:")
-bg_color_label.place(x=scaled_size(20), y=scaled_size(355))
+bg_color_label = Label(master=profiles_lf, text="Background Color:")
+bg_color_label.place(x=scaled_size(40), y=scaled_size(365))
 
 bg_color_button = Label(master=profiles_lf, borderwidth=1, relief="solid")
-bg_color_button.place(x=scaled_size(160), y=scaled_size(356), width=scaled_size(60), height=scaled_size(20))
+bg_color_button.place(x=scaled_size(160), y=scaled_size(365), width=scaled_size(60), height=scaled_size(20))
 bg_color_button.bind("<Button-1>", bg_color_click)
 
-kd_color_label = Label(master=profiles_lf, text="Activation color:")
-kd_color_label.place(x=scaled_size(20), y=scaled_size(380))
-
 kd_color_button = Label(master=profiles_lf, borderwidth=1, relief="solid")
-kd_color_button.place(x=scaled_size(160), y=scaled_size(407), width=scaled_size(60), height=scaled_size(20))
+kd_color_button.place(x=scaled_size(160), y=scaled_size(395), width=scaled_size(60), height=scaled_size(20))
 kd_color_button.bind("<Button-1>", kd_color_click)
 
 dim_unused_keys_checkbox_var = IntVar()
-dim_unused_keys_checkbox = Checkbutton(profiles_lf, text="Dim unused keys", variable=dim_unused_keys_checkbox_var, command=dim_unused_keys_click, state=DISABLED)
+dim_unused_keys_checkbox = Checkbutton(profiles_lf, text="Dim Unused Keys", variable=dim_unused_keys_checkbox_var, command=dim_unused_keys_click, state=DISABLED)
 dim_unused_keys_checkbox.place(x=scaled_size(20), y=scaled_size(425))
 
+def kd_color_checkbox_click():
+    global profile_list
+    selection = profile_lstbox.curselection()
+    if len(selection) <= 0:
+        return
+    if kd_color_var.get():
+        profile_list[selection[0]].kd_color = last_rgb
+    else:
+        profile_list[selection[0]].kd_color = None
+    update_profile_display()
+
 kd_color_var = IntVar()
-kd_R1 = Radiobutton(profiles_lf, text="      Auto", variable=kd_color_var, value=0, command=kd_radiobutton_auto_click, state=DISABLED)
-kd_R1.place(x=scaled_size(130), y=scaled_size(380))
-kd_R2 = Radiobutton(profiles_lf, text="", variable=kd_color_var, value=1, command=kd_radiobutton_custom_click, state=DISABLED)
-kd_R2.place(x=scaled_size(130), y=scaled_size(405))
+keydown_color_checkbox = Checkbutton(profiles_lf, text="Custom Activation\nColor", variable=kd_color_var, command=kd_color_checkbox_click, state=DISABLED, anchor='w', justify='left')
+keydown_color_checkbox.place(x=scaled_size(20), y=scaled_size(385))
 
 # ------------- RE frame -----------------
 re_lf = LabelFrame(root, text="Rotary Encoders", width=scaled_size(150), height=scaled_size(205))

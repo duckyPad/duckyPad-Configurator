@@ -108,7 +108,6 @@ class dp_profile(object):
 				on_release_path = os.path.join(path, f'key{this_key.index+1}-release.txt')
 				this_key.script = get_script(on_press_path)
 				this_key.script_on_release = get_script(on_release_path)
-		print("dfsdfsdf", self.path)
 
 	def __str__(self):
 		ret = ""
@@ -169,7 +168,6 @@ def build_profile(root_dir_path, dp_descrip):
 		if this_profile_folder_name not in my_dirs:
 			continue
 		this_profile_folder_path = os.path.join(root_dir_path, this_profile_folder_name)
-		print(this_profile_folder_path)
 		this_profile = dp_profile(dp_descrip)
 		this_profile.load_from_path(this_profile_folder_path)
 		profile_list.append(this_profile)
