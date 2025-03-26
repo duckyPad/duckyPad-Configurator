@@ -39,14 +39,6 @@ HID_RESPONSE_EOF = 3
 
 HID_COMMAND_SW_RESET = 20
 
-# def is_dp_ready():
-#     dp_info = get_dp_info()
-#     if dp_info is None:
-#         return False, 'duckyPad not Found!'
-#     if dp_info[2] == 0:
-#         return True, 'All good!'
-#     return False, 'duckyPad is busy!\n\nMake sure no script is running.'
-
 def duckypad_hid_sw_reset(reboot_into_usb_msc_mode=False):
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
@@ -97,7 +89,7 @@ def eject_drive(vol_str):
 def make_dp_info_dict(hid_msg):
     this_dict = {}
     this_dict['fw_version'] = f"{hid_msg[3]}.{hid_msg[4]}.{hid_msg[5]}"
-    this_dict['dp_model'] = f"{hid_msg[6]}"
+    this_dict['dp_model'] = hid_msg[6]
     serial_number_uint32_t = int.from_bytes(hid_msg[7:11], byteorder='big')
     this_dict['serial'] = f'{serial_number_uint32_t:08X}'.upper()
     return this_dict
@@ -114,12 +106,14 @@ def get_all_dp_info(dp_path_list):
         result = myh.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
         myh.close()
         print(result)
-        if result[2] != 0: # status is not SUCCESS
+        if result[2] != HID_RESPONSE_OK:
             continue
         this_dict = make_dp_info_dict(result)
         dp_info_list.append(this_dict)
     return dp_info_list
 
-# all_dp_paths = get_duckypad_path()
-# all_dp_info = get_all_dp_info(all_dp_paths)
-# print(all_dp_info)
+def scan_duckypads():
+    all_dp_paths = get_duckypad_path()
+    if len(all_dp_paths) == 0:
+        return []
+    return get_all_dp_info(all_dp_paths)

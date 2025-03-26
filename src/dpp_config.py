@@ -331,13 +331,49 @@ def put_duckypad_in_msc_mode_and_get_drive_path(reset_ui=True):
     dp_root_folder_display.set("")
     return duckypad_drive_path
 
+def make_dp_info_str(dp_info_dict):
+    dp_model_lookup = {20:"duckyPad(2020)", 24:"duckyPad Pro"}
+    try:
+        dp_model_str = dp_model_lookup[dp_info_dict['dp_model']]
+    except:
+        dp_model_str = "Unknown"
+    return f" {dp_model_str:<18}{dp_info_dict['serial']:<12}{dp_info_dict['fw_version']}"
+
+def ask_user_to_select_a_duckypad(dp_info_list):
+    dp_select_window = Toplevel(root)
+    dp_select_window.title("Select-a-duckyPad")
+    dp_select_window.geometry(f"{scaled_size(360)}x{scaled_size(320)}")
+    dp_select_window.resizable(width=FALSE, height=FALSE)
+    dp_select_window.grab_set()
+
+    dp_select_text_label = Label(master=dp_select_window, text="Multiple duckyPads detected!\nPlease select one:")
+    dp_select_text_label.place(x=scaled_size(90), y=scaled_size(5))
+
+    dp_select_column_label = Label(master=dp_select_window, text=f"{"Model":<16}{"Serial":<10}Firmware", font='TkFixedFont')
+    dp_select_column_label.place(x=scaled_size(50), y=scaled_size(50))
+
+    def dp_select_button_click(wtf):
+        print("hello", wtf)
+        dp_select_window.destroy()
+
+    dp_select_var = StringVar(value=[make_dp_info_str(x) for x in dp_info_list])
+    dp_select_listbox = Listbox(dp_select_window, listvariable=dp_select_var, height=16, exportselection=0, font='TkFixedFont', selectmode='single')
+    dp_select_listbox.place(x=scaled_size(20), y=scaled_size(70), width=scaled_size(320), height=scaled_size(200))
+    dp_select_listbox.bind('<Double-Button>', dp_select_button_click)
+
+    root.wait_window(dp_select_window)
+    print("dp_select_window has been Closed!")
+
 def connect_button_click():
-    if hid_op.get_duckypad_path() is None:
+    all_dp_info_list = hid_op.scan_duckypads()
+    if len(all_dp_info_list) == 0:
         if(messagebox.askokcancel("Info", "duckyPad not found!\n\nSelect a folder manually instead?") == False):
             return
         select_root_folder()
         return
-
+    
+    ask_user_to_select_a_duckypad(all_dp_info_list)
+    exit()
     init_success = True
     hid_op.duckypad_hid_close()
     try:
@@ -396,7 +432,6 @@ def enable_buttons():
     exp_page_minus_button.config(state=NORMAL)
 
 def profile_shift_up():
-    global profile_var
     global profile_list
     selection = profile_lstbox.curselection()
     if len(selection) <= 0 or selection[0] == 0:
@@ -410,7 +445,6 @@ def profile_shift_up():
     update_profile_display()
 
 def profile_shift_down():
-    global profile_var
     global profile_list
     selection = profile_lstbox.curselection()
     if len(selection) <= 0 or selection[0] == len(profile_list) - 1:
@@ -1617,7 +1651,8 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-select_root_folder("sample_profiles")
+# select_root_folder("sample_profiles")
+connect_button_click()
 my_compare.tk_root = root
 my_compare.tk_strvar = dp_root_folder_display
 root.mainloop()
