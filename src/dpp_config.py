@@ -347,13 +347,14 @@ def ask_user_to_select_a_duckypad(dp_info_list):
     dp_select_window.grab_set()
 
     dp_select_text_label = Label(master=dp_select_window, text="Multiple duckyPads detected!\nDouble click to select one:")
-    dp_select_text_label.place(x=scaled_size(90), y=scaled_size(15))
+    dp_select_text_label.place(x=scaled_size(90), y=scaled_size(10))
 
-    dp_select_column_label = Label(master=dp_select_window, text=f"{"Model":<16}{"Serial":<10}Firmware", font='TkFixedFont')
-    dp_select_column_label.place(x=scaled_size(50), y=scaled_size(60))
+    dp_select_column_label = Label(master=dp_select_window, text=f"{'Model':<16}{'Serial':<10}Firmware", font='TkFixedFont')
+    dp_select_column_label.place(x=scaled_size(50), y=scaled_size(50))
     selected_duckypad = IntVar()
     selected_duckypad.set(-1)
-    def dp_select_button_click(wtf):
+
+    def dp_select_button_click(wtf=None):
         this_selection = dp_select_listbox.curselection()
         if len(this_selection) == 0:
             return
@@ -362,8 +363,11 @@ def ask_user_to_select_a_duckypad(dp_info_list):
 
     dp_select_var = StringVar(value=[make_dp_info_str(x) for x in dp_info_list])
     dp_select_listbox = Listbox(dp_select_window, listvariable=dp_select_var, height=16, exportselection=0, font='TkFixedFont', selectmode='single')
-    dp_select_listbox.place(x=scaled_size(20), y=scaled_size(80), width=scaled_size(320), height=scaled_size(200))
+    dp_select_listbox.place(x=scaled_size(20), y=scaled_size(70), width=scaled_size(320), height=scaled_size(200))
     dp_select_listbox.bind('<Double-Button>', dp_select_button_click)
+
+    dp_select_button = Button(dp_select_window, text="Select", command=dp_select_button_click)
+    dp_select_button.place(x=scaled_size(20), y=scaled_size(280), width=scaled_size(320))
 
     root.wait_window(dp_select_window)
     return selected_duckypad.get()
