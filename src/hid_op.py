@@ -4,25 +4,30 @@ import time
 import sys
 import psutil
 
-HID_WAIT_TIME = float(os.getenv('HID_WAIT_TIME', 0))
-
 if 'win32' in sys.platform:
-    import pywintypes
     import win32api
 
+dp20_pid = 0xd11c
+dpp_pid = 0xd11d
+all_dp_pids = [dp20_pid, dpp_pid]
+
+def is_duckypad_pid(this_pid):
+    return this_pid in all_dp_pids
+
 def get_duckypad_path():
+    dp_path_list = []
     if 'win32' in sys.platform:
         for device_dict in hid.enumerate():
             if device_dict['vendor_id'] == 0x0483 and \
-            device_dict['product_id'] == (0xd11c+1) and \
+            is_duckypad_pid(device_dict['product_id']) and \
             device_dict['usage'] == 58:
-                return device_dict['path']
+                dp_path_list.append(device_dict['path'])
     else:
         for device_dict in hid.enumerate():
             if device_dict['vendor_id'] == 0x0483 and \
-            device_dict['product_id'] == (0xd11c+1):
-                return device_dict['path']
-    return None
+            is_duckypad_pid(device_dict['product_id']):
+                dp_path_list.append(device_dict['path'])
+    return dp_path_list
 
 PC_TO_DUCKYPAD_HID_BUF_SIZE = 64
 DUCKYPAD_TO_PC_HID_BUF_SIZE = 64
@@ -34,50 +39,13 @@ HID_RESPONSE_EOF = 3
 
 HID_COMMAND_SW_RESET = 20
 
-h = hid.device()
-
-def _read_duckypad():
-    """
-    Read from the duckyPad & discard the result if we got a result that is
-    shorter than a single byte.
-    """
-    read_start = time.time()
-    while time.time() - read_start <= 1:
-        result = h.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
-        if len(result) > 1:
-            return result
-        time.sleep(0.005)
-    return []
-
-def duckypad_hid_init():
-    duckypad_path = get_duckypad_path()
-    if duckypad_path is None:
-        raise OSError('duckyPad Not Found!')
-    h.open_path(duckypad_path)
-
-def duckypad_hid_close():
-    h.close()
-
-def get_dp_info():
-    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
-    pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
-    try:
-        duckypad_hid_close()
-        duckypad_hid_init()
-        h.write(pc_to_duckypad_buf)
-        result = _read_duckypad()
-    except Exception as e:
-        print("get_dp_info:", e)
-        return None
-    return result
-
-def is_dp_ready():
-    dp_info = get_dp_info()
-    if dp_info is None:
-        return False, 'duckyPad not Found!'
-    if dp_info[2] == 0:
-        return True, 'All good!'
-    return False, 'duckyPad is busy!\n\nMake sure no script is running.'
+# def is_dp_ready():
+#     dp_info = get_dp_info()
+#     if dp_info is None:
+#         return False, 'duckyPad not Found!'
+#     if dp_info[2] == 0:
+#         return True, 'All good!'
+#     return False, 'duckyPad is busy!\n\nMake sure no script is running.'
 
 def duckypad_hid_sw_reset(reboot_into_usb_msc_mode=False):
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
@@ -126,9 +94,21 @@ def eject_drive(vol_str):
     else:
         time.sleep(1) # well, good enough for windows
 
-# result = get_duckypad_drive("DP24_9BB0")
-# print(result)
-# print(os.listdir(result))
-# duckypad_hid_init()
-# print(is_dp_ready())
-# duckypad_hid_sw_reset()
+def get_all_dp_info(dp_path_list):
+    dp_info_dict = {}
+    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
+    pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
+    for this_path in dp_path_list:
+        print(this_path)
+        myh = hid.device()
+        myh.open_path(this_path)
+        myh.write(pc_to_duckypad_buf)
+        result = myh.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
+        dp_info_dict[this_path] = result
+        myh.close()
+    return dp_info_dict
+
+aaa = get_duckypad_path()
+get_all_dp_info(aaa)
+
+exit()
