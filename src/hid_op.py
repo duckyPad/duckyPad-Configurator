@@ -94,8 +94,16 @@ def eject_drive(vol_str):
     else:
         time.sleep(1) # well, good enough for windows
 
+def make_dp_info_dict(hid_msg):
+    this_dict = {}
+    this_dict['fw_version'] = f"{hid_msg[3]}.{hid_msg[4]}.{hid_msg[5]}"
+    this_dict['dp_model'] = f"{hid_msg[6]}"
+    serial_number_uint32_t = int.from_bytes(hid_msg[7:11], byteorder='big')
+    this_dict['serial'] = f'{serial_number_uint32_t:08X}'.upper()
+    return this_dict
+
 def get_all_dp_info(dp_path_list):
-    dp_info_dict = {}
+    dp_info_list = []
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
     for this_path in dp_path_list:
@@ -104,11 +112,14 @@ def get_all_dp_info(dp_path_list):
         myh.open_path(this_path)
         myh.write(pc_to_duckypad_buf)
         result = myh.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
-        dp_info_dict[this_path] = result
         myh.close()
-    return dp_info_dict
+        print(result)
+        if result[2] != 0: # status is not SUCCESS
+            continue
+        this_dict = make_dp_info_dict(result)
+        dp_info_list.append(this_dict)
+    return dp_info_list
 
-aaa = get_duckypad_path()
-get_all_dp_info(aaa)
-
-exit()
+# all_dp_paths = get_duckypad_path()
+# all_dp_info = get_all_dp_info(all_dp_paths)
+# print(all_dp_info)
