@@ -151,8 +151,8 @@ THIS_DUCKYPAD = dp_type()
 THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp20
 THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.local_dir
 
-MIN_DUCKYPAD_FIRMWARE_VERSION = "1.0.0"
-MAX_DUCKYPAD_FIRMWARE_VERSION = "1.5.0"
+MIN_DUCKYPAD_PRO_FIRMWARE_VERSION = "1.0.0"
+MAX_DUCKYPAD_PRO_FIRMWARE_VERSION = "1.5.0"
 
 UI_SCALE = float(os.getenv("DUCKYPAD_UI_SCALE", default=1))
 USB_MSC_MOUNTPOINT = os.getenv("DUCKYPAD_MS_MOUNTPOINT", default=None)
@@ -238,12 +238,6 @@ def print_fw_update_label(current_fw_str=None):
         dp_fw_update_label.unbind("<Button-1>")
     return this_version
 
-def get_fw_str_hid():
-    dp_info = hid_op.get_dp_info()
-    if dp_info is None:
-        return None
-    return f"{dp_info[3]}.{dp_info[4]}.{dp_info[5]}"
-
 is_root_folder_duckypad_msc = False
 
 FW_OK = 0
@@ -253,9 +247,9 @@ FW_UNKNOWN = 3
 
 def check_fw_support(current_fw_str):
     try:
-        if check_update.versiontuple(current_fw_str) < check_update.versiontuple(MIN_DUCKYPAD_FIRMWARE_VERSION):
+        if check_update.versiontuple(current_fw_str) < check_update.versiontuple(MIN_DUCKYPAD_PRO_FIRMWARE_VERSION):
             return FW_TOO_LOW
-        if check_update.versiontuple(current_fw_str) > check_update.versiontuple(MAX_DUCKYPAD_FIRMWARE_VERSION):
+        if check_update.versiontuple(current_fw_str) > check_update.versiontuple(MAX_DUCKYPAD_PRO_FIRMWARE_VERSION):
             return FW_TOO_HIGH
         return FW_OK
     except Exception as e:
@@ -288,10 +282,10 @@ def select_root_folder(root_path=None, is_msc=False):
 
 def incompatible_fw_msgbox(current_fw_str, fw_status):
     if fw_status == FW_TOO_LOW:
-        if messagebox.askokcancel("Info", f"duckyPad firmware too low!\n\nCurrent: {current_fw_str}\nSupported: Between {MIN_DUCKYPAD_FIRMWARE_VERSION} and {MAX_DUCKYPAD_FIRMWARE_VERSION}.\n\nSee how to update it?"):
+        if messagebox.askokcancel("Info", f"duckyPad firmware too low!\n\nCurrent: {current_fw_str}\nSupported: Between {MIN_DUCKYPAD_PRO_FIRMWARE_VERSION} and {MAX_DUCKYPAD_PRO_FIRMWARE_VERSION}.\n\nSee how to update it?"):
             fw_update_click(None)
     elif fw_status == FW_TOO_HIGH:
-        if messagebox.askokcancel("Info", f"duckyPad firmware too high!\n\nCurrent: {current_fw_str}\nSupported: Between {MIN_DUCKYPAD_FIRMWARE_VERSION} and {MAX_DUCKYPAD_FIRMWARE_VERSION}.\n\nSee how to update this app?"):
+        if messagebox.askokcancel("Info", f"duckyPad firmware too high!\n\nCurrent: {current_fw_str}\nSupported: Between {MIN_DUCKYPAD_PRO_FIRMWARE_VERSION} and {MAX_DUCKYPAD_PRO_FIRMWARE_VERSION}.\n\nSee how to update this app?"):
             app_update_click(None)
     else:
         messagebox.showinfo("Info", f"duckyPad firmware unknown!\n\n")
@@ -332,7 +326,7 @@ def put_duckypad_in_msc_mode_and_get_drive_path(reset_ui=True):
     return duckypad_drive_path
 
 def make_dp_info_str(dp_info_dict):
-    dp_model_lookup = {20:"duckyPad(2020)", 24:"duckyPad Pro"}
+    dp_model_lookup = {DP_MODEL_OG_DUCKYPAD:"duckyPad(2020)", DP_MODEL_DUCKYPAD_PRO:"duckyPad Pro"}
     try:
         dp_model_str = dp_model_lookup[dp_info_dict['dp_model']]
     except:
@@ -372,48 +366,59 @@ def ask_user_to_select_a_duckypad(dp_info_list):
     root.wait_window(dp_select_window)
     return selected_duckypad.get()
 
+def dpp_is_fw_compatible(dp_info_dict):
+    fw_str = dp_info_dict["fw_version"]
+    fw_status = check_fw_support(fw_str)
+    if fw_status != FW_OK:
+        incompatible_fw_msgbox(fw_str, fw_status)
+        return False
+    print_fw_update_label(fw_str)
+    return True
+
+def dp20_is_fw_compatible(dp_info_dict):
+    print(dp_info_dict)
+    return True
+
+def is_dp_fw_valid(dp_info_dict):
+    if dp_info_dict['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
+        return dpp_is_fw_compatible(dp_info_dict)
+    elif dp_info_dict['dp_model'] == DP_MODEL_OG_DUCKYPAD:
+        return dp20_is_fw_compatible(dp_info_dict)
+    else:
+        return False
+
 def connect_button_click():
     all_dp_info_list = hid_op.scan_duckypads()
     if len(all_dp_info_list) == 0:
+        # maybe put all the "permission needed" message here?
+        """
+        no duckypad found, make sure
+        * top USB port
+        cable has data
+        try different ports
+        try using a USB hub
+        
+        macOS: enable permissions
+        linux: sudo
+
+        """
         if(messagebox.askokcancel("Info", "duckyPad not found!\n\nSelect a folder manually instead?") == False):
             return
         select_root_folder()
         return
-    
+    selected_index = -1
+    if len(all_dp_info_list) == 1:
+        selected_index = 0
     selected_index = ask_user_to_select_a_duckypad(all_dp_info_list)
-    print("user selected:", selected_index)
+    if selected_index == -1:
+        return
+    user_selected_dp = all_dp_info_list[selected_index]
+    print("user selected:", user_selected_dp)
+    if is_dp_fw_valid(user_selected_dp) is False:
+        return
+    
+    print("fw check passed")
     exit()
-    init_success = True
-    hid_op.duckypad_hid_close()
-    try:
-        hid_op.duckypad_hid_init()
-        is_dp_ready, comment = hid_op.is_dp_ready()
-        if is_dp_ready is False:
-            messagebox.showerror("Error", comment)
-            return
-        fw_str = get_fw_str_hid()
-        fw_status = check_fw_support(fw_str)
-        if fw_status != FW_OK:
-            init_success = False
-            incompatible_fw_msgbox(fw_str, fw_status)
-        print_fw_update_label(fw_str)
-    except Exception as e:
-        print("connect_button_click:", e)
-        init_success = False
-
-    if init_success is False and 'linux' in sys.platform:
-        box_result = messagebox.askokcancel("Info", "duckyPad detected, but please run me in sudo!\n\nClick OK to select a folder manually.")
-        if box_result is True:
-            select_root_folder()
-        return
-
-    if init_success is False and 'darwin' in sys.platform:
-        box_result = messagebox.askyesnocancel("Info", "duckyPad detected, but I need additional permissions!\n\nClick Yes for instructions\n\nClick No to select a folder manually.")
-        if box_result is True:
-            webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/blob/master/doc/linux_macos_notes.md')
-        elif box_result is False:
-            select_root_folder()
-        return
     
     duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path()
     if duckypad_drive_path is None:

@@ -86,12 +86,13 @@ def eject_drive(vol_str):
     else:
         time.sleep(1) # well, good enough for windows
 
-def make_dp_info_dict(hid_msg):
+def make_dp_info_dict(hid_msg, hid_path):
     this_dict = {}
     this_dict['fw_version'] = f"{hid_msg[3]}.{hid_msg[4]}.{hid_msg[5]}"
     this_dict['dp_model'] = hid_msg[6]
     serial_number_uint32_t = int.from_bytes(hid_msg[7:11], byteorder='big')
     this_dict['serial'] = f'{serial_number_uint32_t:08X}'.upper()
+    this_dict['hid_path'] = hid_path
     return this_dict
 
 def get_all_dp_info(dp_path_list):
@@ -108,7 +109,7 @@ def get_all_dp_info(dp_path_list):
         print(result)
         if result[2] != HID_RESPONSE_OK:
             continue
-        this_dict = make_dp_info_dict(result)
+        this_dict = make_dp_info_dict(result, this_path)
         dp_info_list.append(this_dict)
     return dp_info_list
 

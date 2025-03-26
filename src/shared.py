@@ -554,3 +554,6 @@ class dp_type:
         self.unknown = 255
         self.device_type = self.unknown
         self.connection_type = self.unknown
+
+DP_MODEL_OG_DUCKYPAD = 20
+DP_MODEL_DUCKYPAD_PRO = 24
