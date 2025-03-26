@@ -346,23 +346,27 @@ def ask_user_to_select_a_duckypad(dp_info_list):
     dp_select_window.resizable(width=FALSE, height=FALSE)
     dp_select_window.grab_set()
 
-    dp_select_text_label = Label(master=dp_select_window, text="Multiple duckyPads detected!\nPlease select one:")
-    dp_select_text_label.place(x=scaled_size(90), y=scaled_size(5))
+    dp_select_text_label = Label(master=dp_select_window, text="Multiple duckyPads detected!\nDouble click to select one:")
+    dp_select_text_label.place(x=scaled_size(90), y=scaled_size(15))
 
     dp_select_column_label = Label(master=dp_select_window, text=f"{"Model":<16}{"Serial":<10}Firmware", font='TkFixedFont')
-    dp_select_column_label.place(x=scaled_size(50), y=scaled_size(50))
-
+    dp_select_column_label.place(x=scaled_size(50), y=scaled_size(60))
+    selected_duckypad = IntVar()
+    selected_duckypad.set(-1)
     def dp_select_button_click(wtf):
-        print("hello", wtf)
+        this_selection = dp_select_listbox.curselection()
+        if len(this_selection) == 0:
+            return
+        selected_duckypad.set(this_selection[0])
         dp_select_window.destroy()
 
     dp_select_var = StringVar(value=[make_dp_info_str(x) for x in dp_info_list])
     dp_select_listbox = Listbox(dp_select_window, listvariable=dp_select_var, height=16, exportselection=0, font='TkFixedFont', selectmode='single')
-    dp_select_listbox.place(x=scaled_size(20), y=scaled_size(70), width=scaled_size(320), height=scaled_size(200))
+    dp_select_listbox.place(x=scaled_size(20), y=scaled_size(80), width=scaled_size(320), height=scaled_size(200))
     dp_select_listbox.bind('<Double-Button>', dp_select_button_click)
 
     root.wait_window(dp_select_window)
-    print("dp_select_window has been Closed!")
+    return selected_duckypad.get()
 
 def connect_button_click():
     all_dp_info_list = hid_op.scan_duckypads()
@@ -372,7 +376,8 @@ def connect_button_click():
         select_root_folder()
         return
     
-    ask_user_to_select_a_duckypad(all_dp_info_list)
+    selected_index = ask_user_to_select_a_duckypad(all_dp_info_list)
+    print("user selected:", selected_index)
     exit()
     init_success = True
     hid_op.duckypad_hid_close()
