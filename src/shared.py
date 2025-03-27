@@ -545,15 +545,16 @@ MAX_PROFILE_COUNT = 64
 
 profile_info_dot_txt = "profile_info.txt"
 
+DP_MODEL_OG_DUCKYPAD = 20
+DP_MODEL_DUCKYPAD_PRO = 24
+
 class dp_type:
     def __init__(self):
-        self.dp20 = 0
-        self.dp24 = 1
+        self.dp20 = DP_MODEL_OG_DUCKYPAD
+        self.dp24 = DP_MODEL_DUCKYPAD_PRO
         self.local_dir = 2
         self.usb = 3
         self.unknown = 255
         self.device_type = self.unknown
         self.connection_type = self.unknown
 
-DP_MODEL_OG_DUCKYPAD = 20
-DP_MODEL_DUCKYPAD_PRO = 24

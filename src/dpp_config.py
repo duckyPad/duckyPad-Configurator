@@ -148,11 +148,11 @@ Started working on unified configurator
 THIS_VERSION_NUMBER = '2.3.0'
 
 THIS_DUCKYPAD = dp_type()
-THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp20
-THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.local_dir
 
 MIN_DUCKYPAD_PRO_FIRMWARE_VERSION = "1.0.0"
 MAX_DUCKYPAD_PRO_FIRMWARE_VERSION = "1.5.0"
+MIN_DUCKYPAD_2020_FIRMWARE_VERSION = "2.0.0"
+MAX_DUCKYPAD_2020_FIRMWARE_VERSION = "2.5.0"
 
 UI_SCALE = float(os.getenv("DUCKYPAD_UI_SCALE", default=1))
 USB_MSC_MOUNTPOINT = os.getenv("DUCKYPAD_MS_MOUNTPOINT", default=None)
@@ -222,39 +222,27 @@ def ui_reset():
     exp_page_plus_button.config(state=DISABLED)
     exp_page_minus_button.config(state=DISABLED)
 
-def fw_update_click(event):
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/blob/master/doc/fw_update.md')
+def fw_update_click(event, dp_info_dict):
+    if dp_info_dict['dp_model'] == DP_MODEL_OG_DUCKYPAD:
+        webbrowser.open("https://github.com/dekuNukem/duckyPad/blob/master/firmware_updates_and_version_history.md")
+    elif dp_info_dict['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
+        webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/fw_update.html')
 
-def print_fw_update_label(current_fw_str=None):
-    fw_result, this_version = check_update.get_firmware_update_status(current_fw_str), current_fw_str
+def print_fw_update_label(dp_info_dict):
+    this_version = dp_info_dict["fw_version"]
+    fw_result = check_update.get_firmware_update_status(dp_info_dict)
     if fw_result == 0:
-        dp_fw_update_label.config(text='Firmware (' + str(this_version) +'): Up to date', fg='black', bg=default_button_color)
+        dp_fw_update_label.config(text=f'Firmware ({this_version}): Up to date', fg='black', bg=default_button_color)
         dp_fw_update_label.unbind("<Button-1>")
     elif fw_result == 1:
-        dp_fw_update_label.config(text='Firmware (' + str(this_version) +'): Update available! Click me!', fg='black', bg='orange', cursor="hand2")
-        dp_fw_update_label.bind("<Button-1>", fw_update_click)
+        dp_fw_update_label.config(text=f'Firmware ({this_version}): Update available! Click me!', fg='black', bg='orange', cursor="hand2")
+        dp_fw_update_label.bind("<Button-1>", lambda event: fw_update_click(event, dp_info_dict))
     else:
         dp_fw_update_label.config(text='Firmware: Unknown', fg='black', bg=default_button_color)
         dp_fw_update_label.unbind("<Button-1>")
     return this_version
 
 is_root_folder_duckypad_msc = False
-
-FW_OK = 0
-FW_TOO_LOW = 1
-FW_TOO_HIGH = 2
-FW_UNKNOWN = 3
-
-def check_fw_support(current_fw_str):
-    try:
-        if check_update.versiontuple(current_fw_str) < check_update.versiontuple(MIN_DUCKYPAD_PRO_FIRMWARE_VERSION):
-            return FW_TOO_LOW
-        if check_update.versiontuple(current_fw_str) > check_update.versiontuple(MAX_DUCKYPAD_PRO_FIRMWARE_VERSION):
-            return FW_TOO_HIGH
-        return FW_OK
-    except Exception as e:
-        print('check_fw_support', current_fw_str, e)
-        return FW_UNKNOWN
 
 def select_root_folder(root_path=None, is_msc=False):
     global profile_list
@@ -279,16 +267,6 @@ def select_root_folder(root_path=None, is_msc=False):
         update_profile_display()
     except Exception as e:
         print("select_root_folder:", e)
-
-def incompatible_fw_msgbox(current_fw_str, fw_status):
-    if fw_status == FW_TOO_LOW:
-        if messagebox.askokcancel("Info", f"duckyPad firmware too low!\n\nCurrent: {current_fw_str}\nSupported: Between {MIN_DUCKYPAD_PRO_FIRMWARE_VERSION} and {MAX_DUCKYPAD_PRO_FIRMWARE_VERSION}.\n\nSee how to update it?"):
-            fw_update_click(None)
-    elif fw_status == FW_TOO_HIGH:
-        if messagebox.askokcancel("Info", f"duckyPad firmware too high!\n\nCurrent: {current_fw_str}\nSupported: Between {MIN_DUCKYPAD_PRO_FIRMWARE_VERSION} and {MAX_DUCKYPAD_PRO_FIRMWARE_VERSION}.\n\nSee how to update this app?"):
-            app_update_click(None)
-    else:
-        messagebox.showinfo("Info", f"duckyPad firmware unknown!\n\n")
 
 def put_duckypad_in_msc_mode_and_get_drive_path(reset_ui=True):
     disk_label = None
@@ -366,26 +344,38 @@ def ask_user_to_select_a_duckypad(dp_info_list):
     root.wait_window(dp_select_window)
     return selected_duckypad.get()
 
-def dpp_is_fw_compatible(dp_info_dict):
-    fw_str = dp_info_dict["fw_version"]
-    fw_status = check_fw_support(fw_str)
-    if fw_status != FW_OK:
-        incompatible_fw_msgbox(fw_str, fw_status)
-        return False
-    print_fw_update_label(fw_str)
-    return True
-
-def dp20_is_fw_compatible(dp_info_dict):
-    print(dp_info_dict)
-    return True
+FW_OK = 0
+FW_TOO_LOW = 1
+FW_TOO_HIGH = 2
+FW_UNKNOWN = 3
 
 def is_dp_fw_valid(dp_info_dict):
+    current_fw_str = dp_info_dict["fw_version"]
+    
     if dp_info_dict['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
-        return dpp_is_fw_compatible(dp_info_dict)
+        min_fw = MIN_DUCKYPAD_PRO_FIRMWARE_VERSION
+        max_fw = MAX_DUCKYPAD_PRO_FIRMWARE_VERSION
     elif dp_info_dict['dp_model'] == DP_MODEL_OG_DUCKYPAD:
-        return dp20_is_fw_compatible(dp_info_dict)
+        min_fw = MIN_DUCKYPAD_2020_FIRMWARE_VERSION
+        max_fw = MAX_DUCKYPAD_2020_FIRMWARE_VERSION
     else:
+        return FW_UNKNOWN
+    
+    if check_update.versiontuple(current_fw_str) < check_update.versiontuple(min_fw):
+        if messagebox.askokcancel("Info", f"duckyPad firmware too old!\n\nCurrent: {current_fw_str}\nSupported: Between {min_fw} and {max_fw}.\n\nSee how to update it?"):
+            fw_update_click(None, dp_info_dict)
+        return FW_TOO_LOW
+    if check_update.versiontuple(current_fw_str) > check_update.versiontuple(max_fw):
+        if messagebox.askokcancel("Info", f"duckyPad firmware too new!\n\nCurrent: {current_fw_str}\nSupported: Between {min_fw} and {max_fw}.\n\nSee how to update this app?"):
+            app_update_click(None)
+        return FW_TOO_HIGH
+    return FW_OK
+
+def dpp_is_fw_compatible(dp_info_dict):
+    print_fw_update_label(dp_info_dict)
+    if is_dp_fw_valid(dp_info_dict) != FW_OK:
         return False
+    return True
 
 def connect_button_click():
     all_dp_info_list = hid_op.scan_duckypads()
@@ -409,15 +399,17 @@ def connect_button_click():
     selected_index = -1
     if len(all_dp_info_list) == 1:
         selected_index = 0
-    selected_index = ask_user_to_select_a_duckypad(all_dp_info_list)
+    else:
+        selected_index = ask_user_to_select_a_duckypad(all_dp_info_list)
     if selected_index == -1:
         return
     user_selected_dp = all_dp_info_list[selected_index]
     print("user selected:", user_selected_dp)
-    if is_dp_fw_valid(user_selected_dp) is False:
+    if dpp_is_fw_compatible(user_selected_dp) is False:
         return
     
     print("fw check passed")
+    return
     exit()
     
     duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path()
