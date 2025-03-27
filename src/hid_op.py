@@ -15,19 +15,19 @@ def is_duckypad_pid(this_pid):
     return this_pid in all_dp_pids
 
 def get_duckypad_path():
-    dp_path_list = []
+    dp_path_list = set()
     if 'win32' in sys.platform:
         for device_dict in hid.enumerate():
             if device_dict['vendor_id'] == 0x0483 and \
             is_duckypad_pid(device_dict['product_id']) and \
             device_dict['usage'] == 58:
-                dp_path_list.append(device_dict['path'])
+                dp_path_list.add(device_dict['path'])
     else:
         for device_dict in hid.enumerate():
             if device_dict['vendor_id'] == 0x0483 and \
             is_duckypad_pid(device_dict['product_id']):
-                dp_path_list.append(device_dict['path'])
-    return dp_path_list
+                dp_path_list.add(device_dict['path'])
+    return list(dp_path_list)
 
 PC_TO_DUCKYPAD_HID_BUF_SIZE = 64
 DUCKYPAD_TO_PC_HID_BUF_SIZE = 64
@@ -117,4 +117,8 @@ def scan_duckypads():
     all_dp_paths = get_duckypad_path()
     if len(all_dp_paths) == 0:
         return []
-    return get_all_dp_info(all_dp_paths)
+    try:
+        dp_info_list = get_all_dp_info(all_dp_paths)
+    except Exception:
+        return None
+    return dp_info_list

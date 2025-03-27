@@ -491,6 +491,9 @@ def open_profile_autoswitcher_url():
 def open_tindie_store():
     webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/store_links.html')
 
+def open_mac_linux_instruction():
+    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/linux_macos_notes.html')
+
 def rgb_to_hex(rgb_tuple):
     return '#%02x%02x%02x' % rgb_tuple
 

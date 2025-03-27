@@ -379,17 +379,28 @@ def dpp_is_fw_compatible(dp_info_dict):
 
 def connect_button_click():
     all_dp_info_list = hid_op.scan_duckypads()
-    if len(all_dp_info_list) == 0:
-        # maybe put all the "permission needed" message here?
+    if all_dp_info_list is None:
+        if 'darwin' in sys.platform:
+            box_result = messagebox.askyesno("Info", "duckyPad detected, but I need additional permissions!\n\nClick Yes for instructions\n\nClick No to select a folder manually.")
+            if box_result is True:
+                open_mac_linux_instruction()
+            elif box_result is False:
+                select_root_folder()
+        elif 'linux' in sys.platform:
+            if messagebox.askokcancel("Info", "duckyPad detected, but please run me in sudo!\n\nClick OK to select a folder manually."):
+                select_root_folder()
+        return
+    elif len(all_dp_info_list) == 0:
         """
         no duckypad found, make sure
         * top USB port
         cable has data
         try different ports
         try using a USB hub
-        
-        macOS: enable permissions
-        linux: sudo
+        power switch
+        try on a different computer
+
+        have a seperate webpage about troubleshooting common connection issues?
 
         """
         if(messagebox.askokcancel("Info", "duckyPad not found!\n\nSelect a folder manually instead?") == False):
