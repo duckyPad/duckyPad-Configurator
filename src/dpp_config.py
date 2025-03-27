@@ -18,6 +18,7 @@ import hid_op
 import make_bytecode
 import my_compare
 import traceback
+import dp20_dumpsd
 
 """
 0.13.5
@@ -163,6 +164,8 @@ def scaled_size(size: int) -> int:
 
 ensure_dir(app_save_path)
 ensure_dir(backup_path)
+ensure_dir(hid_dump_path)
+ensure_dir(hid_modified_dir_path)
 
 print("\n\n--------------------------")
 print("\n\nWelcome to duckyPad Configurator!\n")
@@ -256,7 +259,6 @@ def select_root_folder(root_path=None, is_msc=False):
         return
     dp_root_folder_path = root_path
     dp_root_folder_display.set("Selected: " + root_path)
-    root_folder_path_label.config(foreground='navy')
     profile_list = duck_objs.build_profile(root_path)
 
     ui_reset()
@@ -268,27 +270,24 @@ def select_root_folder(root_path=None, is_msc=False):
     except Exception as e:
         print("select_root_folder:", e)
 
-def put_duckypad_in_msc_mode_and_get_drive_path(reset_ui=True):
+def put_duckypad_in_msc_mode_and_get_drive_path(dp_info_dict, reset_ui=True):
     disk_label = None
     if USB_MSC_MOUNTPOINT:
         disk_label = USB_MSC_MOUNTPOINT
     else:
-        dp_info = hid_op.get_dp_info()
-        if dp_info is None:
-            return None
-        disk_label = f'DP{dp_info[6]}_{dp_info[9]:02X}{dp_info[10]:02X}'
+        hid_msg = dp_info_dict['hid_msg']
+        disk_label = f'DP{hid_msg[6]}_{hid_msg[9]:02X}{hid_msg[10]:02X}'
     print("disk label should be", disk_label)
     duckypad_drive_path = hid_op.get_duckypad_drive(disk_label)
     # already mounted
     if duckypad_drive_path is not None:
         return duckypad_drive_path
     
-    hid_op.duckypad_hid_sw_reset(reboot_into_usb_msc_mode=1)
+    hid_op.duckypad_hid_sw_reset(dp_info_dict, reboot_into_usb_msc_mode=1)
 
     if reset_ui:
         ui_reset()
     root.update()
-    root_folder_path_label.config(foreground="blue")
     entry_time = time.time()
     while 1:
         duckypad_drive_path = hid_op.get_duckypad_drive(disk_label)
@@ -418,18 +417,13 @@ def connect_button_click():
     print("user selected:", user_selected_dp)
     if dpp_is_fw_compatible(user_selected_dp) is False:
         return
-    
-    print("fw check passed")
-    return
-    exit()
-    
-    duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path()
-    if duckypad_drive_path is None:
-        if(messagebox.askokcancel("Info", "duckyPad drive not found!\n\nSelect a folder manually?") == False):
-            return
-        select_root_folder()
-        return
-    select_root_folder(duckypad_drive_path, is_msc=True)
+        
+    if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
+        duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
+        select_root_folder(duckypad_drive_path, is_msc=True)
+    elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
+        dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display)
+        select_root_folder(hid_dump_path)
     
 def enable_buttons():
     profile_add_button.config(state=NORMAL)
@@ -936,7 +930,7 @@ root.update()
 root_folder_select_button = Button(root_folder_lf, text="Connect", command=connect_button_click)
 root_folder_select_button.place(x=scaled_size(5), y=0, width=scaled_size(75), height=scaled_size(25))
 
-root_folder_path_label = Label(master=root_folder_lf, textvariable=dp_root_folder_display, foreground='red')
+root_folder_path_label = Label(master=root_folder_lf, textvariable=dp_root_folder_display, foreground='blue')
 root_folder_path_label.place(x=scaled_size(90), y=0)
 
 save_button = Button(root_folder_lf, text="Save", command=save_click, state=DISABLED)
@@ -1669,7 +1663,7 @@ def repeat_func():
 root.after(500, repeat_func)
 
 # select_root_folder("sample_profiles")
-connect_button_click()
+# connect_button_click()
 my_compare.tk_root = root
 my_compare.tk_strvar = dp_root_folder_display
 root.mainloop()

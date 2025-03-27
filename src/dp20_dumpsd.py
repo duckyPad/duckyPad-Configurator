@@ -11,28 +11,6 @@ PC_TO_DUCKYPAD_HID_BUF_SIZE = 64
 DUCKYPAD_TO_PC_HID_BUF_SIZE = 64
 HID_READ_FILE_PATH_SIZE_MAX = 55
 
-duckypad_pid = 0xd11c
-
-def get_duckypad_path_uncached():
-    path_dict = {}
-    for device_dict in hid.enumerate():
-        if device_dict['vendor_id'] == 0x0483 and device_dict['product_id'] == duckypad_pid:
-            path_dict[device_dict['usage']] = device_dict['path']
-    if len(path_dict) == 0:
-        return None
-    if 58 in path_dict:
-        return path_dict[58]
-    return list(path_dict.values())[0]
-
-last_dp_path = None
-def get_duckypad_path(start_fresh=False):
-    global last_dp_path
-    if start_fresh:
-        last_dp_path = None
-    if last_dp_path is None:
-        last_dp_path = get_duckypad_path_uncached()
-    return last_dp_path
-
 HID_COMMAND_DUMP_SD = 32
 
 SD_WALK_OP_TYPE_INDEX = 1
@@ -97,7 +75,7 @@ def hid_dump_file(sd_file_path, hid_obj):
     print()
     return bytes(all_data)
 
-def dump_sd(dump_dir_path, ui_text_obj, backup_dir_path):
+def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root, ui_text_obj):
     current_dir = None
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
@@ -108,12 +86,8 @@ def dump_sd(dump_dir_path, ui_text_obj, backup_dir_path):
     backup_md5_dict = scan_md5.get_md5_dict(backup_dir_path)
     md5_miss_list = []
 
-    duckypad_path = get_duckypad_path()
-    if duckypad_path is None:
-        raise OSError('duckyPad Not Found!')
-
     dp20_h = hid.device()
-    dp20_h.open_path(duckypad_path)
+    dp20_h.open_path(dp_path)
 
     while 1:
         dp20_h.write(pc_to_duckypad_buf)
@@ -135,6 +109,8 @@ def dump_sd(dump_dir_path, ui_text_obj, backup_dir_path):
             md5_list = duckypad_to_pc_buf[2:18]
             md5_string = ''.join(f'{x:02x}' for x in md5_list)
             print(this_file_name, md5_string)
+            ui_text_obj.set(f"Loading {current_dir}/{this_file_name}...")
+            tk_root.update()
             if md5_string in backup_md5_dict:
                 cached_file_content = read_binary_file(backup_md5_dict[md5_string])
                 save_to_file(current_dir, dump_dir_path, this_file_name, cached_file_content)
@@ -147,17 +123,22 @@ def dump_sd(dump_dir_path, ui_text_obj, backup_dir_path):
             raw_filename_list = duckypad_to_pc_buf[4:file_name_end]
             this_file_name = ''.join(chr(c) for c in raw_filename_list[:raw_filename_list.index(0)])
             print(this_file_name)
+            ui_text_obj.set(f"Loading {current_dir}/{this_file_name}...")
+            tk_root.update()
             raw_file_content_bytes = bytes(duckypad_to_pc_buf[file_name_end:file_content_end])
             save_to_file(current_dir, dump_dir_path, this_file_name, raw_file_content_bytes)
 
+    md5_miss_list.append(('', 'profile_info.txt'))
     for item in md5_miss_list:
         sd_dir = item[0]
         sd_file_name = item[1]
-        print("!!!! MISSING FROM LOCAL:", sd_dir, sd_file_name)
+        print("MD5 MISS:", sd_dir, sd_file_name)
+        ui_text_obj.set(f"Loading {sd_dir}/{sd_file_name}...")
+        tk_root.update()
         raw_bytes = hid_dump_file(f'{sd_dir}/{sd_file_name}', dp20_h)
         save_to_file(sd_dir, dump_dir_path, sd_file_name, raw_bytes)
 
     dp20_h.close()
 
 
-dump_sd("./dump", None, "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups")
+# dump_sd("./dump", None, "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups")

@@ -478,6 +478,8 @@ appname = 'duckypad_config'
 appauthor = 'dekuNukem'
 app_save_path = user_data_dir(appname, appauthor, roaming=True)
 backup_path = os.path.join(app_save_path, 'profile_backups')
+hid_dump_path = os.path.join(app_save_path, "hid_dump")
+hid_modified_dir_path = os.path.join(app_save_path, "hid_new")
 
 def open_discord_link():
     webbrowser.open("https://discord.gg/4sJCBx5")

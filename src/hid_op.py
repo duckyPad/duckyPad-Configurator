@@ -39,13 +39,16 @@ HID_RESPONSE_EOF = 3
 
 HID_COMMAND_SW_RESET = 20
 
-def duckypad_hid_sw_reset(reboot_into_usb_msc_mode=False):
+def duckypad_hid_sw_reset(dp_info_dict, reboot_into_usb_msc_mode=False):
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
     pc_to_duckypad_buf[2] = HID_COMMAND_SW_RESET    # Command type
     if(reboot_into_usb_msc_mode):
-        pc_to_duckypad_buf[3] = 1 
-    h.write(pc_to_duckypad_buf)
+        pc_to_duckypad_buf[3] = 1
+    myh = hid.device()
+    myh.open_path(dp_info_dict['hid_path'])
+    myh.write(pc_to_duckypad_buf)
+    myh.close()
 
 def get_duckypad_drive_windows(vol_str):
     removable_drives = [x for x in psutil.disk_partitions() if ('removable' in x.opts.lower() and 'fat' in x.fstype.lower())]
@@ -93,6 +96,7 @@ def make_dp_info_dict(hid_msg, hid_path):
     serial_number_uint32_t = int.from_bytes(hid_msg[7:11], byteorder='big')
     this_dict['serial'] = f'{serial_number_uint32_t:08X}'.upper()
     this_dict['hid_path'] = hid_path
+    this_dict['hid_msg'] = hid_msg
     return this_dict
 
 def get_all_dp_info(dp_path_list):
