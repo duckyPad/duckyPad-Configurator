@@ -96,7 +96,7 @@ class dp_profile(object):
 
 	def load_from_path(self, path):
 		folder_name = os.path.basename(os.path.normpath(path))
-		if not folder_name.startswith('profile_'):
+		if not folder_name.startswith('profile'):
 			print("invalid profile folder:", folder_name)
 			return
 		self.path = path
@@ -154,10 +154,9 @@ def read_profile_order_file(txt_path):
 	profile_info_list.sort(key=lambda tup: tup[0])
 	return profile_info_list
 
-def build_profile(root_dir_path, ):
+def build_profile_with_pfinfo_txt(root_dir_path, profile_info_txt_path):
 	my_dirs = [d for d in os.listdir(root_dir_path) if os.path.isdir(os.path.join(root_dir_path, d))]
 	my_dirs = [x for x in my_dirs if x.startswith('profile_')]
-	profile_info_txt_path = os.path.join(root_dir_path, profile_info_dot_txt)
 	profile_info_list = read_profile_order_file(profile_info_txt_path)
 
 	profile_list = []
@@ -173,6 +172,25 @@ def build_profile(root_dir_path, ):
 		profile_list.append(this_profile)
 
 	return profile_list
+
+def build_profile_without_pfinfo_txt(root_dir_path):
+	my_dirs = [d for d in os.listdir(root_dir_path) if os.path.isdir(os.path.join(root_dir_path, d))]
+	my_dirs = [x for x in my_dirs if x.startswith('profile') and x[7].isnumeric() and '_' in x]
+	my_dirs.sort(key=lambda s: int(s[7:].split("_")[0]))
+	my_dirs = [os.path.join(root_dir_path, d) for d in my_dirs if d.startswith("profile")]
+	my_dirs = my_dirs[:MAX_PROFILE_COUNT]
+	profile_list = []
+	for item in my_dirs:
+		this_profile = dp_profile()
+		this_profile.load_from_path(item)
+		profile_list.append(this_profile)
+	return profile_list
+
+def build_profile(root_dir_path):
+	profile_info_txt_path = os.path.join(root_dir_path, profile_info_dot_txt)
+	if os.path.exists(profile_info_txt_path) and os.path.isfile(profile_info_txt_path):
+		return build_profile_with_pfinfo_txt(root_dir_path, profile_info_txt_path)
+	return build_profile_without_pfinfo_txt(root_dir_path)
 
 def import_profile_single(root_dir_path):
 	this_profile = dp_profile()

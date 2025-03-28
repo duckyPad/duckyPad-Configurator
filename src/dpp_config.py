@@ -1662,7 +1662,7 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-# select_root_folder("sample_profiles")
+select_root_folder("sample_profiles")
 # connect_button_click()
 my_compare.tk_root = root
 my_compare.tk_strvar = dp_root_folder_display
