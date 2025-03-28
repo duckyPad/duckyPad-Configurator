@@ -558,8 +558,18 @@ class dp_type:
         self.dp20 = DP_MODEL_OG_DUCKYPAD
         self.dp24 = DP_MODEL_DUCKYPAD_PRO
         self.local_dir = 2
-        self.usb = 3
+        self.usbmsc = 3
+        self.hidmsg = 4
         self.unknown = 255
         self.device_type = self.unknown
         self.connection_type = self.unknown
+        self.info_dict = None
 
+    def __str__(self):
+        return (
+            f"dp_type(\n"
+            f"  device_type={self.device_type},\n"
+            f"  connection_type={self.connection_type},\n"
+            f"  info_dict={self.info_dict}\n"
+            f")"
+        )

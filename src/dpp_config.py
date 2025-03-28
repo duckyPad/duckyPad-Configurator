@@ -377,6 +377,8 @@ def dpp_is_fw_compatible(dp_info_dict):
     return True
 
 def connect_button_click():
+    THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.unknown
+    THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.local_dir
     all_dp_info_list = hid_op.scan_duckypads()
     if all_dp_info_list is None:
         if 'darwin' in sys.platform:
@@ -417,13 +419,19 @@ def connect_button_click():
     print("user selected:", user_selected_dp)
     if dpp_is_fw_compatible(user_selected_dp) is False:
         return
-        
+    
+    THIS_DUCKYPAD.device_type = user_selected_dp['dp_model']
+    THIS_DUCKYPAD.info_dict = user_selected_dp
+
     if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
         select_root_folder(duckypad_drive_path, is_msc=True)
+        THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.usbmsc
     elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
         dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display)
         select_root_folder(hid_dump_path)
+        THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.hidmsg
+    print(THIS_DUCKYPAD)
     
 def enable_buttons():
     profile_add_button.config(state=NORMAL)
@@ -970,7 +978,7 @@ profile_dupe_button = Button(profiles_lf, text="Duplicate", command=profile_dupe
 profile_dupe_button.place(x=PADDING * 2.5 + BUTTON_WIDTH, y=BUTTON_Y_POS, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
 
 profile_rename_button = Button(profiles_lf, text="Rename", command=profile_rename_click, state=DISABLED)
-profile_rename_button.place(x=PADDING * 2.5 + BUTTON_WIDTH + scaled_size(33), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
+profile_rename_button.place(x=PADDING * 2.5 + BUTTON_WIDTH + scaled_size(34), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
 bg_color_label = Label(master=profiles_lf, text="Background Color:")
 bg_color_label.place(x=scaled_size(40), y=scaled_size(365))
@@ -1149,9 +1157,7 @@ for x in range(MECH_OBSW_COUNT):
     key_button_list.append(this_button)
 
 def update_keyname_info_string(info_string):
-    if THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.unknown:
-        key_char_limit_label.config(text="")
-    elif THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.dp20:
+    if THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.dp20:
         key_char_limit_label.config(text=key_char_limit_dp20)
     else:
         key_char_limit_label.config(text=info_string)
@@ -1542,7 +1548,7 @@ profile_import_button = Button(profiles_lf, text="Import", command=import_profil
 profile_import_button.place(x=PADDING * 2, y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
 profile_export_button = Button(profiles_lf, text="Export", command=import_profile_click, state=DISABLED)
-profile_export_button.place(x=PADDING * 2 + scaled_size(70), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
+profile_export_button.place(x=PADDING * 2 + scaled_size(71), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
 empty_script_label = Label(root, text="<-- Select a key")
 empty_script_label.place(x=scaled_size(800), y=scaled_size(200))
