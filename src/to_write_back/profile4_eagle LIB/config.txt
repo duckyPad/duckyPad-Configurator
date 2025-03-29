@@ -1,0 +1,10 @@
+z1 esc
+z2 CMD
+z4 pin
+z6 copy
+z7 move
+z8 delete
+z14 info
+z15 group
+BG_COLOR 251 255 66
+SWCOLOR_2 255 0 0

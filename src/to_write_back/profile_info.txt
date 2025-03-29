@@ -1,0 +1,5 @@
+1 browser
+2 eagle SCH
+3 eagle BRD
+4 eagle LIB
+5 kicad BRD

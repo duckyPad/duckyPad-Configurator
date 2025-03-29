@@ -1,0 +1,10 @@
+VAR $row = 1
+WHILE $row <= 2
+	VAR $col = 1
+    WHILE $col <= 3
+        STRINGLN R$rowC$col
+        $col = $col + 1
+    END_WHILE
+    $row = $row + 1
+END_WHILE
+
