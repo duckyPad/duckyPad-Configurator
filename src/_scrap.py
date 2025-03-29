@@ -15,6 +15,14 @@ class dp_file_op(object):
         self.destination_path = None
 # ------------------------
 
+pc_to_duckypad_buf[2] = HID_COMMAND_OPEN_FILE_FOR_WRITING
+    file_path = make_file_path_for_hid(this_op.source_path)
+    write_str_into_buf(file_path, pc_to_duckypad_buf)
+
+    print(file_path)
+    print(pc_to_duckypad_buf)
+    exit()
+
 duckypad_pid = 0xd11c
 valid_pid_list = [duckypad_pid]
 

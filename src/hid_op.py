@@ -133,51 +133,117 @@ def make_file_path_for_hid(pc_path):
     result = '/'
     for item in path_parts[1:]:
         result += f"{item}/"
-    return result[:-1]
+    result = result[:-1]
+    if len(result) > HID_READ_FILE_PATH_SIZE_MAX:
+        raise OSError("HID file path too long")
+    return result
 
-def make_fileop_hid_packet(this_op):
-    print(this_op)
-    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
-    pc_to_duckypad_buf[0] = 5   # HID Usage ID
+def write_str_into_buf(text, buf):
+    for index, value in enumerate(text):
+        buf[3+index] = ord(value)
+
+def write_bytes_into_buf(bin_buf, buf):
+    for index, value in enumerate(bin_buf):
+        buf[3+index] = value
+
+def get_empty_pc_to_duckypad_buf():
+    ptd_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
+    ptd_buf[0] = 5   # HID Usage ID
+    return ptd_buf
+
+def split_file_to_chunks(path, chunk_size=60):
+    path = Path(path)
+    with path.open('rb') as f:
+        data = f.read()
+    chunks = [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+    return chunks
+
+def hid_write_file(file_op, hid_obj):
+    pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
+    pc_to_duckypad_buf[2] = HID_COMMAND_OPEN_FILE_FOR_WRITING
+    file_path = make_file_path_for_hid(file_op.destination_path)
+    write_str_into_buf(file_path, pc_to_duckypad_buf)
+    hid_txrx(pc_to_duckypad_buf, hid_obj)
+
+    file_chunks = split_file_to_chunks(file_op.destination_path)
+
+    for this_chunk in file_chunks:
+        print(len(this_chunk), this_chunk)
+        this_chunk_buf = get_empty_pc_to_duckypad_buf()
+        this_chunk_buf[1] = len(this_chunk)
+        this_chunk_buf[2] = HID_COMMAND_WRITE_FILE
+        write_bytes_into_buf(this_chunk, this_chunk_buf)
+        print(this_chunk_buf)
+        hid_txrx(this_chunk_buf, hid_obj)
+
+    pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
+    pc_to_duckypad_buf[2] = HID_COMMAND_CLOSE_FILE
+    hid_txrx(pc_to_duckypad_buf, hid_obj)
+    hid_obj.close()
+    exit()
+
+def hid_txrx(buf_64b, hid_obj):
+    # return
+    print("\n\nSending to duckyPad:\n", buf_64b)
+    hid_obj.write(buf_64b)
+    duckypad_to_pc_buf = hid_obj.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
+    print("\nduckyPad response:\n", duckypad_to_pc_buf)
+
+def do_hid_fileop(this_op, hid_obj):
+    pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
 
     if this_op.type == this_op.delete_file:
         pc_to_duckypad_buf[2] = HID_COMMAND_DELETE_FILE
         file_path = make_file_path_for_hid(this_op.source_path)
-        print(file_path)
-        if len(file_path) > HID_READ_FILE_PATH_SIZE_MAX:
-            raise OSError("file path too long")
-        for index, value in enumerate(file_path):
-            pc_to_duckypad_buf[3+index] = ord(value)
-
-        print(pc_to_duckypad_buf)
-        exit()
-
-    print('-------------')
+        write_str_into_buf(file_path, pc_to_duckypad_buf)
+        hid_txrx(pc_to_duckypad_buf, hid_obj)
+    elif this_op.type == this_op.copy_file:
+        hid_write_file(this_op, hid_obj)
+    elif this_op.type == this_op.rmdir:
+        pc_to_duckypad_buf[2] = HID_COMMAND_DELETE_DIR
+        file_path = make_file_path_for_hid(this_op.source_path)
+        write_str_into_buf(file_path, pc_to_duckypad_buf)
+        hid_txrx(pc_to_duckypad_buf, hid_obj)
+    elif this_op.type == this_op.mkdir:
+        pc_to_duckypad_buf[2] = HID_COMMAND_CREATE_DIR
+        file_path = make_file_path_for_hid(this_op.source_path)
+        write_str_into_buf(file_path, pc_to_duckypad_buf)
+        hid_txrx(pc_to_duckypad_buf, hid_obj)
 
     return pc_to_duckypad_buf
 
 def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
     print(hid_path, orig_path, modified_path)
 
-    sync_ops = my_compare.get_file_sync_ops(sd_path, modified_path)
-    if len(sync_ops) == 0:
-        return 0
+    # sync_ops = my_compare.get_file_sync_ops(sd_path, modified_path)
+    # if len(sync_ops) == 0:
+    #     return 0
 
-    # myh = hid.device()
-    # myh.open_path(hid_path)
+    sync_ops = []
+    this_op = my_compare.dp_file_op()
+    this_op.type = this_op.copy_file
+    this_op.source_path = os.path.join(orig_path, "dpkm_Japan.txt")
+    this_op.destination_path = os.path.join(modified_path, "dpkm_Japan.txt")
+    sync_ops.append(this_op)
+
+    myh = hid.device()
+    myh.open_path(hid_path)
 
     for item in sync_ops:
-        to_send = make_fileop_hid_packet(item)
-
+        print(item)
+        do_hid_fileop(item, myh)
         
-    # myh.close()
+    myh.close()
 
 sd_path = "./dump"
 modified_path = "./to_write_back"
 
 dp_list = scan_duckypads()
 if dp_list is None or len(dp_list) == 0:
+    print("no duckypad found")
     exit()
 
 dp_path = dp_list[0]['hid_path']
 duckypad_file_sync_hid(dp_path, sd_path, modified_path)
+
+
