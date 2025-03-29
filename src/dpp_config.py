@@ -828,6 +828,8 @@ def save_click():
             hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict['hid_path'])
         elif THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.hidmsg:
             hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict['hid_path'])
+            delete_path(hid_dump_path)
+            shutil.copytree(this_backup_path, hid_dump_path)
         dp_root_folder_display.set("Done!")
     except Exception as e:
         print('save_click:',e)

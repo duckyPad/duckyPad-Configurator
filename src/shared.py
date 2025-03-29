@@ -1,6 +1,8 @@
 import os
+import shutil
 import webbrowser
 from platformdirs import *
+from pathlib import Path
 
 cmd_REPEAT = "REPEAT"
 cmd_REM = "REM"
@@ -619,3 +621,12 @@ def ui_print(text, tk_root_obj, ui_text_obj):
     ui_text_obj.set(str(text))
     tk_root_obj.update()
 
+def delete_path(path):
+    path = Path(path)
+    try:
+        if path.is_dir():
+            shutil.rmtree(path, ignore_errors=True)
+        elif path.is_file():
+            path.unlink()
+    except Exception as e:
+        print("delete_path:", e)

@@ -69,16 +69,6 @@ def compare_dir(orig_path, new_path):
     result_dict["dirs_to_delete"] = [x for x in dirs_to_delete if is_duckypad_file(x)]
     result_dict["dir_in_both_not_checked"] = [x for x in dir_in_both_not_checked if is_duckypad_file(x)]
     return result_dict
-
-def delete_path(path):
-    path = Path(path)
-    try:
-        if path.is_dir():
-            shutil.rmtree(path)
-        elif path.is_file():
-            path.unlink()
-    except Exception as e:
-        print("delete_path:", e)
         
 def make_file_op(diff_dict, current_dir):
     op_list = []
