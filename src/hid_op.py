@@ -161,11 +161,11 @@ def split_file_to_chunks(path, chunk_size=60):
 def hid_write_file(file_op, hid_obj):
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
     pc_to_duckypad_buf[2] = HID_COMMAND_OPEN_FILE_FOR_WRITING
-    file_path = make_file_path_for_hid(file_op.destination_path)
+    file_path = make_file_path_for_hid(file_op.source_path)
     write_str_into_buf(file_path, pc_to_duckypad_buf)
     hid_txrx(pc_to_duckypad_buf, hid_obj)
 
-    file_chunks = split_file_to_chunks(file_op.destination_path)
+    file_chunks = split_file_to_chunks(file_op.source_path)
 
     for this_chunk in file_chunks:
         print(len(this_chunk), this_chunk)
@@ -179,11 +179,8 @@ def hid_write_file(file_op, hid_obj):
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
     pc_to_duckypad_buf[2] = HID_COMMAND_CLOSE_FILE
     hid_txrx(pc_to_duckypad_buf, hid_obj)
-    hid_obj.close()
-    exit()
 
 def hid_txrx(buf_64b, hid_obj):
-    # return
     print("\n\nSending to duckyPad:\n", buf_64b)
     hid_obj.write(buf_64b)
     duckypad_to_pc_buf = hid_obj.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
@@ -215,16 +212,16 @@ def do_hid_fileop(this_op, hid_obj):
 def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
     print(hid_path, orig_path, modified_path)
 
-    # sync_ops = my_compare.get_file_sync_ops(sd_path, modified_path)
-    # if len(sync_ops) == 0:
-    #     return 0
+    sync_ops = my_compare.get_file_sync_ops(sd_path, modified_path)
+    if len(sync_ops) == 0:
+        return 0
 
-    sync_ops = []
-    this_op = my_compare.dp_file_op()
-    this_op.type = this_op.copy_file
-    this_op.source_path = os.path.join(orig_path, "dpkm_Japan.txt")
-    this_op.destination_path = os.path.join(modified_path, "dpkm_Japan.txt")
-    sync_ops.append(this_op)
+    # sync_ops = []
+    # this_op = my_compare.dp_file_op()
+    # this_op.type = this_op.copy_file
+    # this_op.source_path = os.path.join(orig_path, "dpkm_Japan.txt")
+    # this_op.destination_path = os.path.join(modified_path, "dpkm_Japan.txt")
+    # sync_ops.append(this_op)
 
     myh = hid.device()
     myh.open_path(hid_path)
