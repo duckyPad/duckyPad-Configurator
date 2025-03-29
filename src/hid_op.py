@@ -219,6 +219,18 @@ def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
         
     myh.close()
 
+def duckypad_hid_sw_reset(hid_path):
+    myh = hid.device()
+    myh.open_path(hid_path)
+
+    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
+    pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
+    pc_to_duckypad_buf[2] = HID_COMMAND_SW_RESET    # Command type
+    myh.write(pc_to_duckypad_buf)
+
+    myh.close()
+
+
 # sd_path = "./dump"
 # modified_path = "./to_write_back"
 

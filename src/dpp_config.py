@@ -825,9 +825,9 @@ def save_click():
             dp_root_folder_display.set("Ejecting...")
             root.update()
             hid_op.eject_drive(dp_root_folder_path)
-            hid_op.duckypad_hid_close()
-            hid_op.duckypad_hid_init()
-            hid_op.duckypad_hid_sw_reset()
+            hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict['hid_path'])
+        elif THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.hidmsg:
+            hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict['hid_path'])
         dp_root_folder_display.set("Done!")
     except Exception as e:
         print('save_click:',e)
