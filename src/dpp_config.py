@@ -820,7 +820,7 @@ def save_click():
     try:
         if os.path.isdir(dp_root_folder_path) is False:
             put_duckypad_in_msc_mode_and_get_drive_path(reset_ui=False)
-        my_compare.duckypad_file_sync(dp_root_folder_path, this_backup_path, THIS_DUCKYPAD)
+        my_compare.duckypad_file_sync(dp_root_folder_path, this_backup_path, THIS_DUCKYPAD, root, dp_root_folder_display)
         if THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.usbmsc:
             dp_root_folder_display.set("Ejecting...")
             root.update()
@@ -1666,6 +1666,5 @@ root.after(500, repeat_func)
 
 # select_root_folder("lol")
 # connect_button_click()
-tk_root = root
-tk_strvar = dp_root_folder_display
+
 root.mainloop()

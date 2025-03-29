@@ -165,12 +165,12 @@ def hid_write_file(file_op, hid_obj):
     file_chunks = split_file_to_chunks(os.path.join(file_op.source_parent, file_op.source_path))
 
     for this_chunk in file_chunks:
-        print(len(this_chunk), this_chunk)
+        # print(len(this_chunk), this_chunk)
         this_chunk_buf = get_empty_pc_to_duckypad_buf()
         this_chunk_buf[1] = len(this_chunk)
         this_chunk_buf[2] = HID_COMMAND_WRITE_FILE
         write_bytes_into_buf(this_chunk, this_chunk_buf)
-        print(this_chunk_buf)
+        # print(this_chunk_buf)
         hid_txrx(this_chunk_buf, hid_obj)
 
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
@@ -205,7 +205,7 @@ def do_hid_fileop(this_op, hid_obj):
         hid_txrx(pc_to_duckypad_buf, hid_obj)
     return pc_to_duckypad_buf
 
-def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
+def duckypad_file_sync_hid(hid_path, orig_path, modified_path, tk_root=None, ui_text_obj=None):
     sync_ops = my_compare.get_file_sync_ops(orig_path, modified_path)
     if len(sync_ops) == 0:
         return 0
@@ -215,7 +215,7 @@ def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
 
     for item in sync_ops:
         print(item)
-        ui_print(f"Saving: ", tk_root, tk_strvar)
+        ui_print(f"Saving: {item.source_path}", tk_root, ui_text_obj)
         do_hid_fileop(item, myh)
 
     myh.close()

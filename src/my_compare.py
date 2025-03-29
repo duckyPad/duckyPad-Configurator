@@ -146,7 +146,6 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
 def execute_sync_ops_msc(op_list):
     for item in op_list:
         print(item)
-        ui_print(f"Copying: ", tk_root, tk_strvar)
         if item.action == item.mkdir:
             this_path = Path(os.path.join(item.source_parent, item.source_path))
             this_path.mkdir(parents=True, exist_ok=True)
@@ -160,10 +159,10 @@ def execute_sync_ops_msc(op_list):
             shutil.copy(src, dst)
 
 import hid_op
-def duckypad_file_sync(orig_path, modified_path, THIS_DUCKYPAD):
+def duckypad_file_sync(orig_path, modified_path, THIS_DUCKYPAD, tk_root_obj=None, ui_text_obj=None):
     sync_ops = get_file_sync_ops(orig_path, modified_path)
     if THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.hidmsg:
-        hid_op.duckypad_file_sync_hid(THIS_DUCKYPAD.info_dict['hid_path'], orig_path, modified_path)
+        hid_op.duckypad_file_sync_hid(THIS_DUCKYPAD.info_dict['hid_path'], orig_path, modified_path, tk_root_obj, ui_text_obj)
     else:
         execute_sync_ops_msc(sync_ops)
 

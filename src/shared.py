@@ -611,12 +611,9 @@ class dp_file_op(object):
         self.destination_parent = None
         self.destination_path = None
 
-tk_root = None
-tk_strvar = None
-
-def ui_print(text, my_tk_root, ui_text_obj):
-    if my_tk_root is None or ui_text_obj is None:
+def ui_print(text, tk_root_obj, ui_text_obj):
+    if tk_root_obj is None or ui_text_obj is None:
         return
     ui_text_obj.set(str(text))
-    my_tk_root.update()
+    tk_root_obj.update()
 
