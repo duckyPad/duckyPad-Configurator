@@ -1,3 +1,52 @@
+class dp_file_op(object):
+    def __str__(self):
+        return (f"file_op("
+                f"type={self.type}, "
+                f"src_path={self.source_path}, "
+                f"dest_path={self.destination_path})")
+    
+    def __init__(self):
+        self.mkdir = "mkdir"
+        self.rmdir = "rmdir"
+        self.copy_file = "cpf"
+        self.delete_file = "rmf"
+        self.type = None
+        self.source_path = None
+        self.destination_path = None
+# ------------------------
+
+duckypad_pid = 0xd11c
+valid_pid_list = [duckypad_pid]
+
+def get_duckypad_path_uncached():
+    path_dict = {}
+    for device_dict in hid.enumerate():
+        if device_dict['vendor_id'] == 0x0483 and device_dict['product_id'] in valid_pid_list:
+            path_dict[device_dict['usage']] = device_dict['path']
+    if len(path_dict) == 0:
+        return None
+    if 58 in path_dict:
+        return path_dict[58]
+    return list(path_dict.values())[0]
+
+last_dp_path = None
+def get_duckypad_path(start_fresh=False):
+    global last_dp_path
+    if start_fresh:
+        last_dp_path = None
+    if last_dp_path is None:
+        last_dp_path = get_duckypad_path_uncached()
+    return last_dp_path
+
+
+duckypad_path = get_duckypad_path()
+if duckypad_path is None:
+    raise OSError('duckyPad Not Found!')
+
+dump_sd(duckypad_path, "./dump", "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups")
+
+import my_compare
+
 
 for item in new_program_listing:
         print(item)

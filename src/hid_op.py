@@ -3,6 +3,9 @@ import hid
 import time
 import sys
 import psutil
+import my_compare
+from shared import *
+from pathlib import Path
 
 if 'win32' in sys.platform:
     import win32api
@@ -36,8 +39,6 @@ HID_RESPONSE_OK = 0
 HID_RESPONSE_ERROR = 1
 HID_RESPONSE_BUSY = 2
 HID_RESPONSE_EOF = 3
-
-HID_COMMAND_SW_RESET = 20
 
 def duckypad_hid_sw_reset(dp_info_dict, reboot_into_usb_msc_mode=False):
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
@@ -126,3 +127,57 @@ def scan_duckypads():
     except Exception:
         return None
     return dp_info_list
+
+def make_file_path_for_hid(pc_path):
+    path_parts = Path(pc_path).parts
+    result = '/'
+    for item in path_parts[1:]:
+        result += f"{item}/"
+    return result[:-1]
+
+def make_fileop_hid_packet(this_op):
+    print(this_op)
+    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
+    pc_to_duckypad_buf[0] = 5   # HID Usage ID
+
+    if this_op.type == this_op.delete_file:
+        pc_to_duckypad_buf[2] = HID_COMMAND_DELETE_FILE
+        file_path = make_file_path_for_hid(this_op.source_path)
+        print(file_path)
+        if len(file_path) > HID_READ_FILE_PATH_SIZE_MAX:
+            raise OSError("file path too long")
+        for index, value in enumerate(file_path):
+            pc_to_duckypad_buf[3+index] = ord(value)
+
+        print(pc_to_duckypad_buf)
+        exit()
+
+    print('-------------')
+
+    return pc_to_duckypad_buf
+
+def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
+    print(hid_path, orig_path, modified_path)
+
+    sync_ops = my_compare.get_file_sync_ops(sd_path, modified_path)
+    if len(sync_ops) == 0:
+        return 0
+
+    # myh = hid.device()
+    # myh.open_path(hid_path)
+
+    for item in sync_ops:
+        to_send = make_fileop_hid_packet(item)
+
+        
+    # myh.close()
+
+sd_path = "./dump"
+modified_path = "./to_write_back"
+
+dp_list = scan_duckypads()
+if dp_list is None or len(dp_list) == 0:
+    exit()
+
+dp_path = dp_list[0]['hid_path']
+duckypad_file_sync_hid(dp_path, sd_path, modified_path)

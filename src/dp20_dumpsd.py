@@ -3,15 +3,10 @@ import hid
 import time
 import shutil
 import scan_md5
+from shared import *
 
 def millis():
     return time.time_ns() // 1000000
-
-PC_TO_DUCKYPAD_HID_BUF_SIZE = 64
-DUCKYPAD_TO_PC_HID_BUF_SIZE = 64
-HID_READ_FILE_PATH_SIZE_MAX = 55
-
-HID_COMMAND_DUMP_SD = 32
 
 SD_WALK_OP_TYPE_INDEX = 1
 
@@ -40,8 +35,6 @@ def hid_dump_file(sd_file_path, hid_obj):
         raise OSError("SD file path too long")
 
     print(f'Reading file: {sd_file_path} ', end='')
-    HID_COMMAND_OPEN_FILE_FOR_READING = 33
-    HID_COMMAND_READ_FILE = 11
 
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
@@ -141,37 +134,3 @@ def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root=None, ui_text_obj=N
 
     dp20_h.close()
 
-
-# ------------------------
-
-duckypad_pid = 0xd11c
-valid_pid_list = [duckypad_pid]
-
-def get_duckypad_path_uncached():
-    path_dict = {}
-    for device_dict in hid.enumerate():
-        if device_dict['vendor_id'] == 0x0483 and device_dict['product_id'] in valid_pid_list:
-            path_dict[device_dict['usage']] = device_dict['path']
-    if len(path_dict) == 0:
-        return None
-    if 58 in path_dict:
-        return path_dict[58]
-    return list(path_dict.values())[0]
-
-last_dp_path = None
-def get_duckypad_path(start_fresh=False):
-    global last_dp_path
-    if start_fresh:
-        last_dp_path = None
-    if last_dp_path is None:
-        last_dp_path = get_duckypad_path_uncached()
-    return last_dp_path
-
-
-duckypad_path = get_duckypad_path()
-if duckypad_path is None:
-    raise OSError('duckyPad Not Found!')
-
-dump_sd(duckypad_path, "./dump", "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups")
-
-import my_compare
