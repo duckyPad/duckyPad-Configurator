@@ -5,9 +5,6 @@ import shutil
 from pathlib import Path
 from shared import *
 
-tk_root = None
-tk_strvar = None
-
 duckypad_file_whitelist = [
     "profile_",
     "dpkm_",
@@ -149,6 +146,7 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
 def execute_sync_ops_msc(op_list):
     for item in op_list:
         print(item)
+        ui_print(f"Copying: ", tk_root, tk_strvar)
         if item.action == item.mkdir:
             this_path = Path(os.path.join(item.source_parent, item.source_path))
             this_path.mkdir(parents=True, exist_ok=True)

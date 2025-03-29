@@ -479,7 +479,6 @@ appauthor = 'dekuNukem'
 app_save_path = user_data_dir(appname, appauthor, roaming=True)
 backup_path = os.path.join(app_save_path, 'profile_backups')
 hid_dump_path = os.path.join(app_save_path, "hid_dump")
-hid_modified_dir_path = os.path.join(app_save_path, "hid_new")
 
 def open_discord_link():
     webbrowser.open("https://discord.gg/4sJCBx5")
@@ -611,3 +610,13 @@ class dp_file_op(object):
         self.source_path = None
         self.destination_parent = None
         self.destination_path = None
+
+tk_root = None
+tk_strvar = None
+
+def ui_print(text, my_tk_root, ui_text_obj):
+    if my_tk_root is None or ui_text_obj is None:
+        return
+    ui_text_obj.set(str(text))
+    my_tk_root.update()
+

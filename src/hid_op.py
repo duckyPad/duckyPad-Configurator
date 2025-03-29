@@ -178,10 +178,10 @@ def hid_write_file(file_op, hid_obj):
     hid_txrx(pc_to_duckypad_buf, hid_obj)
 
 def hid_txrx(buf_64b, hid_obj):
-    print("\n\nSending to duckyPad:\n", buf_64b)
+    # print("\n\nSending to duckyPad:\n", buf_64b)
     hid_obj.write(buf_64b)
     duckypad_to_pc_buf = hid_obj.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
-    print("\nduckyPad response:\n", duckypad_to_pc_buf)
+    # print("\nduckyPad response:\n", duckypad_to_pc_buf)
 
 def do_hid_fileop(this_op, hid_obj):
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
@@ -215,8 +215,9 @@ def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
 
     for item in sync_ops:
         print(item)
+        ui_print(f"Saving: ", tk_root, tk_strvar)
         do_hid_fileop(item, myh)
-        
+
     myh.close()
 
 def duckypad_hid_sw_reset(hid_path):

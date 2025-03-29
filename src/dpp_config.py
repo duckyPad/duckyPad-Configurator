@@ -1666,6 +1666,6 @@ root.after(500, repeat_func)
 
 # select_root_folder("lol")
 # connect_button_click()
-my_compare.tk_root = root
-my_compare.tk_strvar = dp_root_folder_display
+tk_root = root
+tk_strvar = dp_root_folder_display
 root.mainloop()

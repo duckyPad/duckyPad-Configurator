@@ -66,13 +66,7 @@ def hid_dump_file(sd_file_path, hid_obj):
     print()
     return bytes(all_data)
 
-def ui_print(text, tk_root, ui_text_obj):
-    if tk_root is None or ui_text_obj is None:
-        return
-    ui_text_obj.set(str(text))
-    tk_root.update()
-
-def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root=None, ui_text_obj=None):
+def dump_sd(dp_path, dump_dir_path, backup_dir_path, my_tk_root=None, ui_text_obj=None):
     current_dir = None
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
@@ -106,7 +100,7 @@ def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root=None, ui_text_obj=N
             md5_list = duckypad_to_pc_buf[2:18]
             md5_string = ''.join(f'{x:02x}' for x in md5_list)
             print(this_file_name, md5_string)
-            ui_print(f"Loading {current_dir}/{this_file_name}", tk_root, ui_text_obj)
+            ui_print(f"Loading {current_dir}/{this_file_name}", my_tk_root, ui_text_obj)
             if md5_string in backup_md5_dict:
                 cached_file_content = read_binary_file(backup_md5_dict[md5_string])
                 save_to_file(current_dir, dump_dir_path, this_file_name, cached_file_content)
@@ -119,7 +113,7 @@ def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root=None, ui_text_obj=N
             raw_filename_list = duckypad_to_pc_buf[4:file_name_end]
             this_file_name = ''.join(chr(c) for c in raw_filename_list[:raw_filename_list.index(0)])
             print(this_file_name)
-            ui_print(f"Loading {current_dir}/{this_file_name}", tk_root, ui_text_obj)
+            ui_print(f"Loading {current_dir}/{this_file_name}", my_tk_root, ui_text_obj)
             raw_file_content_bytes = bytes(duckypad_to_pc_buf[file_name_end:file_content_end])
             save_to_file(current_dir, dump_dir_path, this_file_name, raw_file_content_bytes)
 
@@ -128,7 +122,7 @@ def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root=None, ui_text_obj=N
         sd_dir = item[0]
         sd_file_name = item[1]
         print("MD5 MISS:", sd_dir, sd_file_name)
-        ui_print(f"Loading {sd_dir}/{sd_file_name}", tk_root, ui_text_obj)
+        ui_print(f"Loading {sd_dir}/{sd_file_name}", my_tk_root, ui_text_obj)
         raw_bytes = hid_dump_file(f'{sd_dir}/{sd_file_name}', dp20_h)
         save_to_file(sd_dir, dump_dir_path, sd_file_name, raw_bytes)
 
