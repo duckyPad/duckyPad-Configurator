@@ -1,4 +1,12 @@
-
+def make_file_path_for_hid(sd_path):
+    path_parts = Path(sd_path).parts
+    result = '/'
+    for item in path_parts[-2:]:
+        result += f"{item}/"
+    result = result[:-1]
+    if len(result) > HID_READ_FILE_PATH_SIZE_MAX:
+        raise OSError(f"HID file path too long: {result}")
+    return result
     # sync_ops = []
     # this_op = my_compare.dp_file_op()
     # this_op.type = this_op.copy_file

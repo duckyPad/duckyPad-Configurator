@@ -82,48 +82,37 @@ def delete_path(path):
             path.unlink()
     except Exception as e:
         print("delete_path:", e)
-    
-class dp_file_op(object):
-    def __str__(self):
-        return (f"file_op("
-                f"type={self.type}, "
-                f"src_path={self.source_path}, "
-                f"dest_path={self.destination_path})")
-    
-    def __init__(self):
-        self.mkdir = "mkdir"
-        self.rmdir = "rmdir"
-        self.copy_file = "cpf"
-        self.delete_file = "rmf"
-        self.type = None
-        self.source_path = None
-        self.destination_path = None
         
 def make_file_op(diff_dict):
     op_list = []
     for item in diff_dict["files_to_delete"]:
         this_op = dp_file_op()
-        this_op.type = this_op.delete_file
-        this_op.source_path = os.path.join(diff_dict['orig_path'], item)
+        this_op.action = this_op.delete_file
+        this_op.source_parent = diff_dict['orig_path']
+        this_op.source_path = item
         op_list.append(this_op)
     
     for item in diff_dict["files_to_add"]:
         this_op = dp_file_op()
-        this_op.type = this_op.copy_file
-        this_op.source_path = os.path.join(diff_dict['new_path'], item)
-        this_op.destination_path = os.path.join(diff_dict['orig_path'], item)
+        this_op.action = this_op.copy_file
+        this_op.source_parent = diff_dict['new_path']
+        this_op.source_path = item
+        this_op.destination_parent = diff_dict['orig_path']
+        this_op.destination_path = item
         op_list.append(this_op)
 
     for item in diff_dict["dirs_to_delete"]:
         this_op = dp_file_op()
-        this_op.type = this_op.rmdir
-        this_op.source_path = os.path.join(diff_dict['orig_path'], item)
+        this_op.action = this_op.rmdir
+        this_op.source_parent = diff_dict['orig_path']
+        this_op.source_path = item
         op_list.append(this_op)
 
     for item in diff_dict["dirs_to_create"]:
         this_op = dp_file_op()
-        this_op.type = this_op.mkdir
-        this_op.source_path = os.path.join(diff_dict['orig_path'], item)
+        this_op.action = this_op.mkdir
+        this_op.source_parent = diff_dict['orig_path']
+        this_op.source_path = item
         op_list.append(this_op)
     
     return op_list
@@ -139,9 +128,11 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
         subdir_modified_path = os.path.join(modified_dir_root, this_dir)
         for this_file in os.listdir(subdir_modified_path):
             this_op = dp_file_op()
-            this_op.type = this_op.copy_file
-            this_op.source_path = os.path.join(result_dict_top_lvl['new_path'], this_dir, this_file)
-            this_op.destination_path = os.path.join(result_dict_top_lvl['orig_path'], this_dir, this_file)
+            this_op.action = this_op.copy_file
+            this_op.source_parent = result_dict_top_lvl['new_path']
+            this_op.source_path = os.path.join(this_dir, this_file)
+            this_op.destination_parent = result_dict_top_lvl['orig_path']
+            this_op.destination_path = os.path.join(this_dir, this_file)
             file_ops_all.append(this_op)
 
     for this_dir in result_dict_top_lvl["dir_in_both_not_checked"]:
@@ -151,9 +142,6 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
         subdir_diff_dict["dirs_to_add"] = []
         subdir_diff_dict["dirs_to_delete"] = []
         subdir_diff_dict["dir_in_both_not_checked"] = []
-
-        # for key in subdir_diff_dict:
-        #     print(key, subdir_diff_dict[key])
         
         file_ops_all += make_file_op(subdir_diff_dict)
     return file_ops_all
@@ -161,21 +149,30 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
 def execute_sync_ops_msc(op_list):
     for item in op_list:
         print(item)
-        if item.type == item.mkdir:
-            this_path = Path(item.source_path)
+        if item.action == item.mkdir:
+            this_path = Path(os.path.join(item.source_parent, item.source_path))
             this_path.mkdir(parents=True, exist_ok=True)
-        elif item.type == item.rmdir:
-            delete_path(item.source_path)
-        elif item.type == item.delete_file:
-            delete_path(item.source_path)
-        elif item.type == item.copy_file:
-            src = Path(item.source_path)
-            dst = Path(item.destination_path)
+        elif item.action == item.rmdir:
+            delete_path(os.path.join(item.source_parent, item.source_path))
+        elif item.action == item.delete_file:
+            delete_path(os.path.join(item.source_parent, item.source_path))
+        elif item.action == item.copy_file:
+            src = Path(os.path.join(item.source_parent, item.source_path))
+            dst = Path(os.path.join(item.destination_parent, item.destination_path))
             shutil.copy(src, dst)
 
-
 import hid_op
-def duckypad_file_sync(orig_path, modified_path, dp_type_obj):
+def duckypad_file_sync(orig_path, modified_path, THIS_DUCKYPAD):
     sync_ops = get_file_sync_ops(orig_path, modified_path)
-    execute_sync_ops_msc(sync_ops)
+    if THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.hidmsg:
+        hid_op.duckypad_file_sync_hid(THIS_DUCKYPAD.info_dict['hid_path'], orig_path, modified_path)
+    else:
+        execute_sync_ops_msc(sync_ops)
 
+# sd_path = "./dump"
+# modified_path = "./to_write_back"
+
+# ops = get_file_sync_ops(sd_path, modified_path)
+
+# for item in ops:
+#     print(item)

@@ -1,3 +1,0 @@
-
-STRING MOVE
-ENTER 

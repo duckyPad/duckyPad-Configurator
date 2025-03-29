@@ -1,3 +1,0 @@
-
-STRING pin
-ENTER 

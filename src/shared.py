@@ -590,3 +590,24 @@ HID_COMMAND_OPEN_FILE_FOR_READING = 33
 PC_TO_DUCKYPAD_HID_BUF_SIZE = 64
 DUCKYPAD_TO_PC_HID_BUF_SIZE = 64
 HID_READ_FILE_PATH_SIZE_MAX = 55
+
+class dp_file_op(object):
+    def __str__(self):
+        return (f"dp_file_op(\n"
+                f"  action={self.action},\n"
+                f"  source_parent={self.source_parent},\n"
+                f"  source_path={self.source_path},\n"
+                f"  destination_parent={self.destination_parent},\n"
+                f"  destination_path={self.destination_path}\n"
+                f")")
+
+    def __init__(self):
+        self.mkdir = "mkdir"
+        self.rmdir = "rmdir"
+        self.copy_file = "cpf"
+        self.delete_file = "rmf"
+        self.action = None
+        self.source_parent = None
+        self.source_path = None
+        self.destination_parent = None
+        self.destination_path = None

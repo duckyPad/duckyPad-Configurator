@@ -165,7 +165,6 @@ def scaled_size(size: int) -> int:
 ensure_dir(app_save_path)
 ensure_dir(backup_path)
 ensure_dir(hid_dump_path)
-ensure_dir(hid_modified_dir_path)
 
 print("\n\n--------------------------")
 print("\n\nWelcome to duckyPad Configurator!\n")
@@ -245,14 +244,11 @@ def print_fw_update_label(dp_info_dict):
         dp_fw_update_label.unbind("<Button-1>")
     return this_version
 
-is_root_folder_duckypad_msc = False
 
-def select_root_folder(root_path=None, is_msc=False):
+def select_root_folder(root_path=None):
     global profile_list
     global dp_root_folder_path
-    global is_root_folder_duckypad_msc
 
-    is_root_folder_duckypad_msc = is_msc
     if root_path is None:
         root_path = filedialog.askdirectory()
     if len(root_path) <= 0:
@@ -425,7 +421,7 @@ def connect_button_click():
 
     if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
-        select_root_folder(duckypad_drive_path, is_msc=True)
+        select_root_folder(duckypad_drive_path)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.usbmsc
     elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
         dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display)
@@ -825,7 +821,7 @@ def save_click():
         if os.path.isdir(dp_root_folder_path) is False:
             put_duckypad_in_msc_mode_and_get_drive_path(reset_ui=False)
         my_compare.duckypad_file_sync(dp_root_folder_path, this_backup_path, THIS_DUCKYPAD)
-        if is_root_folder_duckypad_msc:
+        if THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.usbmsc:
             dp_root_folder_display.set("Ejecting...")
             root.update()
             hid_op.eject_drive(dp_root_folder_path)
@@ -1668,7 +1664,7 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-select_root_folder("sample_profiles")
+# select_root_folder("lol")
 # connect_button_click()
 my_compare.tk_root = root
 my_compare.tk_strvar = dp_root_folder_display

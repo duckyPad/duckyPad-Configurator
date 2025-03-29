@@ -128,14 +128,11 @@ def scan_duckypads():
         return None
     return dp_info_list
 
-def make_file_path_for_hid(pc_path):
-    path_parts = Path(pc_path).parts
-    result = '/'
-    for item in path_parts[1:]:
-        result += f"{item}/"
-    result = result[:-1]
+def make_hid_file_path(sd_path):
+    result = sd_path.lstrip('\\/')
+    result = '/' + sd_path
     if len(result) > HID_READ_FILE_PATH_SIZE_MAX:
-        raise OSError("HID file path too long")
+        raise OSError(f"HID file path too long: {result}")
     return result
 
 def write_str_into_buf(text, buf):
@@ -161,11 +158,11 @@ def split_file_to_chunks(path, chunk_size=60):
 def hid_write_file(file_op, hid_obj):
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
     pc_to_duckypad_buf[2] = HID_COMMAND_OPEN_FILE_FOR_WRITING
-    file_path = make_file_path_for_hid(file_op.source_path)
+    file_path = make_hid_file_path(file_op.source_path)
     write_str_into_buf(file_path, pc_to_duckypad_buf)
     hid_txrx(pc_to_duckypad_buf, hid_obj)
 
-    file_chunks = split_file_to_chunks(file_op.source_path)
+    file_chunks = split_file_to_chunks(os.path.join(file_op.source_parent, file_op.source_path))
 
     for this_chunk in file_chunks:
         print(len(this_chunk), this_chunk)
@@ -189,24 +186,23 @@ def hid_txrx(buf_64b, hid_obj):
 def do_hid_fileop(this_op, hid_obj):
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
 
-    if this_op.type == this_op.delete_file:
+    if this_op.action == this_op.delete_file:
         pc_to_duckypad_buf[2] = HID_COMMAND_DELETE_FILE
-        file_path = make_file_path_for_hid(this_op.source_path)
+        file_path = make_hid_file_path(this_op.source_path)
         write_str_into_buf(file_path, pc_to_duckypad_buf)
         hid_txrx(pc_to_duckypad_buf, hid_obj)
-    elif this_op.type == this_op.copy_file:
+    elif this_op.action == this_op.copy_file:
         hid_write_file(this_op, hid_obj)
-    elif this_op.type == this_op.rmdir:
+    elif this_op.action == this_op.rmdir:
         pc_to_duckypad_buf[2] = HID_COMMAND_DELETE_DIR
-        file_path = make_file_path_for_hid(this_op.source_path)
+        file_path = make_hid_file_path(this_op.source_path)
         write_str_into_buf(file_path, pc_to_duckypad_buf)
         hid_txrx(pc_to_duckypad_buf, hid_obj)
-    elif this_op.type == this_op.mkdir:
+    elif this_op.action == this_op.mkdir:
         pc_to_duckypad_buf[2] = HID_COMMAND_CREATE_DIR
-        file_path = make_file_path_for_hid(this_op.source_path)
+        file_path = make_hid_file_path(this_op.source_path)
         write_str_into_buf(file_path, pc_to_duckypad_buf)
         hid_txrx(pc_to_duckypad_buf, hid_obj)
-
     return pc_to_duckypad_buf
 
 def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
@@ -235,3 +231,4 @@ def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
 # duckypad_file_sync_hid(dp_path, sd_path, modified_path)
 
 
+# print(make_hid_file_path("/Users/allen/AppData/Roaming/dekuNukem/duckypad_config/hid_dump/profile_info.txt"))

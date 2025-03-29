@@ -1,3 +1,0 @@
-sleep_after_min 30
-bi 4
-kbl dpkm_English (UK).txt
