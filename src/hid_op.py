@@ -210,8 +210,6 @@ def do_hid_fileop(this_op, hid_obj):
     return pc_to_duckypad_buf
 
 def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
-    print(hid_path, orig_path, modified_path)
-
     sync_ops = my_compare.get_file_sync_ops(orig_path, modified_path)
     if len(sync_ops) == 0:
         return 0
