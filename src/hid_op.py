@@ -128,9 +128,10 @@ def scan_duckypads():
         return None
     return dp_info_list
 
-def make_hid_file_path(sd_path):
-    result = sd_path.lstrip('\\/')
-    result = '/' + sd_path
+def make_hid_file_path(file_op):
+    result = os.path.join(file_op.local_dir, file_op.source_path)
+    result = result.lstrip('\\/')
+    result = '/' + result
     if len(result) > HID_READ_FILE_PATH_SIZE_MAX:
         raise OSError(f"HID file path too long: {result}")
     return result
@@ -158,7 +159,7 @@ def split_file_to_chunks(path, chunk_size=60):
 def hid_write_file(file_op, hid_obj):
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
     pc_to_duckypad_buf[2] = HID_COMMAND_OPEN_FILE_FOR_WRITING
-    file_path = make_hid_file_path(file_op.source_path)
+    file_path = make_hid_file_path(file_op)
     write_str_into_buf(file_path, pc_to_duckypad_buf)
     hid_txrx(pc_to_duckypad_buf, hid_obj)
 
@@ -188,19 +189,19 @@ def do_hid_fileop(this_op, hid_obj):
 
     if this_op.action == this_op.delete_file:
         pc_to_duckypad_buf[2] = HID_COMMAND_DELETE_FILE
-        file_path = make_hid_file_path(this_op.source_path)
+        file_path = make_hid_file_path(this_op)
         write_str_into_buf(file_path, pc_to_duckypad_buf)
         hid_txrx(pc_to_duckypad_buf, hid_obj)
     elif this_op.action == this_op.copy_file:
         hid_write_file(this_op, hid_obj)
     elif this_op.action == this_op.rmdir:
         pc_to_duckypad_buf[2] = HID_COMMAND_DELETE_DIR
-        file_path = make_hid_file_path(this_op.source_path)
+        file_path = make_hid_file_path(this_op)
         write_str_into_buf(file_path, pc_to_duckypad_buf)
         hid_txrx(pc_to_duckypad_buf, hid_obj)
     elif this_op.action == this_op.mkdir:
         pc_to_duckypad_buf[2] = HID_COMMAND_CREATE_DIR
-        file_path = make_hid_file_path(this_op.source_path)
+        file_path = make_hid_file_path(this_op)
         write_str_into_buf(file_path, pc_to_duckypad_buf)
         hid_txrx(pc_to_duckypad_buf, hid_obj)
     return pc_to_duckypad_buf

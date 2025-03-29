@@ -80,10 +80,11 @@ def delete_path(path):
     except Exception as e:
         print("delete_path:", e)
         
-def make_file_op(diff_dict):
+def make_file_op(diff_dict, current_dir):
     op_list = []
     for item in diff_dict["files_to_delete"]:
         this_op = dp_file_op()
+        this_op.local_dir = current_dir
         this_op.action = this_op.delete_file
         this_op.source_parent = diff_dict['orig_path']
         this_op.source_path = item
@@ -91,6 +92,7 @@ def make_file_op(diff_dict):
     
     for item in diff_dict["files_to_add"]:
         this_op = dp_file_op()
+        this_op.local_dir = current_dir
         this_op.action = this_op.copy_file
         this_op.source_parent = diff_dict['new_path']
         this_op.source_path = item
@@ -100,6 +102,7 @@ def make_file_op(diff_dict):
 
     for item in diff_dict["dirs_to_delete"]:
         this_op = dp_file_op()
+        this_op.local_dir = current_dir
         this_op.action = this_op.rmdir
         this_op.source_parent = diff_dict['orig_path']
         this_op.source_path = item
@@ -107,6 +110,7 @@ def make_file_op(diff_dict):
 
     for item in diff_dict["dirs_to_create"]:
         this_op = dp_file_op()
+        this_op.local_dir = current_dir
         this_op.action = this_op.mkdir
         this_op.source_parent = diff_dict['orig_path']
         this_op.source_path = item
@@ -119,12 +123,13 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
     result_dict_top_lvl = compare_dir(original_dir_root, modified_dir_root)
     # for key in result_dict_top_lvl:
     #     print(key, result_dict_top_lvl[key])
-    file_ops_all += make_file_op(result_dict_top_lvl)
+    file_ops_all += make_file_op(result_dict_top_lvl, '')
 
     for this_dir in result_dict_top_lvl["dirs_to_create"]:
         subdir_modified_path = os.path.join(modified_dir_root, this_dir)
         for this_file in os.listdir(subdir_modified_path):
             this_op = dp_file_op()
+            this_op.local_dir = ''
             this_op.action = this_op.copy_file
             this_op.source_parent = result_dict_top_lvl['new_path']
             this_op.source_path = os.path.join(this_dir, this_file)
@@ -140,7 +145,7 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
         subdir_diff_dict["dirs_to_delete"] = []
         subdir_diff_dict["dir_in_both_not_checked"] = []
         
-        file_ops_all += make_file_op(subdir_diff_dict)
+        file_ops_all += make_file_op(subdir_diff_dict, this_dir)
     return file_ops_all
 
 def execute_sync_ops_msc(op_list):
@@ -166,10 +171,10 @@ def duckypad_file_sync(orig_path, modified_path, THIS_DUCKYPAD, tk_root_obj=None
     else:
         execute_sync_ops_msc(sync_ops)
 
-# sd_path = "./dump"
-# modified_path = "./to_write_back"
+sd_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\hid_dump"
+modified_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups\\duckyPad_Pro_backup_2025-03-29T20-48-30"
 
-# ops = get_file_sync_ops(sd_path, modified_path)
+ops = get_file_sync_ops(sd_path, modified_path)
 
-# for item in ops:
-#     print(item)
+for item in ops:
+    print(item)

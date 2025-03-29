@@ -594,6 +594,7 @@ class dp_file_op(object):
     def __str__(self):
         return (f"dp_file_op(\n"
                 f"  action={self.action},\n"
+                f"  local_dir={self.local_dir},\n"
                 f"  source_parent={self.source_parent},\n"
                 f"  source_path={self.source_path},\n"
                 f"  destination_parent={self.destination_parent},\n"
@@ -610,6 +611,7 @@ class dp_file_op(object):
         self.source_path = None
         self.destination_parent = None
         self.destination_path = None
+        self.local_dir = None
 
 def ui_print(text, tk_root_obj, ui_text_obj):
     if tk_root_obj is None or ui_text_obj is None:
