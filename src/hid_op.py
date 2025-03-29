@@ -212,16 +212,9 @@ def do_hid_fileop(this_op, hid_obj):
 def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
     print(hid_path, orig_path, modified_path)
 
-    sync_ops = my_compare.get_file_sync_ops(sd_path, modified_path)
+    sync_ops = my_compare.get_file_sync_ops(orig_path, modified_path)
     if len(sync_ops) == 0:
         return 0
-
-    # sync_ops = []
-    # this_op = my_compare.dp_file_op()
-    # this_op.type = this_op.copy_file
-    # this_op.source_path = os.path.join(orig_path, "dpkm_Japan.txt")
-    # this_op.destination_path = os.path.join(modified_path, "dpkm_Japan.txt")
-    # sync_ops.append(this_op)
 
     myh = hid.device()
     myh.open_path(hid_path)
@@ -232,15 +225,15 @@ def duckypad_file_sync_hid(hid_path, orig_path, modified_path):
         
     myh.close()
 
-sd_path = "./dump"
-modified_path = "./to_write_back"
+# sd_path = "./dump"
+# modified_path = "./to_write_back"
 
-dp_list = scan_duckypads()
-if dp_list is None or len(dp_list) == 0:
-    print("no duckypad found")
-    exit()
+# dp_list = scan_duckypads()
+# if dp_list is None or len(dp_list) == 0:
+#     print("no duckypad found")
+#     exit()
 
-dp_path = dp_list[0]['hid_path']
-duckypad_file_sync_hid(dp_path, sd_path, modified_path)
+# dp_path = dp_list[0]['hid_path']
+# duckypad_file_sync_hid(dp_path, sd_path, modified_path)
 
 

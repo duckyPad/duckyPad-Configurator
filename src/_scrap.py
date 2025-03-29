@@ -1,3 +1,11 @@
+
+    # sync_ops = []
+    # this_op = my_compare.dp_file_op()
+    # this_op.type = this_op.copy_file
+    # this_op.source_path = os.path.join(orig_path, "dpkm_Japan.txt")
+    # this_op.destination_path = os.path.join(modified_path, "dpkm_Japan.txt")
+    # sync_ops.append(this_op)
+
 class dp_file_op(object):
     def __str__(self):
         return (f"file_op("
