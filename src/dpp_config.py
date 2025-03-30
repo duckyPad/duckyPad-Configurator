@@ -244,6 +244,19 @@ def print_fw_update_label(dp_info_dict):
         dp_fw_update_label.unbind("<Button-1>")
     return this_version
 
+def convert_to_dp20_key_order(profile_list):
+    if THIS_DUCKYPAD.device_type != THIS_DUCKYPAD.dp20:
+        return
+    for this_profile in profile_list:
+        new_klist = [None] * MAX_KEY_COUNT
+        for this_key in this_profile.keylist:
+            if this_key is None:
+                continue
+            dp24_index = dp20_to_dp24_lookup.get(this_key.index+1)-1
+            if dp24_index is None:
+                continue
+            new_klist[dp24_index] = this_key
+        this_profile.keylist = new_klist
 
 def select_root_folder(root_path=None):
     global profile_list
@@ -256,6 +269,7 @@ def select_root_folder(root_path=None):
     dp_root_folder_path = root_path
     dp_root_folder_display.set("Selected: " + root_path)
     profile_list = duck_objs.build_profile(root_path)
+    convert_to_dp20_key_order(profile_list)
 
     ui_reset()
     update_profile_display()
@@ -1541,6 +1555,7 @@ def import_profile_click():
         messagebox.showinfo("Import", f"Import failed:\n\n{content}")
         return
     profile_list += content
+    convert_to_dp20_key_order(profile_list)
     update_profile_display()
 
 user_manual_button = Button(resources_lf, text="User\nManual", command=open_duckypad_user_manual_url)
