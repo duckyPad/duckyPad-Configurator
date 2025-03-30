@@ -679,9 +679,16 @@ def profile_rename_click():
     profile_list[selection[0]].name = answer
     update_profile_display()
 
+dp24_to_dp20_lookup = {1:1, 2:2, 3:3, 5:4, 6:5, 7:6, 9:7, 10:8, 11:9, 13:10, 14:11, 15:12, 17:13, 18:14, 19:15}
+
+def get_appropriate_key_index(key_index, dp_type_obj):
+    if dp_type_obj.device_type == dp_type_obj.dp24:
+        return key_index
+    return dp24_to_dp20_lookup.get(key_index)
+
 def validate_data_objs(save_path):
     # update path and indexs of profile and keys
-    for profile_index, this_profile in enumerate(profile_list):
+    for this_profile in profile_list:
         this_profile.path = os.path.join(save_path, f"profile_{this_profile.name}")
         for key_index, this_key in enumerate(this_profile.keylist):
             if this_key is None:
@@ -693,6 +700,7 @@ def validate_data_objs(save_path):
             this_key.path = os.path.join(this_profile.path, 'key'+str(key_index+1)+'.txt')
             this_key.path_on_release = os.path.join(this_profile.path, 'key'+str(key_index+1)+'-release.txt')
             this_key.index = key_index + 1
+            this_key.index_as_dp20 = dp24_to_dp20_lookup.get(this_key.index)
 
 def compile_all_scripts():
     try:
@@ -746,6 +754,9 @@ def save_everything(save_path):
             for this_key in this_profile.keylist:
                 if this_key is None:
                     continue
+                correct_index = get_appropriate_key_index(this_key.index, THIS_DUCKYPAD)
+                if correct_index is None:
+                    continue
                 config_file.write(f"z{this_key.index} {this_key.name}\n")
                 if this_key.name_line2 is not None and len(this_key.name_line2) > 0:
                     config_file.write(f"x{this_key.index} {this_key.name_line2}\n")
@@ -761,7 +772,7 @@ def save_everything(save_path):
                 config_file.write('DIM_UNUSED_KEYS 0\n')
             if this_profile.is_landscape:
                 config_file.write('IS_LANDSCAPE 1\n')
-            for key_index, this_key in enumerate(this_profile.keylist):
+            for this_key in this_profile.keylist:
                 if this_key is None:
                     continue
                 # newline='' is important, it forces python to not write \r, only \n
@@ -809,11 +820,13 @@ def save_everything(save_path):
         dp_root_folder_display.set("Save FAILED!")
     return False
 
-def make_default_backup_dir_name():
-    return 'duckyPad_Pro_backup_' + datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+def make_backup_dir_name():
+    if THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.dp24:
+        return 'duckyPad_Pro_backup_' + datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    return 'duckyPad_backup_' + datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
 def save_click():
-    this_backup_path = os.path.join(backup_path, make_default_backup_dir_name())
+    this_backup_path = os.path.join(backup_path, make_backup_dir_name())
     if save_everything(this_backup_path) is False:
         messagebox.showerror("Error", "Backup save failed")
         return

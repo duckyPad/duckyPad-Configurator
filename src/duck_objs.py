@@ -19,7 +19,6 @@ class dp_key(object):
 		return ret
 
 	def __init__(self, path_on_press=None, path_on_release=None):
-		super(dp_key, self).__init__()
 		self.path = path_on_press
 		self.path_on_release = path_on_release
 		self.name = None
