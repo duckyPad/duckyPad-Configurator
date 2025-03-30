@@ -437,7 +437,9 @@ def connect_button_click():
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
         select_root_folder(duckypad_drive_path)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.usbmsc
+        show_relf()
     elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
+        re_lf.place_forget()
         dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display)
         select_root_folder(hid_dump_path)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.hidmsg
@@ -1040,7 +1042,9 @@ keydown_color_checkbox.place(x=scaled_size(20), y=scaled_size(385))
 
 # ------------- RE frame -----------------
 re_lf = LabelFrame(root, text="Rotary Encoders", width=scaled_size(150), height=scaled_size(205))
-re_lf.place(x=scaled_size(590), y=scaled_size(50))
+def show_relf():
+    re_lf.place(x=scaled_size(590), y=scaled_size(50))
+show_relf()
 root.update()
 RE_BUTTON_WIDTH = scaled_size(80)
 RE_BUTTON_HEIGHT = scaled_size(25)
