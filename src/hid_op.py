@@ -40,14 +40,14 @@ HID_RESPONSE_ERROR = 1
 HID_RESPONSE_BUSY = 2
 HID_RESPONSE_EOF = 3
 
-def duckypad_hid_sw_reset(dp_info_dict, reboot_into_usb_msc_mode=False):
+def duckypad_hid_sw_reset(hid_path, reboot_into_usb_msc_mode=False):
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
     pc_to_duckypad_buf[2] = HID_COMMAND_SW_RESET    # Command type
     if(reboot_into_usb_msc_mode):
         pc_to_duckypad_buf[3] = 1
     myh = hid.device()
-    myh.open_path(dp_info_dict['hid_path'])
+    myh.open_path(hid_path)
     myh.write(pc_to_duckypad_buf)
     myh.close()
 
@@ -220,18 +220,6 @@ def duckypad_file_sync_hid(hid_path, orig_path, modified_path, tk_root=None, ui_
         do_hid_fileop(item, myh)
 
     myh.close()
-
-def duckypad_hid_sw_reset(hid_path):
-    myh = hid.device()
-    myh.open_path(hid_path)
-
-    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
-    pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
-    pc_to_duckypad_buf[2] = HID_COMMAND_SW_RESET    # Command type
-    myh.write(pc_to_duckypad_buf)
-
-    myh.close()
-
 
 # sd_path = "./dump"
 # modified_path = "./to_write_back"

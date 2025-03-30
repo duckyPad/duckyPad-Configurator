@@ -497,6 +497,12 @@ def open_tindie_store():
 def open_mac_linux_instruction():
     webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/linux_macos_notes.html')
 
+def script_instruction_click(event):
+    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/duckyscript_info.html')
+
+def open_dpp_page(event):
+    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/README.html')
+
 def rgb_to_hex(rgb_tuple):
     return '#%02x%02x%02x' % rgb_tuple
 

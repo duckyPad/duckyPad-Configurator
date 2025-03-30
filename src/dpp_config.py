@@ -293,7 +293,7 @@ def put_duckypad_in_msc_mode_and_get_drive_path(dp_info_dict, reset_ui=True):
     if duckypad_drive_path is not None:
         return duckypad_drive_path
     
-    hid_op.duckypad_hid_sw_reset(dp_info_dict, reboot_into_usb_msc_mode=1)
+    hid_op.duckypad_hid_sw_reset(dp_info_dict['hid_path'], reboot_into_usb_msc_mode=1)
 
     if reset_ui:
         ui_reset()
@@ -434,12 +434,12 @@ def connect_button_click():
     THIS_DUCKYPAD.info_dict = user_selected_dp
 
     if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
+        show_relf()
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
         select_root_folder(duckypad_drive_path)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.usbmsc
-        show_relf()
     elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
-        re_lf.place_forget()
+        hide_relf()
         dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display)
         select_root_folder(hid_dump_path)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.hidmsg
@@ -1042,13 +1042,26 @@ keydown_color_checkbox.place(x=scaled_size(20), y=scaled_size(385))
 
 # ------------- RE frame -----------------
 re_lf = LabelFrame(root, text="Rotary Encoders", width=scaled_size(150), height=scaled_size(205))
+re_tease_lf = LabelFrame(root, text="Rotary Encoders", width=scaled_size(150), height=scaled_size(205))
+key_instruction_label = Label(master=re_tease_lf, text="None on this duckyPad :(")
+key_instruction_label.place(x=scaled_size(2), y=scaled_size(60))
+
+script_instruction = Label(master=re_tease_lf, text="Check out duckyPad Pro", fg="blue", cursor="hand2")
+script_instruction.place(x=scaled_size(5), y=scaled_size(80))
+script_instruction.bind("<Button-1>", open_dpp_page)
+
+def hide_relf():
+    re_tease_lf.place(x=scaled_size(590), y=scaled_size(50))
+    re_lf.place_forget()
+
 def show_relf():
     re_lf.place(x=scaled_size(590), y=scaled_size(50))
+    re_tease_lf.place_forget()
+
 show_relf()
 root.update()
 RE_BUTTON_WIDTH = scaled_size(80)
 RE_BUTTON_HEIGHT = scaled_size(25)
-
 # ------------- Keys frame -------------
 selected_key = None
 
@@ -1071,8 +1084,8 @@ rotate_keys_checkbox = Checkbutton(keys_lf, text="Rotate", variable=is_in_landsc
 rotate_keys_checkbox.place(x=scaled_size(10), y=scaled_size(0))
 
 key_instruction_label = Label(master=keys_lf, text="Click to edit, drag to rearrange")
-root.update()
 key_instruction_label.place(x=scaled_size(100), y=scaled_size(0))
+root.update()
 
 def search_button(rootx, rooty):
     for index, item in enumerate(key_button_list):
@@ -1425,12 +1438,6 @@ key_color_button.bind("<Button-1>", key_color_button_click)
 root.update()
 # ------------- Scripts frame -------------
 scripts_lf = LabelFrame(root, text="Scripts", width=scaled_size(310), height=scaled_size(473))
-
-def open_duckyscript_url():
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/blob/master/doc/duckyscript_info.md')
-
-def script_instruction_click(event):
-    open_duckyscript_url()
 
 script_instruction = Label(master=scripts_lf, text="Read more about Duckyscript...", fg="blue", cursor="hand2")
 root.update()
