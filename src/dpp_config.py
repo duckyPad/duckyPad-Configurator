@@ -697,10 +697,7 @@ def validate_data_objs(save_path):
                 this_key.script = ""
             if this_key.script_on_release is None:
                 this_key.script_on_release = ""
-            this_key.path = os.path.join(this_profile.path, 'key'+str(key_index+1)+'.txt')
-            this_key.path_on_release = os.path.join(this_profile.path, 'key'+str(key_index+1)+'-release.txt')
             this_key.index = key_index + 1
-            this_key.index_as_dp20 = dp24_to_dp20_lookup.get(this_key.index)
 
 def compile_all_scripts():
     try:
@@ -757,13 +754,13 @@ def save_everything(save_path):
                 correct_index = get_appropriate_key_index(this_key.index, THIS_DUCKYPAD)
                 if correct_index is None:
                     continue
-                config_file.write(f"z{this_key.index} {this_key.name}\n")
+                config_file.write(f"z{correct_index} {this_key.name}\n")
                 if this_key.name_line2 is not None and len(this_key.name_line2) > 0:
-                    config_file.write(f"x{this_key.index} {this_key.name_line2}\n")
+                    config_file.write(f"x{correct_index} {this_key.name_line2}\n")
                 if this_key.allow_abort:
-                    config_file.write(f"ab {this_key.index}\n")
+                    config_file.write(f"ab {correct_index}\n")
                 if this_key.dont_repeat:
-                    config_file.write(f"dr {this_key.index}\n")
+                    config_file.write(f"dr {correct_index}\n")
 
             config_file.write('BG_COLOR %d %d %d\n' % (this_profile.bg_color))
             if this_profile.kd_color is not None:
@@ -775,6 +772,11 @@ def save_everything(save_path):
             for this_key in this_profile.keylist:
                 if this_key is None:
                     continue
+                correct_index = get_appropriate_key_index(this_key.index, THIS_DUCKYPAD)
+                if correct_index is None:
+                    continue
+                this_key.path = os.path.join(this_profile.path, f'key{correct_index}.txt')
+                this_key.path_on_release = os.path.join(this_profile.path, f'key{correct_index}-release.txt')
                 # newline='' is important, it forces python to not write \r, only \n
                 # otherwise it will read back as double \n
                 with open(this_key.path, 'w', encoding='utf8', newline='') as key_file:
@@ -811,7 +813,7 @@ def save_everything(save_path):
                         root.update()
                         dsb_file.write(this_key.binary_array_on_release)
                 if this_key.color is not None:
-                    config_file.write('SWCOLOR_%d %d %d %d\n' % (this_key.index, this_key.color[0], this_key.color[1], this_key.color[2]))
+                    config_file.write('SWCOLOR_%d %d %d %d\n' % (correct_index, this_key.color[0], this_key.color[1], this_key.color[2]))
             config_file.close()
         return True
     except Exception as e:
