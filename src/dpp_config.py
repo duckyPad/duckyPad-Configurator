@@ -680,6 +680,7 @@ def profile_rename_click():
     update_profile_display()
 
 dp24_to_dp20_lookup = {1:1, 2:2, 3:3, 5:4, 6:5, 7:6, 9:7, 10:8, 11:9, 13:10, 14:11, 15:12, 17:13, 18:14, 19:15}
+dp20_to_dp24_lookup = {1:1, 2:2, 3:3, 4:5, 5:6, 6:7, 7:9, 8:10, 9:11, 10:13, 11:14, 12:15, 13:17, 14:18, 15:19}
 
 def get_appropriate_key_index(key_index, dp_type_obj):
     if dp_type_obj.device_type == dp_type_obj.dp24:

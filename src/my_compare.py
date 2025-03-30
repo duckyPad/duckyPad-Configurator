@@ -161,10 +161,12 @@ def duckypad_file_sync(orig_path, modified_path, THIS_DUCKYPAD, tk_root_obj=None
     else:
         execute_sync_ops_msc(sync_ops)
 
-sd_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\hid_dump"
-modified_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups\\duckyPad_Pro_backup_2025-03-29T20-48-30"
+# sd_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\hid_dump"
+# modified_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups\\duckyPad_Pro_backup_2025-03-29T20-48-30"
 
-ops = get_file_sync_ops(sd_path, modified_path)
+# ops = get_file_sync_ops(sd_path, modified_path)
 
-for item in ops:
-    print(item)
+# for item in ops:
+#     print(item)
+
+
