@@ -40,14 +40,25 @@ HID_RESPONSE_ERROR = 1
 HID_RESPONSE_BUSY = 2
 HID_RESPONSE_EOF = 3
 
-def duckypad_hid_sw_reset(hid_path, reboot_into_usb_msc_mode=False):
+def duckypad_hid_sw_reset(dp_dict, reboot_into_usb_msc_mode=False):
+    print("duckypad_hid_sw_reset", dp_dict)
+    dp_list = scan_duckypads() # scan again because HID path might have changed
+    if dp_list is None or len(dp_list) == 0:
+        return
+    dp_to_reset_hid_path = []
+    for this_dp in dp_list:
+        if this_dp["serial"] == dp_dict["serial"]:
+            dp_to_reset_hid_path.append(this_dp["hid_path"])
+    if len(dp_to_reset_hid_path) == 0:
+        return
+    print(dp_to_reset_hid_path)
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
     pc_to_duckypad_buf[2] = HID_COMMAND_SW_RESET    # Command type
     if(reboot_into_usb_msc_mode):
         pc_to_duckypad_buf[3] = 1
     myh = hid.device()
-    myh.open_path(hid_path)
+    myh.open_path(dp_to_reset_hid_path[0])
     myh.write(pc_to_duckypad_buf)
     myh.close()
 

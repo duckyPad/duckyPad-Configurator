@@ -293,7 +293,7 @@ def put_duckypad_in_msc_mode_and_get_drive_path(dp_info_dict, reset_ui=True):
     if duckypad_drive_path is not None:
         return duckypad_drive_path
     
-    hid_op.duckypad_hid_sw_reset(dp_info_dict['hid_path'], reboot_into_usb_msc_mode=1)
+    hid_op.duckypad_hid_sw_reset(dp_info_dict, reboot_into_usb_msc_mode=1)
 
     if reset_ui:
         ui_reset()
@@ -851,15 +851,15 @@ def save_click():
         return
     try:
         if os.path.isdir(dp_root_folder_path) is False:
-            put_duckypad_in_msc_mode_and_get_drive_path(reset_ui=False)
+            put_duckypad_in_msc_mode_and_get_drive_path(THIS_DUCKYPAD.info_dict, reset_ui=False)
         my_compare.duckypad_file_sync(dp_root_folder_path, this_backup_path, THIS_DUCKYPAD, root, dp_root_folder_display)
         if THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.usbmsc:
             dp_root_folder_display.set("Ejecting...")
             root.update()
             hid_op.eject_drive(dp_root_folder_path)
-            hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict['hid_path'])
+            hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict)
         elif THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.hidmsg:
-            hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict['hid_path'])
+            hid_op.duckypad_hid_sw_reset(THIS_DUCKYPAD.info_dict)
             delete_path(hid_dump_path)
             shutil.copytree(this_backup_path, hid_dump_path)
         dp_root_folder_display.set("Done!")
