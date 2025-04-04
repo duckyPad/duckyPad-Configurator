@@ -221,6 +221,7 @@ def ui_reset():
     profile_lstbox.delete(0, 'end')
     check_syntax_label.config(text="", fg="green")
     profile_import_button.config(state=DISABLED)
+    profile_export_button.config(state=DISABLED)
     exp_page_plus_button.config(state=DISABLED)
     exp_page_minus_button.config(state=DISABLED)
 
@@ -459,6 +460,7 @@ def enable_buttons():
     rotate_keys_checkbox.config(state=NORMAL)
     key_remove_button.config(state=NORMAL)
     profile_import_button.config(state=NORMAL)
+    profile_export_button.config(state=NORMAL)
     exp_page_plus_button.config(state=NORMAL)
     exp_page_minus_button.config(state=NORMAL)
 
@@ -1569,6 +1571,9 @@ def import_profile_click():
     convert_to_dp20_key_order(profile_list)
     update_profile_display()
 
+def export_profile_click():
+    pass
+
 user_manual_button = Button(resources_lf, text="User\nManual", command=open_duckypad_user_manual_url)
 user_manual_button.place(x=scaled_size(10), y=scaled_size(0), width=scaled_size(100))
 
@@ -1587,7 +1592,7 @@ tindie_button.place(x=scaled_size(600), y=scaled_size(0), width=scaled_size(100)
 profile_import_button = Button(profiles_lf, text="Import", command=import_profile_click, state=DISABLED)
 profile_import_button.place(x=PADDING * 2, y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
-profile_export_button = Button(profiles_lf, text="Export", command=import_profile_click, state=DISABLED)
+profile_export_button = Button(profiles_lf, text="Export", command=export_profile_click, state=DISABLED)
 profile_export_button.place(x=PADDING * 2 + scaled_size(71), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
 empty_script_label = Label(root, text="<-- Select a key")
