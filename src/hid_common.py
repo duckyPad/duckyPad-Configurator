@@ -44,8 +44,7 @@ def make_dp_info_dict(hid_msg, hid_path):
 
 def get_all_dp_info(dp_path_list):
     dp_info_list = []
-    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
-    pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
+    pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
     for this_path in dp_path_list:
         # print(this_path)
         myh = hid.device()
