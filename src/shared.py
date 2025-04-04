@@ -3,6 +3,7 @@ import shutil
 import webbrowser
 from platformdirs import *
 from pathlib import Path
+from hid_common import *
 
 cmd_REPEAT = "REPEAT"
 cmd_REM = "REM"
@@ -557,30 +558,6 @@ MAX_PROFILE_COUNT = 64
 MAX_KEY_COUNT = (MECH_OBSW_COUNT + ROTARY_ENCODER_SW_COUNT + ONBOARD_SPARE_GPIO_COUNT + MAX_EXPANSION_CHANNEL)
 
 profile_info_dot_txt = "profile_info.txt"
-
-DP_MODEL_OG_DUCKYPAD = 20
-DP_MODEL_DUCKYPAD_PRO = 24
-
-class dp_type:
-    def __init__(self):
-        self.dp20 = DP_MODEL_OG_DUCKYPAD
-        self.dp24 = DP_MODEL_DUCKYPAD_PRO
-        self.local_dir = 2
-        self.usbmsc = 3
-        self.hidmsg = 4
-        self.unknown = 255
-        self.device_type = self.unknown
-        self.connection_type = self.unknown
-        self.info_dict = None
-
-    def __str__(self):
-        return (
-            f"dp_type(\n"
-            f"  device_type={self.device_type},\n"
-            f"  connection_type={self.connection_type},\n"
-            f"  info_dict={self.info_dict}\n"
-            f")"
-        )
 
 HID_COMMAND_READ_FILE = 11
 
