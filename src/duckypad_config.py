@@ -144,9 +144,11 @@ fixed a bug where whitespace at end of KEYUP and KEYDOWN causes an syntax error
 2025 03 20
 Started working on unified configurator
 
+3.0.0
+Unified configurator public beta
 """
 
-THIS_VERSION_NUMBER = '2.3.0'
+THIS_VERSION_NUMBER = '3.0.0'
 
 THIS_DUCKYPAD = dp_type()
 
