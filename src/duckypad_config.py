@@ -327,7 +327,7 @@ def ask_user_to_select_a_duckypad(dp_info_list):
     dp_select_window.resizable(width=FALSE, height=FALSE)
     dp_select_window.grab_set()
 
-    dp_select_text_label = Label(master=dp_select_window, text="Multiple duckyPads detected!\nDouble click to select one:")
+    dp_select_text_label = Label(master=dp_select_window, text="Multiple duckyPads detected!\nDouble click to select one")
     dp_select_text_label.place(x=scaled_size(90), y=scaled_size(10))
 
     dp_select_column_label = Label(master=dp_select_window, text=f"{'Model':<16}{'Serial':<10}Firmware", font='TkFixedFont')
