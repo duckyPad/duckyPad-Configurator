@@ -23,8 +23,7 @@ def duckypad_hid_sw_reset(dp_dict, reboot_into_usb_msc_mode=False):
     if len(dp_to_reset_hid_path) == 0:
         return
     print(dp_to_reset_hid_path)
-    pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
-    pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
+    pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
     pc_to_duckypad_buf[2] = HID_COMMAND_SW_RESET    # Command type
     if(reboot_into_usb_msc_mode):
         pc_to_duckypad_buf[3] = 1
