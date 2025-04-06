@@ -504,6 +504,9 @@ def script_instruction_click(event):
 def open_dpp_page(event):
     webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/README.html')
 
+def open_beta_instruction_page(event=None):
+    webbrowser.open('https://github.com/duckyPad/duckyPad-Configurator/blob/master/README.md')
+
 def rgb_to_hex(rgb_tuple):
     return '#%02x%02x%02x' % rgb_tuple
 

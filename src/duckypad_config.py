@@ -181,7 +181,7 @@ MAIN_WINDOW_WIDTH = scaled_size(1070)
 MAIN_WINDOW_HEIGHT = scaled_size(605)
 PADDING = scaled_size(10)
 HEIGHT_ROOT_FOLDER_LF = scaled_size(50)
-INVALID_ROOT_FOLDER_STRING = "<-- Press to connect to duckyPad"
+INVALID_ROOT_FOLDER_STRING = "<---- Press to connect"
 last_rgb = (238,130,238)
 
 def open_duckypad_user_manual_url():
@@ -1574,7 +1574,7 @@ def import_profile_click():
     update_profile_display()
 
 def export_profile_click():
-    pass
+    messagebox.showinfo("Yo!", "Not implemented yet")
 
 user_manual_button = Button(resources_lf, text="User\nManual", command=open_duckypad_user_manual_url)
 user_manual_button.place(x=scaled_size(10), y=scaled_size(0), width=scaled_size(100))
@@ -1705,6 +1705,9 @@ current_selected_expansion_module = 0
 exp_page_update()
 
 root.update()
+
+if messagebox.askokcancel("Howdy", "This is a BETA TEST of the Unified Configurator\n\nthat works with BOTH duckyPad and duckyPad Pro!\n\nMay be very buggy!\n\nClick OK for instructions"):
+    open_beta_instruction_page()
 
 # --------------------
 
