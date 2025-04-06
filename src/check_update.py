@@ -2,7 +2,7 @@ import json
 from shared import *
 import urllib.request
 
-pc_app_release_url = "https://api.github.com/repos/dekuNukem/duckyPad-Configurator/releases/latest"
+pc_app_release_url = "https://api.github.com/repos/duckyPad/duckyPad-Configurator/releases/latest"
 firmware_url_dpp = 'https://api.github.com/repos/dekuNukem/duckyPad-Pro/contents/firmware?ref=master'
 firmware_url_dp20 = 'https://api.github.com/repos/dekuNukem/duckyPad/contents/firmware?ref=master'
 

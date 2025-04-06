@@ -487,10 +487,10 @@ def open_discord_link():
     webbrowser.open("https://discord.gg/4sJCBx5")
 
 def app_update_click(event):
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-Configurator/releases/latest')
+    webbrowser.open('https://github.com/duckyPad/duckyPad-Configurator/releases/latest')
 
 def open_profile_autoswitcher_url():
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-profile-autoswitcher/blob/master/README.md')
+    webbrowser.open('https://github.com/duckyPad/duckyPad-profile-autoswitcher/blob/master/README.md')
 
 def open_tindie_store():
     webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/store_links.html')
@@ -506,6 +506,12 @@ def open_dpp_page(event):
 
 def open_beta_instruction_page(event=None):
     webbrowser.open('https://github.com/duckyPad/duckyPad-Configurator/blob/master/README.md')
+
+def open_duckypad_user_manual_url():
+    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html')
+
+def open_duckypad_troubleshooting_url():
+    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/troubleshooting.html')
 
 def rgb_to_hex(rgb_tuple):
     return '#%02x%02x%02x' % rgb_tuple

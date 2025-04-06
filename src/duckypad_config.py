@@ -184,12 +184,6 @@ HEIGHT_ROOT_FOLDER_LF = scaled_size(50)
 INVALID_ROOT_FOLDER_STRING = "<---- Press to connect"
 last_rgb = (238,130,238)
 
-def open_duckypad_user_manual_url():
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/blob/master/doc/getting_started.md')
-
-def open_duckypad_troubleshooting_url():
-    webbrowser.open('https://github.com/dekuNukem/duckyPad-Pro/blob/master/doc/troubleshooting.md')
-
 def reset_key_button_relief():
     for item in key_button_list:
         item.config(borderwidth=1, relief="solid")
@@ -229,7 +223,7 @@ def ui_reset():
 
 def fw_update_click(event, dp_info_dict):
     if dp_info_dict['dp_model'] == DP_MODEL_OG_DUCKYPAD:
-        webbrowser.open("https://github.com/dekuNukem/duckyPad/blob/master/firmware_updates_and_version_history.md")
+        webbrowser.open("https://dekunukem.github.io/duckyPad/firmware_updates_and_version_history.html")
     elif dp_info_dict['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
         webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/fw_update.html')
 
