@@ -23,11 +23,11 @@
 Update your duckyPad to **latest beta firmware**
 
 * duckyPad (2020):
-	* [Download beta FW](./resources/duckypad_v2.0.0.dfu)
+	* [Download beta FW](https://github.com/duckyPad/duckyPad-Configurator/raw/master/duckypad_v2.0.0.dfu)
 	* [Follow this guide](https://github.com/dekuNukem/duckyPad/blob/master/firmware_updates_and_version_history.md), use the file above!
 
 * duckyPad Pro (2024)
-	* [Download beta FW](./resources/DPP_FW_2.0.0_94d284c5.bin)
+	* [Download beta FW](https://github.com/duckyPad/duckyPad-Configurator/raw/master/DPP_FW_2.0.0_94d284c5.bin)
 	* [Follow this guide](https://dekunukem.github.io/duckyPad-Pro/doc/fw_update.html), use the file above!
 
 #### ⚠️ Warning: New File Structure
