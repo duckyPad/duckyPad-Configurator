@@ -20,7 +20,7 @@
 
 ## How to Use
 
-Update your duckyPad to **latest beta firmware**
+### Step 1: Update to **Latest Beta Firmware**
 
 * duckyPad (2020):
 	* [Download beta FW](https://github.com/duckyPad/duckyPad-Configurator/raw/refs/heads/master/resources/duckypad_v2.0.0.dfu)
@@ -40,7 +40,7 @@ Update your duckyPad to **latest beta firmware**
 
 * To revert, copy On-PC backups back.
 
-### Download Configurator
+### Step 2: Download Configurator
 
 * Download the [Latest BETA Releases Here](https://github.com/duckyPad/duckyPad-Configurator/releases/latest)
 
