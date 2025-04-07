@@ -411,7 +411,7 @@ def connect_button_click():
         have a seperate webpage about troubleshooting common connection issues?
 
         """
-        if(messagebox.askokcancel("Info", "duckyPad not found!\n\n* Use Upper USB Port\n\nEnsure not in Bluetooth Mode\n\n* Try Another Cable\n\n* Try an USB Hub\n\nClick OK to Select a Local Folder") == False):
+        if(messagebox.askokcancel("Info", "duckyPad not found!\n\n* Use Upper USB Port\n\n* Ensure not in Bluetooth Mode\n\n* Try Another Cable\n\n* Try an USB Hub\n\nClick OK to Select a Local Folder") == False):
             return
         select_root_folder()
         return
