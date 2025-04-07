@@ -48,8 +48,10 @@
 
 	* If unsure, [follow instructions here](https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html).
 
-* Let me know how it goes!
+## How'd It Go?
 
-	* [Open an issue](https://github.com/duckyPad/duckyPad-Configurator/issues)
-	* Ask in [official duckyPad discord](https://discord.gg/4sJCBx5)
-	* Email dekuNukem`@`gmail.com!
+Let me know any issues, comments, and feedbacks via **any** of below:
+
+* [Open an issue](https://github.com/duckyPad/duckyPad-Configurator/issues)
+* Ask in [official duckyPad discord](https://discord.gg/4sJCBx5)
+* Email dekuNukem`@`gmail.com!
