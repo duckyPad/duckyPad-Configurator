@@ -48,6 +48,14 @@
 
 	* If unsure, [follow instructions here](https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html).
 
+### Step 3: Autoswitcher
+
+* Download the [Latest BETA Releases Here](https://github.com/duckyPad/duckyPad-Profile-Autoswitcher/releases/tag/1.0.0)
+
+* Launch as usual
+
+	* If unsure, [follow instructions here](https://github.com/duckyPad/duckyPad-Profile-Autoswitcher/blob/master/README.md).
+
 ## How'd It Go?
 
 Let me know any issues, comments, and feedbacks via **any** of below:
