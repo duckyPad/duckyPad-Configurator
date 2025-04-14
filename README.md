@@ -27,7 +27,7 @@
 	* [Follow this guide](https://github.com/dekuNukem/duckyPad/blob/master/firmware_updates_and_version_history.md), use the file above!
 
 * duckyPad Pro (2024)
-	* [Download beta FW](https://github.com/duckyPad/duckyPad-Configurator/raw/refs/heads/master/resources/DPP_FW_2.0.0_94d284c5.bin)
+	* [Download beta FW](https://github.com/duckyPad/duckyPad-Configurator/raw/refs/heads/master/resources/DPP_FW_2.0.1_b5ee21f8.bin)
 	* [Follow this guide](https://dekunukem.github.io/duckyPad-Pro/doc/fw_update.html), use the file above!
 
 #### ⚠️ Warning: New File Structure
