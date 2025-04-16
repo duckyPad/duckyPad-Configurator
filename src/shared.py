@@ -637,3 +637,15 @@ def zip_directory(source_dir_path, output_zip_path):
                 # Add file to the zip archive with a relative path
                 arcname = os.path.relpath(file_path, start=source_dir_path)
                 zipf.write(file_path, arcname)
+    
+
+import platform
+import subprocess
+def open_directory_in_file_browser(path):
+    system = platform.system()
+    if system == 'Windows':
+        os.startfile(path)
+    elif system == 'Darwin':  # macOS
+        subprocess.run(['open', path])
+    elif system == 'Linux':
+        subprocess.run(['xdg-open', path])

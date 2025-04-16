@@ -1571,7 +1571,9 @@ def save_profile_to_temp_dir():
     shutil.rmtree(temp_dir_path, ignore_errors=True)
     if save_everything(temp_dir_path) is False:
         messagebox.showerror("Error", "Profile Export Failed")
-        return
+        return False
+    dp_root_folder_display.set("Done!")
+    return True
 
 def zip_profiles(selection_list, output_dir):
     if len(selection_list) == 0:
@@ -1582,8 +1584,6 @@ def zip_profiles(selection_list, output_dir):
         this_profile = profile_list[pfidx]
         zip_filename = f"duckyPad_Profile_{this_profile.name}.zip"
         full_output_dir = os.path.join(output_dir, zip_filename)
-        print(this_profile)
-        print(full_output_dir)
         zip_directory(this_profile.path, full_output_dir)
 
 def export_profile_click():
@@ -1609,8 +1609,10 @@ def export_profile_click():
         
         pf_select_window.destroy()
         print(selected_profiles)
-        save_profile_to_temp_dir()
-        zip_profiles(selected_profiles, zip_output_dir)
+        if save_profile_to_temp_dir():
+            zip_profiles(selected_profiles, zip_output_dir)
+            if messagebox.askyesno("Info", "Export Complete!\n\nFeel Free to Share Them!\n\nSee the Files?"):
+                open_directory_in_file_browser(zip_output_dir)
         
     dp_select_var = StringVar(value=[x.name for x in profile_list])
     dp_select_listbox = Listbox(pf_select_window, listvariable=dp_select_var, height=16, exportselection=1, selectmode='multiple')
@@ -1620,7 +1622,6 @@ def export_profile_click():
     pf_select_button.place(x=scaled_size(20), y=scaled_size(350), width=scaled_size(210))
 
     root.wait_window(pf_select_window)
-    exit()
 
 user_manual_button = Button(resources_lf, text="User\nManual", command=open_duckypad_user_manual_url)
 user_manual_button.place(x=scaled_size(10), y=scaled_size(0), width=scaled_size(100))
@@ -1762,6 +1763,6 @@ root.after(500, repeat_func)
 
 select_root_folder("sample_profiles")
 # connect_button_click()
-export_profile_click()
+# export_profile_click()
 
 root.mainloop()
