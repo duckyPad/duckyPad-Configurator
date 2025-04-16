@@ -80,7 +80,6 @@ def hid_txrx(buf_64b, hid_obj):
     duckypad_to_pc_buf = hid_obj.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
     # print("\nduckyPad response:\n", duckypad_to_pc_buf)
 
-
 DP_MODEL_OG_DUCKYPAD = 20
 DP_MODEL_DUCKYPAD_PRO = 24
 

@@ -466,14 +466,6 @@ MAX_EXPANSION_MODULE_COUNT = 4
 CHANNELS_PER_EXPANSION_MODULE = 8
 MAX_EXPANSION_CHANNEL = MAX_EXPANSION_MODULE_COUNT * CHANNELS_PER_EXPANSION_MODULE
 
-class dp_descriptor(object):
-    def __init__(self):
-        self.MECH_OBSW_COUNT = None
-        self.ROTARY_ENCODER_SW_COUNT = None
-        self.ONBOARD_SPARE_GPIO_COUNT = None
-        self.MAX_EXPANSION_CHANNEL = None
-        self.MAX_PROFILE_COUNT = None
-
 def ensure_dir(dir_path):
     os.makedirs(dir_path, exist_ok=1)
 
