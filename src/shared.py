@@ -655,13 +655,13 @@ def is_safe_path(base_path, target_path):
     # Prevent path traversal
     return os.path.realpath(target_path).startswith(os.path.realpath(base_path))
 
-def unzip_to_own_directory(zip_file_path, output_dir_path):
-    os.makedirs(output_dir_path, exist_ok=True)
+def reset_directory(dir_path):
+    if os.path.exists(dir_path):
+        shutil.rmtree(dir_path)
+    os.makedirs(dir_path)
 
-    zip_file_name = os.path.basename(zip_file_path)
-    zip_name_without_ext = os.path.splitext(zip_file_name)[0]
-    target_dir = os.path.join(output_dir_path, zip_name_without_ext)
-    os.makedirs(target_dir, exist_ok=True)
+def unzip_to_own_directory(zip_file_path, output_dir_path):
+    reset_directory(output_dir_path)
 
     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
         infos = zip_ref.infolist()
@@ -676,10 +676,19 @@ def unzip_to_own_directory(zip_file_path, output_dir_path):
             if info.file_size > MAX_FILE_SIZE:
                 raise Exception(f"File {info.filename} is too large")
 
-            extracted_path = os.path.join(target_dir, info.filename)
-            if not is_safe_path(target_dir, extracted_path):
+            extracted_path = os.path.join(output_dir_path, info.filename)
+            if not is_safe_path(output_dir_path, extracted_path):
                 raise Exception(f"Unsafe file path detected: {info.filename}")
 
-            zip_ref.extract(info, target_dir)
+            zip_ref.extract(info, output_dir_path)
 
-# unzip_to_own_directory("duckyPad-profile-autoswitcher.zip", "output")
+def get_profile_dir(dir_path):
+    if not os.path.isdir(dir_path):
+        return None
+    for entry in os.listdir(dir_path):
+        full_path = os.path.join(dir_path, entry)
+        if os.path.isdir(full_path) and entry.startswith("profile"):
+            return full_path
+    return None
+
+# unzip_to_own_directory("duckyPad_Profile_Photoshop.zip", "output")

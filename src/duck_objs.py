@@ -196,16 +196,4 @@ def import_profile_single(root_dir_path):
 	this_profile.load_from_path(root_dir_path)
 	return this_profile
 
-def import_profile(root_dir_path):
-	try:
-		key_file_list = [x for x in os.listdir(root_dir_path) if x.endswith('.txt') and x.startswith('key') and x[3].isnumeric()]
-		if len(key_file_list) != 0:
-			return True, [import_profile_single(root_dir_path)]
-	except Exception as e:
-		return False, str(e)
-	try:
-		return True, build_profile(root_dir_path)
-	except Exception as e:
-		return False, str(e)
-
 

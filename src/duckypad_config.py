@@ -249,8 +249,11 @@ def convert_to_dp20_key_order(profile_list):
         for this_key in this_profile.keylist:
             if this_key is None:
                 continue
-            dp24_index = dp20_to_dp24_lookup.get(this_key.index+1)-1
-            if dp24_index is None:
+            wtf = dp20_to_dp24_lookup.get(this_key.index+1)
+            if wtf is None:
+                continue
+            dp24_index = wtf-1
+            if dp24_index < 0 or dp24_index >= MAX_KEY_COUNT:
                 continue
             new_klist[dp24_index] = this_key
         this_profile.keylist = new_klist
@@ -258,6 +261,14 @@ def convert_to_dp20_key_order(profile_list):
 def select_root_folder(root_path=None):
     global profile_list
     global dp_root_folder_path
+
+    if THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.unknown:
+        if messagebox.askyesno(message="Is this for duckyPad Pro (2024)?\n\nDPP has 20 Keys and 2 rotary encoders."):
+            THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+            show_relf()
+        else:
+            THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp20
+            hide_relf()
 
     if root_path is None:
         root_path = filedialog.askdirectory()
@@ -1559,17 +1570,21 @@ def import_profile_click():
     file_path = filedialog.askopenfilename(title="Select a file")
     if file_path == '':
         return
-    exit()
-    # import_path = filedialog.askdirectory()
-    # if len(import_path) <= 0:
-    #     return
-    # is_success, content = duck_objs.import_profile(import_path)
-    # if is_success is False:
-    #     messagebox.showinfo("Import", f"Import failed:\n\n{content}")
-    #     return
-    # profile_list += content
-    # convert_to_dp20_key_order(profile_list)
-    # update_profile_display()
+    try:
+        unzip_to_own_directory(file_path, temp_dir_path)
+        profile_dir = get_profile_dir(temp_dir_path)
+        if profile_dir is None:
+            raise ValueError("Profile not found")
+    except Exception as e:
+        messagebox.showerror("Error", f"Import Failed:\n\n{str(e)}")
+        return
+    this_profile = duck_objs.import_profile_single(profile_dir)
+    if this_profile.name is None:
+        messagebox.showerror("Error", f"Invalid Profile")
+        return
+    profile_list.append(this_profile)
+    convert_to_dp20_key_order(profile_list)
+    update_profile_display()
 
 def save_profile_to_temp_dir():
     shutil.rmtree(temp_dir_path, ignore_errors=True)
@@ -1767,5 +1782,7 @@ root.after(500, repeat_func)
 select_root_folder("sample_profiles")
 # connect_button_click()
 # export_profile_click()
-import_profile_click()
+# import_profile_click()
+
+
 root.mainloop()
