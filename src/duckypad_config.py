@@ -1555,17 +1555,21 @@ dp_fw_update_label.place(x=scaled_size(5), y=scaled_size(25))
 
 def import_profile_click():
     global profile_list
-    # messagebox.showinfo("Import", f"Select a folder containing the profiles")
-    import_path = filedialog.askdirectory()
-    if len(import_path) <= 0:
+    messagebox.showinfo("Import", "Select a duckyPad_Profile.zip file")
+    file_path = filedialog.askopenfilename(title="Select a file")
+    if file_path == '':
         return
-    is_success, content = duck_objs.import_profile(import_path)
-    if is_success is False:
-        messagebox.showinfo("Import", f"Import failed:\n\n{content}")
-        return
-    profile_list += content
-    convert_to_dp20_key_order(profile_list)
-    update_profile_display()
+    exit()
+    # import_path = filedialog.askdirectory()
+    # if len(import_path) <= 0:
+    #     return
+    # is_success, content = duck_objs.import_profile(import_path)
+    # if is_success is False:
+    #     messagebox.showinfo("Import", f"Import failed:\n\n{content}")
+    #     return
+    # profile_list += content
+    # convert_to_dp20_key_order(profile_list)
+    # update_profile_display()
 
 def save_profile_to_temp_dir():
     shutil.rmtree(temp_dir_path, ignore_errors=True)
@@ -1608,7 +1612,6 @@ def export_profile_click():
             return
         
         pf_select_window.destroy()
-        print(selected_profiles)
         if save_profile_to_temp_dir():
             zip_profiles(selected_profiles, zip_output_dir)
             if messagebox.askyesno("Info", "Export Complete!\n\nFeel Free to Share Them!\n\nSee the Files?"):
@@ -1764,5 +1767,5 @@ root.after(500, repeat_func)
 select_root_folder("sample_profiles")
 # connect_button_click()
 # export_profile_click()
-
+import_profile_click()
 root.mainloop()

@@ -622,20 +622,16 @@ def delete_path(path):
     except Exception as e:
         print("delete_path:", e)
 
-
 import zipfile
+
 def zip_directory(source_dir_path, output_zip_path):
-    """
-    Zips the contents of a directory into a single zip file.
-    :param source_dir_path: Path to the directory to be zipped.
-    :param output_zip_path: Full path (including filename.zip) for the output zip file.
-    """
+    top_level_folder_name = os.path.basename(os.path.normpath(source_dir_path))
     with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(source_dir_path):
             for file in files:
                 file_path = os.path.join(root, file)
-                # Add file to the zip archive with a relative path
-                arcname = os.path.relpath(file_path, start=source_dir_path)
+                relative_path = os.path.relpath(file_path, start=source_dir_path)
+                arcname = os.path.join(top_level_folder_name, relative_path)
                 zipf.write(file_path, arcname)
 
 import platform
