@@ -637,7 +637,6 @@ def zip_directory(source_dir_path, output_zip_path):
                 # Add file to the zip archive with a relative path
                 arcname = os.path.relpath(file_path, start=source_dir_path)
                 zipf.write(file_path, arcname)
-    
 
 import platform
 import subprocess
@@ -649,3 +648,42 @@ def open_directory_in_file_browser(path):
         subprocess.run(['open', path])
     elif system == 'Linux':
         subprocess.run(['xdg-open', path])
+
+import zipfile
+
+MAX_TOTAL_UNCOMPRESSED_SIZE = 10 * 1024 * 1024  # 50 MB
+MAX_FILE_COUNT = 256
+MAX_FILE_SIZE = 1 * 1024 * 1024  # 1 MB
+
+def is_safe_path(base_path, target_path):
+    # Prevent path traversal
+    return os.path.realpath(target_path).startswith(os.path.realpath(base_path))
+
+def unzip_to_own_directory(zip_file_path, output_dir_path):
+    os.makedirs(output_dir_path, exist_ok=True)
+
+    zip_file_name = os.path.basename(zip_file_path)
+    zip_name_without_ext = os.path.splitext(zip_file_name)[0]
+    target_dir = os.path.join(output_dir_path, zip_name_without_ext)
+    os.makedirs(target_dir, exist_ok=True)
+
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        infos = zip_ref.infolist()
+        if len(infos) > MAX_FILE_COUNT:
+            raise Exception("Too many files in zip archive")
+
+        total_uncompressed_size = sum(info.file_size for info in infos)
+        if total_uncompressed_size > MAX_TOTAL_UNCOMPRESSED_SIZE:
+            raise Exception("Uncompressed size too large")
+
+        for info in infos:
+            if info.file_size > MAX_FILE_SIZE:
+                raise Exception(f"File {info.filename} is too large")
+
+            extracted_path = os.path.join(target_dir, info.filename)
+            if not is_safe_path(target_dir, extracted_path):
+                raise Exception(f"Unsafe file path detected: {info.filename}")
+
+            zip_ref.extract(info, target_dir)
+
+# unzip_to_own_directory("duckyPad-profile-autoswitcher.zip", "output")
