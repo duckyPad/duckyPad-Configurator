@@ -482,6 +482,7 @@ appauthor = 'dekuNukem'
 app_save_path = user_data_dir(appname, appauthor, roaming=True)
 backup_path = os.path.join(app_save_path, 'profile_backups')
 hid_dump_path = os.path.join(app_save_path, "hid_dump")
+temp_dir_path = os.path.join(app_save_path, "temp_dir")
 
 def open_discord_link():
     webbrowser.open("https://discord.gg/4sJCBx5")
@@ -620,3 +621,19 @@ def delete_path(path):
             path.unlink()
     except Exception as e:
         print("delete_path:", e)
+
+
+import zipfile
+def zip_directory(source_dir_path, output_zip_path):
+    """
+    Zips the contents of a directory into a single zip file.
+    :param source_dir_path: Path to the directory to be zipped.
+    :param output_zip_path: Full path (including filename.zip) for the output zip file.
+    """
+    with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(source_dir_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                # Add file to the zip archive with a relative path
+                arcname = os.path.relpath(file_path, start=source_dir_path)
+                zipf.write(file_path, arcname)

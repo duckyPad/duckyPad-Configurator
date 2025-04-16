@@ -1567,6 +1567,25 @@ def import_profile_click():
     convert_to_dp20_key_order(profile_list)
     update_profile_display()
 
+def save_profile_to_temp_dir():
+    shutil.rmtree(temp_dir_path, ignore_errors=True)
+    if save_everything(temp_dir_path) is False:
+        messagebox.showerror("Error", "Profile Export Failed")
+        return
+
+def zip_profiles(selection_list, output_dir):
+    if len(selection_list) == 0:
+        return
+    for pfidx in selection_list:
+        if pfidx < 0 or pfidx >= len(profile_list):
+            continue
+        this_profile = profile_list[pfidx]
+        zip_filename = f"duckyPad_Profile_{this_profile.name}.zip"
+        full_output_dir = os.path.join(output_dir, zip_filename)
+        print(this_profile)
+        print(full_output_dir)
+        zip_directory(this_profile.path, full_output_dir)
+
 def export_profile_click():
     pf_select_window = Toplevel(root)
     pf_select_window.title("Select-a-Profile")
@@ -1583,9 +1602,16 @@ def export_profile_click():
             return
         for item in dp_select_listbox.curselection():
             selected_profiles.append(item)
+
+        zip_output_dir = filedialog.askdirectory(title="Export Location")
+        if len(zip_output_dir) <= 0:
+            return
+        
         pf_select_window.destroy()
         print(selected_profiles)
-
+        save_profile_to_temp_dir()
+        zip_profiles(selected_profiles, zip_output_dir)
+        
     dp_select_var = StringVar(value=[x.name for x in profile_list])
     dp_select_listbox = Listbox(pf_select_window, listvariable=dp_select_var, height=16, exportselection=1, selectmode='multiple')
     dp_select_listbox.place(x=scaled_size(20), y=scaled_size(40), width=scaled_size(210), height=scaled_size(300))
