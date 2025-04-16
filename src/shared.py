@@ -504,9 +504,6 @@ def script_instruction_click(event):
 def open_dpp_page(event):
     webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/README.html')
 
-def open_beta_instruction_page(event=None):
-    webbrowser.open('https://github.com/duckyPad/duckyPad-Configurator/blob/master/README.md')
-
 def open_duckypad_user_manual_url():
     webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html')
 

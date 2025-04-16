@@ -1568,7 +1568,33 @@ def import_profile_click():
     update_profile_display()
 
 def export_profile_click():
-    messagebox.showinfo("Yo!", "Not implemented yet")
+    pf_select_window = Toplevel(root)
+    pf_select_window.title("Select-a-Profile")
+    pf_select_window.geometry(f"{scaled_size(256)}x{scaled_size(390)}")
+    pf_select_window.resizable(width=FALSE, height=FALSE)
+    pf_select_window.grab_set()
+
+    dp_select_text_label = Label(master=pf_select_window, text="Select the Profile(s) to Export:")
+    dp_select_text_label.place(x=scaled_size(50), y=scaled_size(10))
+
+    selected_profiles = []
+    def pf_select_button_click(wtf=None):
+        if len(dp_select_listbox.curselection()) == 0:
+            return
+        for item in dp_select_listbox.curselection():
+            selected_profiles.append(item)
+        pf_select_window.destroy()
+        print(selected_profiles)
+
+    dp_select_var = StringVar(value=[x.name for x in profile_list])
+    dp_select_listbox = Listbox(pf_select_window, listvariable=dp_select_var, height=16, exportselection=1, selectmode='multiple')
+    dp_select_listbox.place(x=scaled_size(20), y=scaled_size(40), width=scaled_size(210), height=scaled_size(300))
+
+    pf_select_button = Button(pf_select_window, text="Select", command=pf_select_button_click)
+    pf_select_button.place(x=scaled_size(20), y=scaled_size(350), width=scaled_size(210))
+
+    root.wait_window(pf_select_window)
+    exit()
 
 user_manual_button = Button(resources_lf, text="User\nManual", command=open_duckypad_user_manual_url)
 user_manual_button.place(x=scaled_size(10), y=scaled_size(0), width=scaled_size(100))
@@ -1697,11 +1723,7 @@ for mmm in range(MAX_EXPANSION_MODULE_COUNT):
 
 current_selected_expansion_module = 0
 exp_page_update()
-
 root.update()
-
-if messagebox.askokcancel("Howdy", "This is a BETA TEST of the Unified Configurator\n\nthat works with BOTH duckyPad and duckyPad Pro!\n\nMay be very buggy!\n\nClick OK for instructions"):
-    open_beta_instruction_page()
 
 # --------------------
 
@@ -1712,7 +1734,8 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-# select_root_folder("lol")
+select_root_folder("sample_profiles")
 # connect_button_click()
+export_profile_click()
 
 root.mainloop()
