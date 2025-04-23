@@ -1584,7 +1584,6 @@ def import_profile_click():
         messagebox.showerror("Error", f"Invalid Profile")
         return
     profile_list.append(this_profile)
-    convert_key_order_dp20_to_dp24(profile_list)
     update_profile_display()
 
 def save_profile_to_temp_dir(dp_obj):
@@ -1782,7 +1781,7 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-select_root_folder("sample_profiles")
+select_root_folder("sample_dp24", is_dir_for_dp24=True)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
