@@ -146,9 +146,13 @@ Started working on unified configurator
 
 3.0.0
 Unified configurator public beta
+
+3.1.0
+Profile import/export
+minor bug fixes
 """
 
-THIS_VERSION_NUMBER = '3.0.0'
+THIS_VERSION_NUMBER = '3.1.0'
 
 THIS_DUCKYPAD = dp_type()
 
