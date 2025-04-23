@@ -214,13 +214,12 @@ def ui_reset():
     allow_abort_checkbox.config(state=DISABLED)
     dont_repeat_checkbox.config(state=DISABLED)
     script_textbox.delete(1.0, 'end')
-    profile_lstbox.delete(0, 'end')
+    profile_lstbox.place_forget()
     check_syntax_label.config(text="", fg="green")
     profile_import_button.config(state=DISABLED)
     profile_export_button.config(state=DISABLED)
     exp_page_plus_button.config(state=DISABLED)
     exp_page_minus_button.config(state=DISABLED)
-    update_profile_display()
     root.update()
 
 def fw_update_click(event, dp_info_dict):
@@ -510,6 +509,7 @@ def update_profile_display():
     index = profile_lstbox.curselection()[0]
     bg_color_hex = rgb_to_hex(profile_list[index].bg_color)
     bg_color_button.config(background=bg_color_hex)
+    profile_lstbox.place(x=scaled_size(32), y=PADDING, width=scaled_size(182), height=scaled_size(270))
 
     if profile_list[index].kd_color is None:
         keydown_color_checkbox.deselect()
