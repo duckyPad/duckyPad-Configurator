@@ -80,9 +80,9 @@ Launching this app on macOS:
 
 https://dekunukem.github.io/duckyPad-Pro/doc/linux_macos_notes.html
 
-Full User Manual:
+Full User Manual (Click Link Below Photo):
 
-https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html
+duckyPad.com
 
 """
 
