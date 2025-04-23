@@ -220,6 +220,8 @@ def ui_reset():
     profile_export_button.config(state=DISABLED)
     exp_page_plus_button.config(state=DISABLED)
     exp_page_minus_button.config(state=DISABLED)
+    update_profile_display()
+    root.update()
 
 def fw_update_click(event, dp_info_dict):
     if dp_info_dict['dp_model'] == DP_MODEL_OG_DUCKYPAD:
@@ -289,7 +291,7 @@ def select_root_folder(root_path=None, is_dir_for_dp24=None):
     except Exception as e:
         print("select_root_folder:", e)
 
-def put_duckypad_in_msc_mode_and_get_drive_path(dp_info_dict, reset_ui=True):
+def put_duckypad_in_msc_mode_and_get_drive_path(dp_info_dict):
     disk_label = None
     if USB_MSC_MOUNTPOINT:
         disk_label = USB_MSC_MOUNTPOINT
@@ -304,9 +306,6 @@ def put_duckypad_in_msc_mode_and_get_drive_path(dp_info_dict, reset_ui=True):
     
     hid_op.duckypad_hid_sw_reset(dp_info_dict, reboot_into_usb_msc_mode=1)
 
-    if reset_ui:
-        ui_reset()
-    root.update()
     entry_time = time.time()
     while 1:
         duckypad_drive_path = hid_op.get_duckypad_drive(disk_label)
@@ -441,7 +440,7 @@ def connect_button_click():
     
     THIS_DUCKYPAD.device_type = user_selected_dp['dp_model']
     THIS_DUCKYPAD.info_dict = user_selected_dp
-
+    ui_reset()
     if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
         show_relf()
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
@@ -861,7 +860,7 @@ def save_click():
         return
     try:
         if os.path.isdir(dp_root_folder_path) is False:
-            put_duckypad_in_msc_mode_and_get_drive_path(THIS_DUCKYPAD.info_dict, reset_ui=False)
+            put_duckypad_in_msc_mode_and_get_drive_path(THIS_DUCKYPAD.info_dict)
         my_compare.duckypad_file_sync(dp_root_folder_path, this_backup_path, THIS_DUCKYPAD, root, dp_root_folder_display)
         if THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.usbmsc:
             dp_root_folder_display.set("Ejecting...")
@@ -1781,10 +1780,9 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-select_root_folder("sample_dp24", is_dir_for_dp24=True)
+# select_root_folder("sample_dp24", is_dir_for_dp24=True)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
-
 
 root.mainloop()

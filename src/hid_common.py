@@ -67,6 +67,7 @@ def scan_duckypads():
         dp_info_list = get_all_dp_info(all_dp_paths)
     except Exception:
         return None
+    dp_info_list = sorted(dp_info_list, key=lambda tup: tup['serial'])
     return dp_info_list
 
 def get_empty_pc_to_duckypad_buf():
