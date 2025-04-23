@@ -241,43 +241,44 @@ def print_fw_update_label(dp_info_dict):
         dp_fw_update_label.unbind("<Button-1>")
     return this_version
 
-def convert_to_dp20_key_order(profile_list):
-    if THIS_DUCKYPAD.device_type != THIS_DUCKYPAD.dp20:
-        return
+def convert_key_order_dp20_to_dp24(profile_list):
     for this_profile in profile_list:
         new_klist = [None] * MAX_KEY_COUNT
         for this_key in this_profile.keylist:
             if this_key is None:
                 continue
-            wtf = dp20_to_dp24_lookup.get(this_key.index+1)
-            if wtf is None:
-                continue
-            dp24_index = wtf-1
-            if dp24_index < 0 or dp24_index >= MAX_KEY_COUNT:
+            dp24_index = dp20_to_dp24_lookup_0idx.get(this_key.index)
+            if dp24_index is None or dp24_index < 0 or dp24_index >= MAX_KEY_COUNT:
                 continue
             new_klist[dp24_index] = this_key
         this_profile.keylist = new_klist
 
-def select_root_folder(root_path=None):
+def select_root_folder(root_path=None, is_dir_for_dp24=None):
     global profile_list
     global dp_root_folder_path
 
+    if root_path is None:
+        root_path = filedialog.askdirectory()
+    if len(root_path) <= 0:
+        return
+    
+    if is_dir_for_dp24 is None:
+        is_dir_for_dp24 = messagebox.askyesno(message="Which duckyPad model was this backup made from?\n\nPress YES for duckyPad Pro (2024)\n\nPress NO for OG duckyPad (2020)")
+
     if THIS_DUCKYPAD.device_type == THIS_DUCKYPAD.unknown:
-        if messagebox.askyesno(message="Is this for duckyPad Pro (2024)?\n\nDPP has 20 Keys and 2 rotary encoders."):
+        if messagebox.askyesno(message="Which duckyPad are you planning to use this backup on?\n\nPress YES for duckyPad Pro (2024)\n\nPress NO for OG duckyPad (2020)"):
             THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
             show_relf()
         else:
             THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp20
             hide_relf()
 
-    if root_path is None:
-        root_path = filedialog.askdirectory()
-    if len(root_path) <= 0:
-        return
     dp_root_folder_path = root_path
     dp_root_folder_display.set("Selected: " + root_path)
     profile_list = duck_objs.build_profile(root_path)
-    convert_to_dp20_key_order(profile_list)
+
+    if is_dir_for_dp24 is False:
+        convert_key_order_dp20_to_dp24(profile_list)
 
     ui_reset()
     update_profile_display()
@@ -444,12 +445,12 @@ def connect_button_click():
     if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
         show_relf()
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
-        select_root_folder(duckypad_drive_path)
+        select_root_folder(duckypad_drive_path, is_dir_for_dp24=True)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.usbmsc
     elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
         hide_relf()
         dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display)
-        select_root_folder(hid_dump_path)
+        select_root_folder(hid_dump_path, is_dir_for_dp24=False)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.hidmsg
     print(THIS_DUCKYPAD)
     
@@ -704,13 +705,13 @@ def profile_rename_click():
     profile_list[selection[0]].name = answer
     update_profile_display()
 
-dp24_to_dp20_lookup = {1:1, 2:2, 3:3, 5:4, 6:5, 7:6, 9:7, 10:8, 11:9, 13:10, 14:11, 15:12, 17:13, 18:14, 19:15}
-dp20_to_dp24_lookup = {1:1, 2:2, 3:3, 4:5, 5:6, 6:7, 7:9, 8:10, 9:11, 10:13, 11:14, 12:15, 13:17, 14:18, 15:19}
+dp24_to_dp20_lookup_1idx = {1:1, 2:2, 3:3, 5:4, 6:5, 7:6, 9:7, 10:8, 11:9, 13:10, 14:11, 15:12, 17:13, 18:14, 19:15}
+dp20_to_dp24_lookup_0idx = {0:0, 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:9, 8:10, 9:12, 10:13, 11:14, 12:16, 13:17, 14:18}
 
 def get_appropriate_key_index(key_index, dp_type_obj):
     if dp_type_obj.device_type == dp_type_obj.dp24:
         return key_index
-    return dp24_to_dp20_lookup.get(key_index)
+    return dp24_to_dp20_lookup_1idx.get(key_index)
 
 def validate_data_objs(save_path):
     # update path and indexs of profile and keys
@@ -754,7 +755,7 @@ def compile_all_scripts():
         messagebox.showerror("Error", error_msg)
     return False
 
-def save_everything(save_path):
+def save_everything(save_path, dp_obj):
     if compile_all_scripts() is False:
         return False
     dp_root_folder_display.set("Saving...")
@@ -777,7 +778,7 @@ def save_everything(save_path):
             for this_key in this_profile.keylist:
                 if this_key is None:
                     continue
-                correct_index = get_appropriate_key_index(this_key.index, THIS_DUCKYPAD)
+                correct_index = get_appropriate_key_index(this_key.index, dp_obj)
                 if correct_index is None:
                     continue
                 config_file.write(f"z{correct_index} {this_key.name}\n")
@@ -798,7 +799,7 @@ def save_everything(save_path):
             for this_key in this_profile.keylist:
                 if this_key is None:
                     continue
-                correct_index = get_appropriate_key_index(this_key.index, THIS_DUCKYPAD)
+                correct_index = get_appropriate_key_index(this_key.index, dp_obj)
                 if correct_index is None:
                     continue
                 this_key.path = os.path.join(this_profile.path, f'key{correct_index}.txt')
@@ -855,7 +856,7 @@ def make_backup_dir_name():
 
 def save_click():
     this_backup_path = os.path.join(backup_path, make_backup_dir_name())
-    if save_everything(this_backup_path) is False:
+    if save_everything(this_backup_path, THIS_DUCKYPAD) is False:
         messagebox.showerror("Error", "Backup save failed")
         return
     try:
@@ -1583,12 +1584,12 @@ def import_profile_click():
         messagebox.showerror("Error", f"Invalid Profile")
         return
     profile_list.append(this_profile)
-    convert_to_dp20_key_order(profile_list)
+    convert_key_order_dp20_to_dp24(profile_list)
     update_profile_display()
 
-def save_profile_to_temp_dir():
+def save_profile_to_temp_dir(dp_obj):
     shutil.rmtree(temp_dir_path, ignore_errors=True)
-    if save_everything(temp_dir_path) is False:
+    if save_everything(temp_dir_path, dp_obj) is False:
         messagebox.showerror("Error", "Profile Export Failed")
         return False
     dp_root_folder_display.set("Done!")
@@ -1625,9 +1626,11 @@ def export_profile_click():
         zip_output_dir = filedialog.askdirectory(title="Export Location")
         if len(zip_output_dir) <= 0:
             return
-        
         pf_select_window.destroy()
-        if save_profile_to_temp_dir():
+
+        temp_dp = dp_type()
+        temp_dp.device_type = temp_dp.dp24
+        if save_profile_to_temp_dir(temp_dp):
             zip_profiles(selected_profiles, zip_output_dir)
             if messagebox.askyesno("Info", "Export Complete!\n\nFeel Free to Share Them!\n\nSee the Files?"):
                 open_directory_in_file_browser(zip_output_dir)
@@ -1779,7 +1782,7 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-# select_root_folder("sample_profiles")
+select_root_folder("sample_profiles")
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
