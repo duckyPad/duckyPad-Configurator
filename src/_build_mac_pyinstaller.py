@@ -56,7 +56,7 @@ os.rename(output_folder_path, new_folder_path)
 sh_content = f"""
 echo
 echo ---------------
-echo Welcome to duckyPad!
+echo Welcome to duckyPad Configurator!
 echo
 echo To Connect, Please Authenticate.
 echo
@@ -64,7 +64,8 @@ echo If Blocked:
 echo "    Go to Settings > Privacy & Security"
 echo "    Scroll down, click \"Allow Anyway\""
 echo
-echo More info: duckyPad.com
+echo More info:
+echo 	https://dekunukem.github.io/duckyPad-Pro/doc/linux_macos_notes.html
 echo ---------------
 echo
 sudo ./{exe_file_name}
@@ -80,7 +81,7 @@ Launching this app on macOS:
 
 https://dekunukem.github.io/duckyPad-Pro/doc/linux_macos_notes.html
 
-Full User Manual (Click Link Below Photo):
+Full User Manuals:
 
 duckyPad.com
 
@@ -93,4 +94,3 @@ zip_file_name = exe_file_name
 shutil.make_archive(exe_file_name, 'zip', new_folder_path)
 
 clean()
-
