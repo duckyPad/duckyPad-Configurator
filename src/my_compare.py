@@ -4,6 +4,7 @@ import hashlib
 import shutil
 from pathlib import Path
 from shared import *
+import hid_op
 
 duckypad_file_whitelist = [
     "profile_",
@@ -134,9 +135,12 @@ def get_file_sync_ops(original_dir_root, modified_dir_root):
         subdir_diff_dict["dirs_to_add"] = []
         subdir_diff_dict["dirs_to_delete"] = []
         subdir_diff_dict["dir_in_both_not_checked"] = []
-        
         file_ops_all += make_file_op(subdir_diff_dict, this_dir)
-    return file_ops_all
+
+    sps_ops = get_remove_sps_ops(file_ops_all)
+    result = file_ops_all + sps_ops
+
+    return result
 
 def execute_sync_ops_msc(op_list):
     for item in op_list:
@@ -153,20 +157,32 @@ def execute_sync_ops_msc(op_list):
             dst = Path(os.path.join(item.destination_parent, item.destination_path))
             shutil.copy(src, dst)
 
-import hid_op
 def duckypad_file_sync(orig_path, modified_path, THIS_DUCKYPAD, tk_root_obj=None, ui_text_obj=None):
-    sync_ops = get_file_sync_ops(orig_path, modified_path)
     if THIS_DUCKYPAD.connection_type == THIS_DUCKYPAD.hidmsg:
         hid_op.duckypad_file_sync_hid(THIS_DUCKYPAD.info_dict['hid_path'], orig_path, modified_path, tk_root_obj, ui_text_obj)
     else:
+        sync_ops = get_file_sync_ops(orig_path, modified_path)
         execute_sync_ops_msc(sync_ops)
+
+def get_remove_sps_ops(fops):
+    sps_delete_ops = set()
+    for item in fops:
+        last_part = Path(item.source_parent).name
+        if not str(last_part).strip().startswith("profile"):
+            continue
+        sps_op = dp_file_op()
+        sps_op.local_dir = item.local_dir
+        sps_op.action = sps_op.delete_file
+        sps_op.source_parent = item.source_parent
+        sps_op.source_path = "state.sps"
+        sps_delete_ops.add(sps_op)
+    return list(sps_delete_ops)
 
 # sd_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\hid_dump"
 # modified_path = "C:\\Users\\allen\\AppData\\Roaming\\dekuNukem\\duckypad_config\\profile_backups\\duckyPad_Pro_backup_2025-03-29T20-48-30"
 
 # ops = get_file_sync_ops(sd_path, modified_path)
-
 # for item in ops:
 #     print(item)
 
-
+# print("-----------")

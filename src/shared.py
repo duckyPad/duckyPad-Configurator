@@ -597,6 +597,28 @@ class dp_file_op(object):
         self.destination_parent = None
         self.destination_path = None
         self.local_dir = None
+    
+    def __eq__(self, other):
+        if not isinstance(other, dp_file_op):
+            return NotImplemented
+        return (
+            self.action == other.action and
+            self.source_parent == other.source_parent and
+            self.source_path == other.source_path and
+            self.destination_parent == other.destination_parent and
+            self.destination_path == other.destination_path and
+            self.local_dir == other.local_dir
+        )
+
+    def __hash__(self):
+        return hash((
+            self.action,
+            self.source_parent,
+            self.source_path,
+            self.destination_parent,
+            self.destination_path,
+            self.local_dir
+        ))
 
 def ui_print(text, tk_root_obj, ui_text_obj):
     if tk_root_obj is None or ui_text_obj is None:

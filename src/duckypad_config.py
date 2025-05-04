@@ -150,9 +150,12 @@ Unified configurator public beta
 3.1.0
 Profile import/export
 minor bug fixes
+
+3.1.1
+removes state.sps on edited profile
 """
 
-THIS_VERSION_NUMBER = '3.1.0'
+THIS_VERSION_NUMBER = '3.1.1'
 
 THIS_DUCKYPAD = dp_type()
 
@@ -222,8 +225,8 @@ def ui_reset():
     check_syntax_label.config(text="", fg="green")
     profile_import_button.config(state=DISABLED)
     profile_export_button.config(state=DISABLED)
-    exp_page_plus_button.config(state=DISABLED)
-    exp_page_minus_button.config(state=DISABLED)
+    # exp_page_plus_button.config(state=DISABLED)
+    # exp_page_minus_button.config(state=DISABLED)
     root.update()
 
 def fw_update_click(event, dp_info_dict):
@@ -471,8 +474,8 @@ def enable_buttons():
     key_remove_button.config(state=NORMAL)
     profile_import_button.config(state=NORMAL)
     profile_export_button.config(state=NORMAL)
-    exp_page_plus_button.config(state=NORMAL)
-    exp_page_minus_button.config(state=NORMAL)
+    # exp_page_plus_button.config(state=NORMAL)
+    # exp_page_minus_button.config(state=NORMAL)
 
 def profile_shift_up():
     global profile_list
@@ -1719,11 +1722,10 @@ expansion_lf = LabelFrame(root, text="Expansion Modules", width=scaled_size(150)
 expansion_lf.place(x=scaled_size(590), y=scaled_size(260))
 root.update()
 
-
-exp_page_minus_button = Button(expansion_lf, text="-", command=exp_page_minus_button_click, state=DISABLED)
+exp_page_minus_button = Button(expansion_lf, text="-", command=exp_page_minus_button_click, state=NORMAL)
 exp_page_minus_button.place(x=scaled_size(10), y=scaled_size(0), width=scaled_size(25), height=scaled_size(22))
 
-exp_page_plus_button = Button(expansion_lf, text="+", command=exp_page_plus_button_click, state=DISABLED)
+exp_page_plus_button = Button(expansion_lf, text="+", command=exp_page_plus_button_click, state=NORMAL)
 exp_page_plus_button.place(x=scaled_size(110), y=scaled_size(0), width=scaled_size(25), height=scaled_size(22))
 
 current_module_label = Label(master=expansion_lf)
