@@ -6,7 +6,7 @@ This is the software that configures [duckyPad Macropads](duckypad.com)!
 
 * [Click me to download the latest version](https://github.com/duckyPad/duckyPad-Configurator/releases/latest)
 
-* [Click Me for full instructions](https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html)
+* [Click me for full instructions](https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html)
 
 ### Feedbacks
 
