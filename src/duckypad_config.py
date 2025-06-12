@@ -416,18 +416,6 @@ def connect_button_click():
                 select_root_folder()
         return
     elif len(all_dp_info_list) == 0:
-        """
-        no duckypad found, make sure
-        * top USB port
-        cable has data
-        try different ports
-        try using a USB hub
-        power switch
-        try on a different computer
-
-        have a seperate webpage about troubleshooting common connection issues?
-
-        """
         if(messagebox.askokcancel("Info", "duckyPad not found!\n\n* Use Upper USB Port\n\n* Ensure not in Bluetooth Mode\n\n* Try Another Cable\n\n* Try an USB Hub\n\nClick OK to Select a Local Folder") == False):
             return
         select_root_folder()
@@ -454,7 +442,9 @@ def connect_button_click():
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.usbmsc
     elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
         hide_relf()
-        dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display)
+        if dp20_dumpsd.dump_sd(user_selected_dp["hid_path"], hid_dump_path, backup_path, root, dp_root_folder_display) is False:
+            messagebox.showerror("Error", "Empty HID response!\n\nTry a different USB Port\nOr a USB Hub")
+            return
         select_root_folder(hid_dump_path, is_dir_for_dp24=False)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.hidmsg
     print(THIS_DUCKYPAD)

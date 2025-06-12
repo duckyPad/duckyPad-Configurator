@@ -83,6 +83,11 @@ def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root_obj=None, ui_text_o
     while 1:
         dp20_h.write(pc_to_duckypad_buf)
         duckypad_to_pc_buf = dp20_h.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
+
+        if len(duckypad_to_pc_buf) != DUCKYPAD_TO_PC_HID_BUF_SIZE:
+            dp20_h.close()
+            return False
+
         if duckypad_to_pc_buf[SD_WALK_OP_TYPE_INDEX] == SD_WALK_OP_ACK:
             continue
 
@@ -127,4 +132,5 @@ def dump_sd(dp_path, dump_dir_path, backup_dir_path, tk_root_obj=None, ui_text_o
         save_to_file(sd_dir, dump_dir_path, sd_file_name, raw_bytes)
 
     dp20_h.close()
+    return True
 
