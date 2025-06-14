@@ -529,6 +529,16 @@ def update_profile_display():
     else:
         rotate_keys_checkbox.deselect()
 
+    if profile_list[index].is_upper_re_halfstep:
+        half_step_upper_checkbox.select()
+    else:
+        half_step_upper_checkbox.deselect()
+
+    if profile_list[index].is_lower_re_halfstep:
+        half_step_lower_checkbox.select()
+    else:
+        half_step_lower_checkbox.deselect()
+
     update_key_button_appearances(index)
     reset_key_button_relief()
     key_name_textbox.delete('1.0', 'end')
@@ -796,6 +806,10 @@ def save_everything(save_path, dp_obj):
                 config_file.write('DIM_UNUSED_KEYS 0\n')
             if this_profile.is_landscape:
                 config_file.write('IS_LANDSCAPE 1\n')
+            if this_profile.is_upper_re_halfstep:
+                config_file.write('UPPER_HS 1\n')
+            if this_profile.is_lower_re_halfstep:
+                config_file.write('LOWER_HS 1\n')
             for this_key in this_profile.keylist:
                 if this_key is None:
                     continue
@@ -966,13 +980,17 @@ def key_button_click(button_widget):
         dont_repeat_checkbox.deselect()
     check_syntax()
 
-
 is_halfstep_warning_shown = False
 def halfstep_checkbox_click():
     global is_halfstep_warning_shown
     if is_halfstep_warning_shown is False:
         messagebox.showinfo("howdy!", "Doubles the sensitivity.\n\nOnly for SMOOTH encoders!\n\nLeave unchecked if unsure.")
         is_halfstep_warning_shown = True
+    if len(profile_lstbox.curselection()) <= 0:
+        return
+    profile_index = profile_lstbox.curselection()[0]
+    profile_list[profile_index].is_upper_re_halfstep = bool(half_step_upper_checkbox_var.get())
+    profile_list[profile_index].is_lower_re_halfstep = bool(half_step_lower_checkbox_var.get())
 
 # ------------- Folder select -------------
 dp_root_folder_display = StringVar()

@@ -68,6 +68,10 @@ class dp_profile(object):
 						self.dim_unused = False
 					elif line.startswith("IS_LANDSCAPE 1"):
 						self.is_landscape = True
+					elif line.startswith("UPPER_HS 1"):
+						self.is_upper_re_halfstep = True
+					elif line.startswith("LOWER_HS 1"):
+						self.is_lower_re_halfstep = True
 					elif this_split[0].startswith('z'):
 						this_index = int(this_split[0][1:]) - 1
 						self.add_key_if_doesnt_exist(this_index)
@@ -132,6 +136,8 @@ class dp_profile(object):
 		self.kd_color = None
 		self.dim_unused = True
 		self.is_landscape = False
+		self.is_upper_re_halfstep = False
+		self.is_lower_re_halfstep = False
 
 def read_profile_order_file(txt_path):
 	profile_num_dict = {}
