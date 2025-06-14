@@ -155,10 +155,16 @@ minor bug fixes
 removes state.sps on edited profile
 
 3.2.0
+2025 06 14
 Option for rotary encoder half-steps
+
+3.2.1
+2025 06 14
+adjusted MSC timeout
+added messagebox on MSC timeout
 """
 
-THIS_VERSION_NUMBER = '3.2.0'
+THIS_VERSION_NUMBER = '3.2.1'
 
 THIS_DUCKYPAD = dp_type()
 
@@ -169,7 +175,7 @@ MAX_DUCKYPAD_2020_FIRMWARE_VERSION = "2.5.0"
 
 UI_SCALE = float(os.getenv("DUCKYPAD_UI_SCALE", default=1))
 USB_MSC_MOUNTPOINT = os.getenv("DUCKYPAD_MS_MOUNTPOINT", default=None)
-USB_MSC_SECONDS_TO_WAIT = int(os.getenv("DUCKYPAD_MS_TIMEOUT", default=15))
+USB_MSC_SECONDS_TO_WAIT = int(os.getenv("DUCKYPAD_MS_TIMEOUT", default=20))
 
 def scaled_size(size: int) -> int:
     return int(size * UI_SCALE)
@@ -443,6 +449,9 @@ def connect_button_click():
     if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
         show_relf()
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
+        if duckypad_drive_path is None:
+            messagebox.showinfo("Oops", "duckyPad didn't show up in time!\n\nTry pressing the connect button again.")
+            return
         select_root_folder(duckypad_drive_path, is_dir_for_dp24=True)
         THIS_DUCKYPAD.connection_type = THIS_DUCKYPAD.usbmsc
     elif user_selected_dp['dp_model'] == DP_MODEL_OG_DUCKYPAD:
