@@ -153,9 +153,12 @@ minor bug fixes
 
 3.1.1
 removes state.sps on edited profile
+
+3.2.0
+Option for rotary encoder half-steps
 """
 
-THIS_VERSION_NUMBER = '3.1.1'
+THIS_VERSION_NUMBER = '3.2.0'
 
 THIS_DUCKYPAD = dp_type()
 
@@ -984,7 +987,7 @@ is_halfstep_warning_shown = False
 def halfstep_checkbox_click():
     global is_halfstep_warning_shown
     if is_halfstep_warning_shown is False:
-        messagebox.showinfo("howdy!", "Doubles the sensitivity.\n\nOnly for SMOOTH encoders!\n\nLeave unchecked if unsure.")
+        messagebox.showinfo("howdy!", "This doubles the rotary encoder's sensitivity.\n\nOnly for SMOOTH encoders!\n\nLeave unchecked if unsure.")
         is_halfstep_warning_shown = True
     if len(profile_lstbox.curselection()) <= 0:
         return
@@ -1818,8 +1821,8 @@ def repeat_func():
 root.after(500, repeat_func)
 
 
-THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
-select_root_folder("sample_dp24", is_dir_for_dp24=True)
+# THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+# select_root_folder("sample_dp24", is_dir_for_dp24=True)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
