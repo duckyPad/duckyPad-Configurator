@@ -206,6 +206,8 @@ def ui_reset():
     save_button.config(state=DISABLED)
     keydown_color_checkbox.config(state=DISABLED)
     dim_unused_keys_checkbox.config(state=DISABLED)
+    half_step_upper_checkbox.config(state=DISABLED)
+    half_step_lower_checkbox.config(state=DISABLED)
     rotate_keys_checkbox.config(state=DISABLED)
     key_remove_button.config(state=DISABLED)
     key_name_textbox.config(state=DISABLED)
@@ -460,6 +462,8 @@ def enable_buttons():
     backup_button.config(state=NORMAL)
     keydown_color_checkbox.config(state=NORMAL)
     dim_unused_keys_checkbox.config(state=NORMAL)
+    half_step_upper_checkbox.config(state=NORMAL)
+    half_step_lower_checkbox.config(state=NORMAL)
     rotate_keys_checkbox.config(state=NORMAL)
     key_remove_button.config(state=NORMAL)
     profile_import_button.config(state=NORMAL)
@@ -506,7 +510,7 @@ def update_profile_display():
     index = profile_lstbox.curselection()[0]
     bg_color_hex = rgb_to_hex(profile_list[index].bg_color)
     bg_color_button.config(background=bg_color_hex)
-    profile_lstbox.place(x=scaled_size(32), y=PADDING, width=scaled_size(182), height=scaled_size(270))
+    profile_lstbox.place(x=scaled_size(32), y=scaled_size(5), width=scaled_size(182), height=scaled_size(270))
 
     if profile_list[index].kd_color is None:
         keydown_color_checkbox.deselect()
@@ -962,6 +966,14 @@ def key_button_click(button_widget):
         dont_repeat_checkbox.deselect()
     check_syntax()
 
+
+is_halfstep_warning_shown = False
+def halfstep_checkbox_click():
+    global is_halfstep_warning_shown
+    if is_halfstep_warning_shown is False:
+        messagebox.showinfo("howdy!", "Doubles the sensitivity.\n\nOnly for SMOOTH encoders!\n\nLeave unchecked if unsure.")
+        is_halfstep_warning_shown = True
+
 # ------------- Folder select -------------
 dp_root_folder_display = StringVar()
 dp_root_folder_path= ''
@@ -991,7 +1003,7 @@ profiles_lf.place(x=PADDING, y=HEIGHT_ROOT_FOLDER_LF)
 root.update()
 
 profile_lstbox = Listbox(profiles_lf, listvariable=profile_var, height=16, exportselection=0) #, selectmode='single'?
-profile_lstbox.place(x=scaled_size(32), y=PADDING, width=scaled_size(182), height=scaled_size(270))
+profile_lstbox.place(x=scaled_size(32), y=scaled_size(5), width=scaled_size(182), height=scaled_size(270))
 profile_lstbox.bind('<<ListboxSelect>>', on_profile_lstbox_select)
 
 profile_up_button = Button(profiles_lf, text="↑", command=profile_shift_up, state=DISABLED)
@@ -1005,7 +1017,7 @@ profile_down_button.place(x=scaled_size(5), y=scaled_size(160), width=scaled_siz
 
 BUTTON_WIDTH = int(profiles_lf.winfo_width() / 2.5)
 BUTTON_HEIGHT = scaled_size(25)
-BUTTON_Y_POS = scaled_size(295)
+BUTTON_Y_POS = scaled_size(285)
 
 profile_add_button = Button(profiles_lf, text="New", command=profile_add_click, state=DISABLED)
 profile_add_button.place(x=PADDING*2, y=BUTTON_Y_POS, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
@@ -1017,19 +1029,30 @@ profile_rename_button = Button(profiles_lf, text="Rename", command=profile_renam
 profile_rename_button.place(x=PADDING * 2.5 + BUTTON_WIDTH + scaled_size(34), y=BUTTON_Y_POS + BUTTON_HEIGHT + int(PADDING/2), width=scaled_size(70), height=BUTTON_HEIGHT)
 
 bg_color_label = Label(master=profiles_lf, text="Background Color:")
-bg_color_label.place(x=scaled_size(40), y=scaled_size(365))
+bg_color_label.place(x=scaled_size(40), y=scaled_size(350))
 
 bg_color_button = Label(master=profiles_lf, borderwidth=1, relief="solid")
-bg_color_button.place(x=scaled_size(160), y=scaled_size(365), width=scaled_size(60), height=scaled_size(20))
+bg_color_button.place(x=scaled_size(160), y=scaled_size(350), width=scaled_size(60), height=scaled_size(20))
 bg_color_button.bind("<Button-1>", bg_color_click)
 
 kd_color_button = Label(master=profiles_lf, borderwidth=1, relief="solid")
-kd_color_button.place(x=scaled_size(160), y=scaled_size(395), width=scaled_size(60), height=scaled_size(20))
+kd_color_button.place(x=scaled_size(160), y=scaled_size(380), width=scaled_size(60), height=scaled_size(20))
 kd_color_button.bind("<Button-1>", kd_color_click)
 
 dim_unused_keys_checkbox_var = IntVar()
 dim_unused_keys_checkbox = Checkbutton(profiles_lf, text="Dim Unused Keys", variable=dim_unused_keys_checkbox_var, command=dim_unused_keys_click, state=DISABLED)
 dim_unused_keys_checkbox.place(x=scaled_size(20), y=scaled_size(425))
+
+halfstep_label = Label(master=profiles_lf, text="Increase RE Sensitivity:")
+halfstep_label.place(x=scaled_size(40), y=scaled_size(405))
+
+half_step_upper_checkbox_var = IntVar()
+half_step_upper_checkbox = Checkbutton(profiles_lf, text="Upper", variable=half_step_upper_checkbox_var, command=halfstep_checkbox_click, state=DISABLED)
+half_step_upper_checkbox.place(x=scaled_size(170), y=scaled_size(405))
+
+half_step_lower_checkbox_var = IntVar()
+half_step_lower_checkbox = Checkbutton(profiles_lf, text="Lower", variable=half_step_lower_checkbox_var, command=halfstep_checkbox_click, state=DISABLED)
+half_step_lower_checkbox.place(x=scaled_size(170), y=scaled_size(425))
 
 def kd_color_checkbox_click():
     global profile_list
@@ -1044,7 +1067,7 @@ def kd_color_checkbox_click():
 
 kd_color_var = IntVar()
 keydown_color_checkbox = Checkbutton(profiles_lf, text="Custom Key-down\nColor", variable=kd_color_var, command=kd_color_checkbox_click, state=DISABLED, anchor='w', justify='left')
-keydown_color_checkbox.place(x=scaled_size(20), y=scaled_size(385))
+keydown_color_checkbox.place(x=scaled_size(20), y=scaled_size(370))
 
 # ------------- RE frame -----------------
 re_lf = LabelFrame(root, text="Rotary Encoders", width=scaled_size(150), height=scaled_size(205))
@@ -1776,7 +1799,9 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-# select_root_folder("sample_dp24", is_dir_for_dp24=True)
+
+THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+select_root_folder("sample_dp24", is_dir_for_dp24=True)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
