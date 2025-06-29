@@ -162,9 +162,14 @@ Option for rotary encoder half-steps
 2025 06 14
 adjusted MSC timeout
 added messagebox on MSC timeout
+
+3.3.0
+2025 06 27
+Increased persistent global variables to 32
+Now $_GV0 to $_GV31
 """
 
-THIS_VERSION_NUMBER = '3.2.1'
+THIS_VERSION_NUMBER = '3.3.0'
 
 THIS_DUCKYPAD = dp_type()
 

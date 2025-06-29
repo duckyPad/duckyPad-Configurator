@@ -448,6 +448,22 @@ global_variable_dict = {
     "_GV13": (0xffff - GV_OFFSET - 13),
     "_GV14": (0xffff - GV_OFFSET - 14),
     "_GV15": (0xffff - GV_OFFSET - 15),
+    "_GV16": (0xffff - GV_OFFSET - 16),
+    "_GV17": (0xffff - GV_OFFSET - 17),
+    "_GV18": (0xffff - GV_OFFSET - 18),
+    "_GV19": (0xffff - GV_OFFSET - 19),
+    "_GV20": (0xffff - GV_OFFSET - 20),
+    "_GV21": (0xffff - GV_OFFSET - 21),
+    "_GV22": (0xffff - GV_OFFSET - 22),
+    "_GV23": (0xffff - GV_OFFSET - 23),
+    "_GV24": (0xffff - GV_OFFSET - 24),
+    "_GV25": (0xffff - GV_OFFSET - 25),
+    "_GV26": (0xffff - GV_OFFSET - 26),
+    "_GV27": (0xffff - GV_OFFSET - 27),
+    "_GV28": (0xffff - GV_OFFSET - 28),
+    "_GV29": (0xffff - GV_OFFSET - 29),
+    "_GV30": (0xffff - GV_OFFSET - 30),
+    "_GV31": (0xffff - GV_OFFSET - 31),
 }
 
 reserved_variable_dict = internal_variable_dict | global_variable_dict
