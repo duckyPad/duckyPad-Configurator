@@ -5,6 +5,8 @@ import time
 dp20_pid = 0xd11c
 dpp_pid = 0xd11d
 all_dp_pids = [dp20_pid, dpp_pid]
+DUCKYPAD_VID = 0x0483
+DUCKYPAD_CUSTOM_HID_USAGE_PAGE = 0xff00
 
 def is_duckypad_pid(this_pid):
     return this_pid in all_dp_pids
@@ -13,13 +15,13 @@ def get_duckypad_path():
     dp_path_list = set()
     if 'win32' in sys.platform:
         for device_dict in hid.enumerate():
-            if device_dict['vendor_id'] == 0x0483 and \
+            if device_dict['vendor_id'] == DUCKYPAD_VID and \
             is_duckypad_pid(device_dict['product_id']) and \
-            device_dict['usage'] == 58:
+            device_dict['usage_page'] == DUCKYPAD_CUSTOM_HID_USAGE_PAGE:
                 dp_path_list.add(device_dict['path'])
     else:
         for device_dict in hid.enumerate():
-            if device_dict['vendor_id'] == 0x0483 and \
+            if device_dict['vendor_id'] == DUCKYPAD_VID and \
             is_duckypad_pid(device_dict['product_id']):
                 dp_path_list.add(device_dict['path'])
     return list(dp_path_list)
@@ -104,3 +106,5 @@ class dp_type:
             f"  info_dict={self.info_dict}\n"
             f")"
         )
+
+# print(get_duckypad_path())
