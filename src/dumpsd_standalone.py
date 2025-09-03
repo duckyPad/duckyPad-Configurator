@@ -21,6 +21,8 @@ def read_binary_file(file_path):
         return file.read()
 
 def save_to_file(sd_path, pc_dump_dir_path, file_name, file_content):
+    print(sd_path, pc_dump_dir_path, file_name, file_content)
+    return
     sd_path = sd_path.lstrip("\\/")
     # print("save_to_file:", sd_path, pc_dump_dir_path, file_name, file_content)
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -88,8 +90,7 @@ def dump_sd(dp_path, dump_dir_path):
     dp20_h.open_path(dp_path)
 
     while 1:
-        dp20_h.write(pc_to_duckypad_buf)
-        duckypad_to_pc_buf = dp20_h.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
+        duckypad_to_pc_buf = hid_txrx(dp20_h, pc_to_duckypad_buf, DUCKYPAD_TO_PC_HID_BUF_SIZE)
 
         if len(duckypad_to_pc_buf) != DUCKYPAD_TO_PC_HID_BUF_SIZE:
             dp20_h.close()
