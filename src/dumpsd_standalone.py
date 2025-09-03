@@ -30,6 +30,15 @@ def save_to_file(sd_path, pc_dump_dir_path, file_name, file_content):
     with open(full_file_path, 'wb') as file:
         file.write(file_content)
 
+def hid_txrx(hid_obj, tx_buf, buf_size_both):
+    while 1:
+        hid_obj.write(tx_buf)
+        rx_result = hid_obj.read(buf_size_both)
+        if len(rx_result) == buf_size_both:
+            return rx_result
+        print(f"empty response!")
+        time.sleep(0.01)
+
 def hid_dump_file(sd_file_path, hid_obj):
     if len(sd_file_path) > HID_READ_FILE_PATH_SIZE_MAX:
         raise OSError("SD file path too long")
@@ -38,14 +47,13 @@ def hid_dump_file(sd_file_path, hid_obj):
 
     pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
     pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
-    pc_to_duckypad_buf[1] = 0   # unused
+    pc_to_duckypad_buf[1] = 0   # sequence number
     pc_to_duckypad_buf[2] = HID_COMMAND_OPEN_FILE_FOR_READING # Command type
 
     for index, value in enumerate(sd_file_path):
         pc_to_duckypad_buf[3+index] = ord(value)
 
-    hid_obj.write(pc_to_duckypad_buf)
-    duckypad_to_pc_buf = hid_obj.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
+    duckypad_to_pc_buf = hid_txrx(hid_obj, pc_to_duckypad_buf, DUCKYPAD_TO_PC_HID_BUF_SIZE)
     if duckypad_to_pc_buf[2] != 0:
         raise OSError("HID open file for read failed")
 
@@ -53,10 +61,10 @@ def hid_dump_file(sd_file_path, hid_obj):
     while 1:
         pc_to_duckypad_buf = [0] * PC_TO_DUCKYPAD_HID_BUF_SIZE
         pc_to_duckypad_buf[0] = 5   # HID Usage ID, always 5
-        pc_to_duckypad_buf[1] = 0   # unused
+        pc_to_duckypad_buf[1] = 0   # sequence number
         pc_to_duckypad_buf[2] = HID_COMMAND_READ_FILE
-        hid_obj.write(pc_to_duckypad_buf)
-        duckypad_to_pc_buf = hid_obj.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
+
+        duckypad_to_pc_buf = hid_txrx(hid_obj, pc_to_duckypad_buf, DUCKYPAD_TO_PC_HID_BUF_SIZE)
         chunk_size = duckypad_to_pc_buf[2]
         if chunk_size == 0:
             break
