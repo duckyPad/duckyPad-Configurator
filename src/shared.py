@@ -429,6 +429,14 @@ internal_variable_dict = {
     "_DONT_REPEAT": (0xffff - 17),
     "_THIS_KEYID": (0xffff - 18),
     "_DP_MODEL": (0xffff - 19),
+    "_RTC_IS_VALID": (0xffff - 20),
+    "_RTC_UTC_OFFSET": (0xffff - 21),
+    "_RTC_YEAR": (0xffff - 22),
+    "_RTC_MONTH": (0xffff - 23),
+    "_RTC_DAY": (0xffff - 24),
+    "_RTC_HOUR": (0xffff - 25),
+    "_RTC_MINUTE": (0xffff - 26),
+    "_RTC_SECOND": (0xffff - 27),
 }
 
 global_variable_dict = {
