@@ -80,6 +80,7 @@ def hid_txrx(buf_64b, hid_obj):
     hid_obj.write(buf_64b)
     duckypad_to_pc_buf = hid_obj.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
     # print("\nduckyPad response:\n", duckypad_to_pc_buf)
+    return duckypad_to_pc_buf
 
 def get_timestamp_and_utc_offset():
     now = datetime.now().astimezone()  # Local time with timezone info
@@ -115,8 +116,7 @@ def duckypad_sync_rtc(hid_path):
     print(pc_to_duckypad_buf)
     myh = hid.device()
     myh.open_path(hid_path)
-    myh.write(pc_to_duckypad_buf)
-    result = myh.read(DUCKYPAD_TO_PC_HID_BUF_SIZE)
+    result = hid_txrx(pc_to_duckypad_buf, myh)
     myh.close()
     print("duckypad_sync_rtc:", result)
 
