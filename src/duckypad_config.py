@@ -175,7 +175,7 @@ Added print formatting reserved variables
 Added Bitwise XOR support
     XOR is ^
     Power-of is now **
-
+Added RTC Sync
 """
 
 THIS_VERSION_NUMBER = '3.4.0'
