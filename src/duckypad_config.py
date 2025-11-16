@@ -460,6 +460,11 @@ def connect_button_click():
     THIS_DUCKYPAD.device_type = user_selected_dp['dp_model']
     THIS_DUCKYPAD.info_dict = user_selected_dp
     ui_reset()
+
+    # SET RTC HERE????????
+    duckypad_sync_rtc(user_selected_dp['hid_path'])
+    time.sleep(0.1)
+
     if user_selected_dp['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
         show_relf()
         duckypad_drive_path = put_duckypad_in_msc_mode_and_get_drive_path(user_selected_dp)
