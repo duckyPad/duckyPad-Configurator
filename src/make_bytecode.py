@@ -54,6 +54,7 @@ OP_LSHIFT = ("LSHIFT", 21)
 OP_RSHIFT = ("RSHIFT", 22)
 OP_BITOR = ("BITOR", 23)
 OP_BITAND = ("BITAND", 24)
+OP_BITXOR = ("BITXOR", 51)
 
 # Logical operation
 OP_LOGIAND = ("LOGIAND", 25)
@@ -104,6 +105,7 @@ arith_lookup = {
     "RShift" : OP_RSHIFT,
     "BitOr" : OP_BITOR,
     "BitAnd" : OP_BITAND,
+    "BitXor" : OP_BITXOR,
 
     "And" : OP_LOGIAND,
     "Or" : OP_LOGIOR,
@@ -228,7 +230,7 @@ def evaluate_expr(expr):
     return instruction_list
 
 def replace_operators(this_line):
-    return this_line.replace("$", "").replace("||", " or ").replace("&&", " and ").replace("^", "**")
+    return this_line.replace("$", "").replace("||", " or ").replace("&&", " and ")
 
 def assign_var(var_keyword, pgm_line):
     var_sides = pgm_line.split(var_keyword, 1)[-1].split('=', 1)
