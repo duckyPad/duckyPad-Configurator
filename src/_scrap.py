@@ -1,3 +1,14 @@
+    
+    for this_pf in profile_list:
+        print(this_pf.name)
+        for thisk in this_pf.keylist:
+            if thisk is None:
+                continue
+            print(f"\t{thisk.name}")
+            print(f"\t\t{thisk.script}")
+            print(f"\t\t{thisk.script_on_release}")
+
+
 def make_file_path_for_hid(sd_path):
     path_parts = Path(sd_path).parts
     result = '/'

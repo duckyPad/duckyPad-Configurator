@@ -167,9 +167,18 @@ added messagebox on MSC timeout
 2025 06 27
 Increased persistent global variables to 32
 Now $_GV0 to $_GV31
+
+3.4.0
+2025 11 16
+Added RTC reserved variables
+Added print formatting reserved variables
+Added Bitwise XOR support
+    XOR is ^
+    Power-of is now **
+
 """
 
-THIS_VERSION_NUMBER = '3.3.0'
+THIS_VERSION_NUMBER = '3.4.0'
 
 THIS_DUCKYPAD = dp_type()
 
