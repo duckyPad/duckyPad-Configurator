@@ -437,8 +437,10 @@ internal_variable_dict = {
     "_RTC_HOUR": (0xffff - 25),
     "_RTC_MINUTE": (0xffff - 26),
     "_RTC_SECOND": (0xffff - 27),
-    "_STR_PRINT_FORMAT": (0xffff - 28),
-    "_STR_PRINT_PADDING": (0xffff - 29),
+    "_RTC_WDAY": (0xffff - 28),
+    "_RTC_YDAY": (0xffff - 29),
+    "_STR_PRINT_FORMAT": (0xffff - 30),
+    "_STR_PRINT_PADDING": (0xffff - 31),
 }
 
 global_variable_dict = {
