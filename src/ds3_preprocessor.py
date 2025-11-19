@@ -84,8 +84,8 @@ def check_rvalue(rvalue_str, vt):
             rvalue_str = rvalue_str.replace("$"+key, str(vt[key])).strip()
     # print("rvalue_str after replacement:", rvalue_str)
 
-    if contains_english_alphabet(rvalue_str):
-        return False, "unknown variable or invalid character"
+    # if contains_english_alphabet(rvalue_str):
+    #     return False, "unknown variable or invalid character"
     try:
         rvalue_str = rvalue_str.replace("||", " or ").replace("&&", " and ")
         # print("rvalue_str after replacement:", rvalue_str)
