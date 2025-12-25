@@ -15,7 +15,6 @@ from tkinter.colorchooser import askcolor
 from tkinter import messagebox
 import subprocess
 import hid_op
-import make_bytecode
 import my_compare
 import traceback
 import dp20_dumpsd
@@ -178,12 +177,12 @@ Added Bitwise XOR support
 Added RTC Sync
 """
 
-THIS_VERSION_NUMBER = '3.4.0'
+THIS_VERSION_NUMBER = '4.0.0'
 
 THIS_DUCKYPAD = dp_type()
 
-MIN_DUCKYPAD_PRO_FIRMWARE_VERSION = "2.0.0"
-MAX_DUCKYPAD_PRO_FIRMWARE_VERSION = "2.5.0"
+MIN_DUCKYPAD_PRO_FIRMWARE_VERSION = "3.0.0"
+MAX_DUCKYPAD_PRO_FIRMWARE_VERSION = "3.5.0"
 MIN_DUCKYPAD_2020_FIRMWARE_VERSION = "2.0.0"
 MAX_DUCKYPAD_2020_FIRMWARE_VERSION = "2.5.0"
 
@@ -686,7 +685,7 @@ def profile_add_click():
         # print('insert:', e)
         pass
 
-    answer = clean_input(answer, 16)
+    answer = clean_input(answer, MAX_PROFILE_NAME_LEN)
 
     if len(answer) <= 0:# or answer in [x.name for x in profile_list]:
         return
@@ -721,7 +720,7 @@ def profile_dupe_click():
     answer = simpledialog.askstring("Input", "New name?", parent=profiles_lf, initialvalue=profile_list[selection[0]].name)
     if answer is None:
         return
-    answer = clean_input(answer, 13)
+    answer = clean_input(answer, MAX_PROFILE_NAME_LEN)
     if len(answer) <= 0: # or answer in [x.name for x in profile_list]:
         return
     new_profile = copy.deepcopy(profile_list[selection[0]])
@@ -740,7 +739,7 @@ def profile_rename_click():
     answer = simpledialog.askstring("Input", "New name?", parent=profiles_lf, initialvalue=profile_list[selection[0]].name)
     if answer is None:
         return
-    answer = clean_input(answer, 13)
+    answer = clean_input(answer, MAX_PROFILE_NAME_LEN)
     if len(answer) <= 0 or answer in [x.name for x in profile_list]:
         return
     profile_list[selection[0]].name = answer
@@ -775,18 +774,18 @@ def compile_all_scripts():
                     continue
                 text_list = make_final_script(this_key, this_key.script.lstrip().split('\n'))
                 obj_list = make_list_of_ds_line_obj_from_str_listing(text_list)
-                result_dict, bin_arr = make_bytecode.make_dsb_with_exception(obj_list, profile_list)
-                if bin_arr is None:
+                comp_result = make_bytecode.make_dsb_with_exception(obj_list)
+                if comp_result.is_success is False:
                     raise ValueError("Compile failed")
-                this_key.binary_array = bin_arr
+                this_key.binary_array = comp_result.bin_array
                 if len(this_key.script_on_release.lstrip()) > 0:
                     tl_or = make_final_script(this_key, this_key.script_on_release.lstrip().split('\n'))
                     ol_or = make_list_of_ds_line_obj_from_str_listing(tl_or)
-                    result_dict, bin_arr = make_bytecode.make_dsb_with_exception(ol_or, profile_list)
-                    if bin_arr is None:
+                    comp_result = make_bytecode.make_dsb_with_exception(ol_or)
+                    if comp_result.is_success is False:
                         raise ValueError("Compile failed")
-                    this_key.binary_array_on_release = bin_arr
-                if len(this_key.binary_array) >= 65000 or (this_key.binary_array_on_release is not None and len(this_key.binary_array_on_release) >= 65000):
+                    this_key.binary_array_on_release = comp_result.bin_array
+                if len(this_key.binary_array) >= MAX_BIN_SIZE or (this_key.binary_array_on_release is not None and len(this_key.binary_array_on_release) >= MAX_BIN_SIZE):
                     messagebox.showerror("Error", f'Script size too large!\n\nProfile: {this_profile.name}\nKey: {this_key.name}')
                     return False
         return True
@@ -1596,13 +1595,13 @@ def check_syntax():
         return
     last_check_syntax_listing = program_listing.copy()
     ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
-    result_dict, bin_arr = make_bytecode.make_dsb_no_exception(ds_line_obj_list, profile_list)
+    comp_result = make_bytecode.make_dsb_no_exception(ds_line_obj_list) #result_dict, bin_arr 
     script_textbox.tag_remove("error", '1.0', 'end')
-    if result_dict is None:
+    if comp_result.is_success:
         check_syntax_label.config(text="Code seems OK..", fg="green")       
         return
-    error_lnum = result_dict['error_line_number_starting_from_1']
-    error_text = result_dict['comments']
+    error_lnum = comp_result.error_line_number_starting_from_1
+    error_text = comp_result.error_comment
     script_textbox.tag_add("error", str(error_lnum)+".0", str(error_lnum)+".0 lineend")
     check_syntax_label.config(text=error_text, fg='red')
 
