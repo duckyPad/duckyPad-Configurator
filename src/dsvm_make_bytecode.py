@@ -1,13 +1,10 @@
 import sys
 from dsvm_common import *
-import ds3_preprocessor
-import ds2py
+import dsvm_preprocessor
+import dsvm_ds2py
 import ast
 import symtable
-import ast
-import sys
-import symtable
-import myast
+import dsvm_myast
 import copy
 from collections import defaultdict
 import traceback
@@ -134,7 +131,7 @@ def classify_name(name: str, current_function: str | None, ctx_dict) -> int:
     root_table = ctx_dict["symtable_root"]
 
     if current_function is not None:
-        this_table = myast.find_function_table(root_table, current_function)
+        this_table = dsvm_myast.find_function_table(root_table, current_function)
         user_declared_func_locals = ctx_dict['user_declared_var_dict'].get(current_function)
         if this_table is None:
             raise ValueError(f"No symtable for {name} in {current_function!r}()")
@@ -242,24 +239,24 @@ def visit_node(node, ctx_dict):
             emit(OP_CALL, payload=f"func_{func_name}")
 
     elif isinstance(node, ast.Return):
-        arg_count = myast.how_many_args(current_function, ctx_dict)
+        arg_count = dsvm_myast.how_many_args(current_function, ctx_dict)
         if arg_count is None:
             raise ValueError("Invalid arg count")
         emit(OP_RET, payload=arg_count)
 
-    elif isinstance(node, myast.add_nop):
+    elif isinstance(node, dsvm_myast.add_nop):
         emit(OP_NOP, label=node.label)
 
-    elif isinstance(node, myast.add_jmp):
+    elif isinstance(node, dsvm_myast.add_jmp):
         emit(OP_JMP, payload=node.label)
 
-    elif isinstance(node, myast.add_push0):
+    elif isinstance(node, dsvm_myast.add_push0):
         emit(OP_PUSHC16, payload=0, label=node.label)
 
-    elif isinstance(node, myast.add_default_return):
+    elif isinstance(node, dsvm_myast.add_default_return):
         emit(OP_RET, payload=node.arg_count)
 
-    elif isinstance(node, myast.add_alloc):
+    elif isinstance(node, dsvm_myast.add_alloc):
         emit(OP_ALLOC, payload=node.func_name)
 
     else:
@@ -532,7 +529,7 @@ def make_dsb_with_exception(program_listing, should_print=False):
     print_asm = should_print
 
     orig_listing = copy.deepcopy(program_listing)
-    rdict = ds3_preprocessor.run_all(program_listing)
+    rdict = dsvm_preprocessor.run_all(program_listing)
 
     if rdict['is_success'] is False:
         comp_result = compile_result(
@@ -547,7 +544,7 @@ def make_dsb_with_exception(program_listing, should_print=False):
     rdict["orig_listing"] = orig_listing
     post_pp_listing = rdict["dspp_listing_with_indent_level"]
     # save_lines_to_file(post_pp_listing, "ppds.txt")
-    pyout = ds2py.run_all(post_pp_listing)
+    pyout = dsvm_ds2py.run_all(post_pp_listing)
     rdict["ds2py_listing"] = pyout
     # save_lines_to_file(pyout, "pyds.py")
     source = dsline_to_source(pyout)
@@ -572,7 +569,7 @@ def make_dsb_with_exception(program_listing, should_print=False):
     for statement in my_tree.body:
         rdict["func_def_name"] = None
         rdict["caller_func_name"] = None
-        myast.postorder_walk(statement, visit_node, rdict)
+        dsvm_myast.postorder_walk(statement, visit_node, rdict)
 
     rdict["root_assembly_list"].append(dsvm_instruction(OP_HALT))
     bin_array = compile_to_bin(rdict)

@@ -1,9 +1,9 @@
 import sys
 from dsvm_common import *
-import ds3_preprocessor
+import dsvm_preprocessor
 import copy
 import ast
-import myast
+import dsvm_myast
 
 def make_str_func(first_word, this_line):
     str_content = this_line[len(first_word)+1:]
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         line = line.rstrip("\r\n")
         program_listing.append(ds_line(line, index + 1))
 
-    rdict = ds3_preprocessor.run_all(program_listing)
+    rdict = dsvm_preprocessor.run_all(program_listing)
     
     if rdict['is_success'] is False:
         print("Preprocessing failed!")

@@ -21,9 +21,6 @@ def download_py_files():
 
     contents = response.json()
 
-    if not os.path.exists(DIRECTORY_PATH):
-        os.makedirs(DIRECTORY_PATH)
-
     for item in contents:
         time.sleep(0.1)
         if item['type'] == 'file' and item['name'].endswith('.py'):
@@ -33,7 +30,7 @@ def download_py_files():
             print(f"Downloading {file_name}...")
             
             file_response = requests.get(file_url)
-            with open(os.path.join(DIRECTORY_PATH, file_name), 'wb') as f:
+            with open(file_name, 'wb') as f:
                 f.write(file_response.content)
 
     print("\nDownload complete!")

@@ -5,11 +5,8 @@ from platformdirs import *
 from pathlib import Path
 from hid_common import *
 
-folder_path = os.path.join(os.getcwd(), 'ds_compiler')
-sys.path.append(folder_path)
-
-import make_bytecode
 from dsvm_common import *
+import dsvm_make_bytecode
 
 print("NOTE TO MYSELF: _pull_dsvm.py to download latest VM version")
 

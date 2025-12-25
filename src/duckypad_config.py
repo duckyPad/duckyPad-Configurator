@@ -779,14 +779,14 @@ def compile_all_scripts():
                     continue
                 text_list = make_final_script(this_key, this_key.script.lstrip().split('\n'))
                 obj_list = make_list_of_ds_line_obj_from_str_listing(text_list)
-                comp_result = make_bytecode.make_dsb_with_exception(obj_list)
+                comp_result = dsvm_make_bytecode.make_dsb_with_exception(obj_list)
                 if comp_result.is_success is False:
                     raise ValueError("Compile failed")
                 this_key.binary_array = comp_result.bin_array
                 if len(this_key.script_on_release.lstrip()) > 0:
                     tl_or = make_final_script(this_key, this_key.script_on_release.lstrip().split('\n'))
                     ol_or = make_list_of_ds_line_obj_from_str_listing(tl_or)
-                    comp_result = make_bytecode.make_dsb_with_exception(ol_or)
+                    comp_result = dsvm_make_bytecode.make_dsb_with_exception(ol_or)
                     if comp_result.is_success is False:
                         raise ValueError("Compile failed")
                     this_key.binary_array_on_release = comp_result.bin_array
@@ -1600,7 +1600,7 @@ def check_syntax():
         return
     last_check_syntax_listing = program_listing.copy()
     ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
-    comp_result = make_bytecode.make_dsb_no_exception(ds_line_obj_list) #result_dict, bin_arr 
+    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list) #result_dict, bin_arr 
     script_textbox.tag_remove("error", '1.0', 'end')
     if comp_result.is_success:
         check_syntax_label.config(text="Code seems OK..", fg="green")       
