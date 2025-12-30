@@ -795,8 +795,8 @@ def compile_all_scripts():
                     return False
         return True
     except Exception as e:
-        error_msg = f"ERROR on Profile [{this_profile.name}] Key [{this_key.name}]:\n\n-------\n"
-        error_msg += str(traceback.format_exc())
+        error_msg = f"ERROR on Profile [{this_profile.name}] Key [{this_key.name}]:\n-------\n{e}"
+        # error_msg += str(traceback.format_exc())
         messagebox.showerror("Error", error_msg)
     return False
 

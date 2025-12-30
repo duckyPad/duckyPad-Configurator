@@ -3,7 +3,6 @@ from dsvm_common import *
 import dsvm_preprocessor
 import copy
 import ast
-import dsvm_myast
 
 def make_str_func(first_word, this_line):
     str_content = this_line[len(first_word)+1:]
@@ -19,21 +18,11 @@ def make_arg_func(first_word, this_line):
 
 def line_has_unconsumed_stack_value(line_obj):
     try:
-        ast_root = ast.parse(line_obj.content, mode="exec").body
-    except Exception as e:
-        return False
-    is_expr = False
-    try:
-        is_expr = isinstance(ast_root[0], ast.Expr)
+        nodes = ast.parse(line_obj.content).body
+        return bool(nodes and isinstance(nodes[0], ast.Expr))
     except Exception as e:
         print("line_has_unconsumed_stack_value:", e)
-    if is_expr is False:
-        return False
-    # no need to pop unused stack item for reserved func
-    for key in ds_reserved_funcs:
-        if f"{key}(" in line_obj.content:
-            return False
-    return True
+    return False
 
 def run_all(program_listing):
     new_listing = []
@@ -41,8 +30,8 @@ def run_all(program_listing):
         line_obj.content = line_obj.content.lstrip(' \t')
         first_word = line_obj.content.split()[0]
 
-        if first_word == cmd_VAR_DECLARE:
-            line_obj.content = line_obj.content[len(cmd_VAR_DECLARE):].strip()
+        if first_word == kw_VAR_DECLARE:
+            line_obj.content = line_obj.content[len(kw_VAR_DECLARE):].strip()
         if first_word not in ds_func_to_parse_as_str:
             line_obj.content = replace_operators(line_obj.content)
 
@@ -56,40 +45,44 @@ def run_all(program_listing):
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = make_arg_func(first_word, this_line)
             new_listing.append(new_obj)
-        elif first_word == cmd_IF:
+        elif first_word == kw_IF:
             new_obj = copy.deepcopy(line_obj)
-            new_obj.content = f"if {this_line[len(cmd_IF):len(this_line)-len(cmd_THEN)].strip()}:"
+            new_obj.content = f"if {this_line[len(kw_IF):len(this_line)].strip().removesuffix(kw_THEN)}:"
             new_listing.append(new_obj)
-        elif this_line.startswith(f"{cmd_ELSE_IF} "):
+        elif this_line.startswith(f"{kw_ELSE_IF} "):
             new_obj = copy.deepcopy(line_obj)
-            new_obj.content = f"elif {this_line[len(cmd_ELSE_IF):len(this_line)-len(cmd_THEN)].strip()}:"
+            new_obj.content = f"elif {this_line[len(kw_ELSE_IF):len(this_line)].strip().removesuffix(kw_THEN)}:"
             new_listing.append(new_obj)
-        elif first_word == cmd_ELSE:
+        elif first_word == kw_ELSE:
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = "else:"
             new_listing.append(new_obj)
-        elif first_word == cmd_CONTINUE:
+        elif first_word == kw_CONTINUE:
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = "continue"
             new_listing.append(new_obj)
-        elif first_word == cmd_LOOP_BREAK:
+        elif first_word == kw_LOOP_BREAK:
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = "break"
             new_listing.append(new_obj)
-        elif first_word == cmd_RETURN:
-            return_expr = this_line[len(cmd_RETURN):].strip()
+        elif first_word == kw_RETURN:
+            return_expr = this_line[len(kw_RETURN):].strip()
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = f"return {return_expr}"
             new_listing.append(new_obj)
         elif first_word in ds2py_ignored_cmds:
             continue
-        elif first_word == cmd_WHILE:
+        elif first_word == kw_WHILE:
             new_obj = copy.deepcopy(line_obj)
-            new_obj.content = f"while {this_line[len(cmd_WHILE):].strip()}:"
+            new_obj.content = f"while {this_line[len(kw_WHILE):].strip()}:"
             new_listing.append(new_obj)
-        elif first_word == cmd_FUNCTION:
+        elif first_word == kw_FUNCTION:
             new_obj = copy.deepcopy(line_obj)
-            new_obj.content = f"def {this_line[len(cmd_FUNCTION):].strip()}:"
+            new_obj.content = f"def {this_line[len(kw_FUNCTION):].strip()}:"
+            new_listing.append(new_obj)
+        elif first_word == kw_FUN:
+            new_obj = copy.deepcopy(line_obj)
+            new_obj.content = f"def {this_line[len(kw_FUN):].strip()}:"
             new_listing.append(new_obj)
         else:
             new_listing.append(line_obj)
@@ -97,7 +90,7 @@ def run_all(program_listing):
     for index, line_obj in enumerate(new_listing):
         line_obj.py_lnum_sf1 = index+1
         if line_has_unconsumed_stack_value(line_obj):
-            line_obj.content = "_UNUSED = " + line_obj.content
+            line_obj.content = f"{DUMMY_VAR_NAME} = " + line_obj.content
     return new_listing
 
 if __name__ == "__main__":

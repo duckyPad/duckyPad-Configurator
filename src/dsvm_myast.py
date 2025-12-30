@@ -1,6 +1,7 @@
 import sys
 import ast
 import symtable
+import copy
 from dsvm_common import *
 
 def find_function_table(root: symtable.SymbolTable, func_name: str):
@@ -56,7 +57,6 @@ def is_leaf(node):
     return not any(ast.iter_child_nodes(node))
 
 def postorder_walk(node, action, ctx_dict):
-    # print_node_info(node)
     this_pylnum_sf1 = getattr(node, "lineno", None)
     this_orig_ds_lnum_sf1 = get_orig_ds_lnumsf1_from_py_lnumsf1(ctx_dict, this_pylnum_sf1)
     if this_orig_ds_lnum_sf1 is not None:
@@ -99,7 +99,6 @@ def postorder_walk(node, action, ctx_dict):
         action(add_alloc(func_name), ctx_dict)
         for item in node.body:
             postorder_walk(item, action, ctx_dict)
-        action(add_push0(), ctx_dict)
         action(add_default_return(this_arg_count), ctx_dict)
     elif isinstance(node, ast.Return):
         if node.value is None:
@@ -108,7 +107,14 @@ def postorder_walk(node, action, ctx_dict):
             postorder_walk(node.value, action, ctx_dict)
         action(node, ctx_dict)
     elif isinstance(node, ast.AugAssign):
-        raise ValueError(f"{node.__class__.__name__}: To Be Implemented")
+        print_node_info(node) # target op value
+        target_load = copy.deepcopy(node.target)
+        target_load.ctx = ast.Load()
+        postorder_walk(target_load, action, ctx_dict)
+        postorder_walk(node.value, action, ctx_dict)
+        postorder_walk(node.op, action, ctx_dict)
+        postorder_walk(node.target, action, ctx_dict) # store
+        # raise ValueError(f"{node.__class__.__name__}: To Be Implemented")
     elif isinstance(node, ast.If):
         if_skip_label = f"{node.__class__.__name__}_skip@{this_orig_ds_lnum_sf1}"
         if_end_label = f"{node.__class__.__name__}_end@{this_orig_ds_lnum_sf1}"

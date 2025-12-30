@@ -8,6 +8,7 @@ import dsvm_myast
 import copy
 from collections import defaultdict
 import traceback
+import re
 
 """
 duckyscript VM changelog
@@ -66,28 +67,33 @@ arith_lookup = {
 global_context_dict = {}
 
 def make_instruction_pushc32(value, comment: str = ""):
+    node_value_32b = int(value) & 0xFFFFFFFF
     node_value_high = (int(value) & 0xFFFF0000) >> 16
     node_value_low  = int(value) & 0xFFFF
-
-    inst_list: list[dsvm_instruction] = []
-
-    # low 16
-    inst_list.append(dsvm_instruction(opcode=OP_PUSHC16, payload=node_value_low, comment=comment))
-
-    # if high 16 is non-zero, build (high << 16) | low
     if node_value_high:
-        inst_list.append(dsvm_instruction(opcode=OP_PUSHC16, payload=node_value_high, comment=comment))
-        inst_list.append(dsvm_instruction(opcode=OP_PUSHC16, payload=16, comment=comment))
-        inst_list.append(dsvm_instruction(opcode=OP_LSHIFT, comment=comment))
-        inst_list.append(dsvm_instruction(opcode=OP_BITOR, comment=comment))
-
-    return inst_list
+        return dsvm_instruction(opcode=OP_PUSHC32, payload=node_value_32b, comment=comment)
+    return dsvm_instruction(opcode=OP_PUSHC16, payload=node_value_low, comment=comment)
 
 def print_assembly_list(asmlist):
     if print_asm is False:
         return
     for item in asmlist:
         print(item)
+
+def print_full_assembly_from_context_dict(ctx_dict):
+    if print_asm is False:
+        return
+    bin_size_bytes = 0
+    for item in ctx_dict["root_assembly_list"]:
+        print(item)
+        bin_size_bytes += item.opcode.length
+    for key in ctx_dict['func_assembly_dict']:
+        print(f'----FUNC: {key}----')
+        for item in ctx_dict['func_assembly_dict'][key]:
+            print(item)
+            bin_size_bytes += item.opcode.length
+        print(f'----END {key}----')
+    print(f"Total: {bin_size_bytes} Bytes")
 
 AST_ARITH_NODES = (
     ast.operator,
@@ -173,9 +179,9 @@ def visit_name_node(node, ctx_dict, inst_list):
         inst_list.append(dsvm_instruction(opcode=opcode, payload=node_name, comment=og_ds_line, parent_func=current_function, var_type=sym_type))
 
 def get_key_combined_value(keyname):
-    if keyname in ds3_keyname_dict:
-        key_code = ds3_keyname_dict[keyname][0]
-        key_type = ds3_keyname_dict[keyname][1]
+    if keyname in ds_hid_keyname_dict:
+        key_code = ds_hid_keyname_dict[keyname][0]
+        key_type = ds_hid_keyname_dict[keyname][1]
     elif len(keyname) == 1:
         key_code = ord(keyname[0])
         key_type = KEY_TYPE_CHAR
@@ -209,7 +215,7 @@ def visit_node(node, ctx_dict):
         elif isinstance(node.value, str) and caller_func_name in ds_keypress_func_lookup:
             emit(OP_PUSHC16, payload=get_key_combined_value(node.value))
         elif isinstance(node.value, int):
-            instruction_list.extend(make_instruction_pushc32(node.value, og_ds_line))
+            instruction_list.append(make_instruction_pushc32(node.value, og_ds_line))
         else:
             raise ValueError(f"Unsupported Constant: {node.value}")
 
@@ -234,7 +240,10 @@ def visit_node(node, ctx_dict):
     elif isinstance(node, ast.Call):
         func_name = node.func.id
         if func_name in ds_reserved_funcs:
-            emit(ds_reserved_funcs[func_name].opcode)
+            fun_info = ds_reserved_funcs[func_name]
+            emit(fun_info.opcode)
+            if fun_info.has_return_value is False:
+                emit(OP_PUSH0)
         else:
             emit(OP_CALL, payload=f"func_{func_name}")
 
@@ -251,10 +260,12 @@ def visit_node(node, ctx_dict):
         emit(OP_JMP, payload=node.label)
 
     elif isinstance(node, dsvm_myast.add_push0):
-        emit(OP_PUSHC16, payload=0, label=node.label)
+        emit(OP_PUSH0)
 
     elif isinstance(node, dsvm_myast.add_default_return):
-        emit(OP_RET, payload=node.arg_count)
+        if instruction_list[-1].opcode != OP_RET:
+            emit(OP_PUSH0)
+            emit(OP_RET, payload=node.arg_count)
 
     elif isinstance(node, dsvm_myast.add_alloc):
         emit(OP_ALLOC, payload=node.func_name)
@@ -347,6 +358,19 @@ def get_func_args(symtable_root):
     _traverse(symtable_root)
     return func_args
 
+def extract_printf_specifier(text):
+    # ^             : Start of the string
+    # %             : Literal percent sign
+    # [-+ #0]* : Optional flags (left-align, sign, space, hash, zero-padding)
+    # (\d+)?        : Optional width (one or more digits)
+    # (\.\d+)?      : Optional precision (a dot followed by digits)
+    # [duxX]        : The type specifier (d, u, x, X)
+    pattern = r"^%[-+ #0]*(\d+)?(\.\d+)?[duxX]"
+    match = re.match(pattern, text)
+    if match:
+        return match.group(0)
+    return ""
+
 endianness = 'little'
 var_boundary_fp_rel = 0x1e
 var_boundary_udgv = 0x1f
@@ -380,12 +404,14 @@ def replace_var_in_str(instruction, arg_and_local_var_lookup, udgv_lookup):
 
             # Skip over '$' + variable name
             i += 1 + len(var_name)
-
+            printf_format_specifier = extract_printf_specifier(msg[i:])
             # Emit boundary, payload, boundary
             result.extend(boundary.to_bytes(1, endianness))
             result.extend(payload_bytes)
+            result.extend(printf_format_specifier.encode("ascii", errors="ignore"))
             result.extend(boundary.to_bytes(1, endianness))
-
+            # skip over format specifier (if any)
+            i += len(printf_format_specifier)
         else:
             result.extend(ch.encode())
             i += 1
@@ -394,20 +420,15 @@ def replace_var_in_str(instruction, arg_and_local_var_lookup, udgv_lookup):
 
 def compile_to_bin(rdict):
     if print_asm:
-        print("\n\n--------- Assembly Listing, Unresolved: ---------")
-        print_assembly_list(rdict['root_assembly_list'])
-        for key in rdict['func_assembly_dict']:
-            print(f'----FUNC: {key}----')
-            print_assembly_list(rdict['func_assembly_dict'][key])
-            print(f'----END {key}----')
+        print("\n\n--------- Assembly Listing, (Mildly) Optimised, Unresolved: ---------")
+        print_full_assembly_from_context_dict(rdict)
 
     """
     this is generated from walking the nodes, not the symtable and AST.
     that means if a function has args but none are referenced, those args wont show up
     """
     user_strings_dict = {}
-
-    func_arg_and_local_var_lookup = group_vars(rdict)
+    func_arg_and_local_var_lookup = rdict['func_arg_and_local_var_lookup']
     user_declared_global_var_addr_lookup = {}
     for index, item in enumerate(sorted([x.name for x in rdict['var_info_set'] if x.type is SymType.GLOBAL_VAR])):
         user_declared_global_var_addr_lookup[item] = index * USER_VAR_BYTE_WIDTH + USER_VAR_START_ADDRESS
@@ -506,7 +527,7 @@ def compile_to_bin(rdict):
         print("\n\n--------- Assembly Listing, Resolved: ---------")
         print_assembly_list(final_assembly_list)
         for key in user_strings_dict:
-            print(f"{user_strings_dict[key]}  DATA: {key}")
+            print(f"{user_strings_dict[key]}   DATA: {key}")
 
     # ------------------ generate binary ------------------
 
@@ -516,12 +537,74 @@ def compile_to_bin(rdict):
         this_payload = this_inst.payload
         if this_payload is None:
             continue
-        output_bin_array += pack_to_two_bytes(this_payload)
+        if this_inst.opcode == OP_PUSHC32:
+            output_bin_array += pack_to_four_bytes(this_payload)
+        else:
+            output_bin_array += pack_to_two_bytes(this_payload)
     for key in user_strings_dict:
         output_bin_array += key
     if len(output_bin_array) > MAX_BIN_SIZE:
         raise ValueError("Binary size too large")
     return output_bin_array
+
+def optimize_pass(instruction_list, arg_and_var_dict):
+    optimized_list = []
+    i = 0
+    while i < len(instruction_list):
+        current_instr = instruction_list[i]
+        
+        # Lookahead for peephole optimizations
+        if i + 1 < len(instruction_list):
+            next_instr = instruction_list[i + 1]
+            
+            # PUSH0 + DROP -> Remove both
+            if current_instr.opcode == OP_PUSH0 and next_instr.opcode == OP_DROP:
+                i += 2
+                continue
+
+            # POPI/POPR [X] + PUSHI/PUSHR [X] -> DUP + POPI/POPR [X]
+            # This handles both Global (POPI) and Local (POPR) variables
+            is_same_mem_save_load = (current_instr.opcode == OP_POPI and next_instr.opcode == OP_PUSHI) or (current_instr.opcode == OP_POPR and next_instr.opcode == OP_PUSHR)
+            if is_same_mem_save_load and current_instr.payload == next_instr.payload:
+                optimized_list.append(dsvm_instruction(opcode=OP_DUP))
+                optimized_list.append(current_instr)
+                i += 2
+                continue
+
+        # PUSHC16 0 -> PUSH0
+        if current_instr.opcode == OP_PUSHC16 and current_instr.payload == 0:
+            optimized_list.append(dsvm_instruction(opcode=OP_PUSH0, label=current_instr.label, comment=current_instr.comment))
+            i += 1
+            continue
+        if current_instr.opcode == OP_PUSHC16 and current_instr.payload == 1:
+            optimized_list.append(dsvm_instruction(opcode=OP_PUSH1, label=current_instr.label, comment=current_instr.comment))
+            i += 1
+            continue
+        if current_instr.opcode == OP_ALLOC and current_instr.payload in arg_and_var_dict and len(arg_and_var_dict[current_instr.payload]['locals']) == 0:
+            i += 1
+            continue
+
+        optimized_list.append(current_instr)
+        i += 1
+    
+    return optimized_list
+
+def optimize_full_assembly_from_context_dict(ctx_dict):
+    arg_and_var_dict = ctx_dict['func_arg_and_local_var_lookup']
+    ctx_dict["root_assembly_list"] = optimize_pass(ctx_dict["root_assembly_list"], arg_and_var_dict)
+    for key in ctx_dict['func_assembly_dict']:
+        ctx_dict['func_assembly_dict'][key] = optimize_pass(ctx_dict['func_assembly_dict'][key], arg_and_var_dict)
+
+def replace_dummy_with_drop(instruction_list):
+    for this_instruction in instruction_list:
+        if this_instruction.opcode == OP_POPI and this_instruction.payload == DUMMY_VAR_NAME:
+            this_instruction.opcode = OP_DROP
+            this_instruction.payload = None
+
+def replace_dummy_with_drop_from_context_dict(ctx_dict):
+    replace_dummy_with_drop(ctx_dict["root_assembly_list"])
+    for key in ctx_dict['func_assembly_dict']:
+        replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
 
 def make_dsb_with_exception(program_listing, should_print=False):
     global global_context_dict
@@ -543,10 +626,11 @@ def make_dsb_with_exception(program_listing, should_print=False):
     global_context_dict = rdict
     rdict["orig_listing"] = orig_listing
     post_pp_listing = rdict["dspp_listing_with_indent_level"]
-    # save_lines_to_file(post_pp_listing, "ppds.txt")
     pyout = dsvm_ds2py.run_all(post_pp_listing)
     rdict["ds2py_listing"] = pyout
-    # save_lines_to_file(pyout, "pyds.py")
+    if should_print:
+        save_lines_to_file(post_pp_listing, "ppds.txt")
+        save_lines_to_file(pyout, "pyds.py")
     source = dsline_to_source(pyout)
     try:
         my_tree = ast.parse(source, mode="exec")
@@ -571,7 +655,14 @@ def make_dsb_with_exception(program_listing, should_print=False):
         rdict["caller_func_name"] = None
         dsvm_myast.postorder_walk(statement, visit_node, rdict)
 
+    print("\n\n--------- Assembly Listing, Unoptimised, Unresolved: ---------")
+    print_full_assembly_from_context_dict(rdict)
+    rdict['func_arg_and_local_var_lookup'] = group_vars(rdict)
+
+    replace_dummy_with_drop_from_context_dict(rdict)
+    optimize_full_assembly_from_context_dict(rdict)
     rdict["root_assembly_list"].append(dsvm_instruction(OP_HALT))
+
     bin_array = compile_to_bin(rdict)
     comp_result = compile_result(
         is_success=True,
