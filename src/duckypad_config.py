@@ -18,6 +18,7 @@ import hid_op
 import my_compare
 import traceback
 import dp20_dumpsd
+from tkinter import font
 
 """
 0.13.5
@@ -1550,7 +1551,23 @@ def script_textbox_event(event):
     script_textbox_modified()
     script_textbox.tk.call(script_textbox._w, 'edit', 'modified', 0)
 
-script_textbox = Text(scripts_lf, relief='solid', borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word")
+
+def get_monospace_font():
+    platform = sys.platform
+    if platform == "win32":
+        family = "Consolas" 
+    elif platform == "darwin":
+        family = "Menlo"
+    elif platform.startswith("linux"):
+        family = "Monospace"
+    else:
+        family = "Courier"
+    return (family, 10)
+
+script_box_font = get_monospace_font()
+char_width = font.Font(font=script_box_font).measure("0")
+script_textbox = Text(scripts_lf, relief='solid', font=script_box_font, borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word", undo=True)
+script_textbox.configure(font=script_box_font, tabs=(char_width * 2))
 script_textbox.place(x=PADDING, y=scaled_size(50), width=scaled_size(285), height=scaled_size(360))
 root.update()
 script_textbox.bind("<<Modified>>", script_textbox_event)
