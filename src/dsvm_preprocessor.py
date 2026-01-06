@@ -176,7 +176,7 @@ def string_block_end_check(lnum, sbss, sbdict):
 
 def func_end_check(lnum, fss, fdict):
     if len(fss) == 0:
-        return PARSE_ERROR, "orphan END_FUNCTION"
+        return PARSE_ERROR, "orphan END_FUN"
     fun_name = fss.pop()
     fdict[fun_name]['fun_end'] = lnum
     return PARSE_OK, ''
@@ -427,6 +427,7 @@ def single_pass(program_listing, define_dict):
 
         if first_word != kw_DEFINE:
             this_line = replace_DEFINE(this_line, define_dict)
+            first_word = this_line.split()[0]
 
         if first_word == kw_END_REM:
             presult, pcomment = rem_block_end_check(line_number_starting_from_1, rem_block_search_stack, rem_block_table)
@@ -447,9 +448,9 @@ def single_pass(program_listing, define_dict):
             presult, pcomment = new_define(this_line, define_dict)
         elif first_word == kw_VAR_DECLARE:
             presult, pcomment = check_var_declare(this_line, user_declared_var_dict, func_search_stack)
-        elif first_word == kw_FUNCTION or first_word == kw_FUN:
+        elif first_word == kw_FUN:
             presult, pcomment = new_func_check(this_line, line_number_starting_from_1, func_search_stack, func_table)
-        elif first_word == kw_END_FUNCTION or first_word == kw_END_FUN:
+        elif first_word == kw_END_FUN:
             this_indent_level -= 1
             presult, pcomment = func_end_check(line_number_starting_from_1, func_search_stack, func_table)
         elif first_word == kw_IF:
@@ -542,8 +543,8 @@ def single_pass(program_listing, define_dict):
 
     if len(func_search_stack) != 0:
         return_dict['is_success'] = False
-        # return_dict['comments'] = f"END_FUNCTION missing for FUNCTION {func_search_stack[0]}() at line {func_table[func_search_stack[0]]['fun_start']}"
-        return_dict['comments'] = "Missing END_FUNCTION"
+        # return_dict['comments'] = f"END_FUN missing for FUNCTION {func_search_stack[0]}() at line {func_table[func_search_stack[0]]['fun_start']}"
+        return_dict['comments'] = "Missing END_FUN"
         return_dict['error_line_number_starting_from_1'] = func_table[func_search_stack[0]]['fun_start']
         return return_dict
 
@@ -605,6 +606,9 @@ def get_default_def_dict():
         kw_DEFAULTDELAY : "_DEFAULTDELAY =",
         kw_DEFAULTCHARDELAY : "_DEFAULTCHARDELAY =",
         kw_CHARJITTER : "_CHARJITTER =",
+        kw_MOUSE_WHEEL : f"{kw_MOUSE_SCROLL} 0",
+        f"{kw_FUNCTION} " : f"{kw_FUN} ",
+        kw_END_FUNCTION : kw_END_FUN,
     }
     return default_dict
 

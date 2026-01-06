@@ -15,6 +15,8 @@ kw_RANDCHR = "RANDCHR"
 kw_RANDINT = "RANDINT"
 kw_PUTS = "PUTS"
 kw_BUZZ = "BUZZ"
+kw_HIDTX = "HIDTX"
+
 
 kw_RANDOM_LOWERCASE_LETTER = "RANDOM_LOWERCASE_LETTER"
 kw_RANDOM_UPPERCASE_LETTER = "RANDOM_UPPERCASE_LETTER"
@@ -61,8 +63,12 @@ kw_BCLR = "BCLR"
 kw_LMOUSE = "LMOUSE"
 kw_RMOUSE = "RMOUSE"
 kw_MMOUSE = "MMOUSE"
+kw_BMOUSE = "BMOUSE"
+kw_FMOUSE = "FMOUSE"
+
 kw_MOUSE_MOVE = "MOUSE_MOVE"
 kw_MOUSE_WHEEL = "MOUSE_WHEEL"
+kw_MOUSE_SCROLL = "MOUSE_SCROLL"
 
 kw_VAR_DECLARE = "VAR"
 kw_VAR_PREFIX = "$"
@@ -152,14 +158,20 @@ kw_KPEQUAL = "KP_EQUAL" # Keypad EQUAL
 kw_MK_VOLUP = "MK_VOLUP"
 kw_MK_VOLDOWN = "MK_VOLDOWN"
 kw_MK_VOLMUTE = "MK_MUTE"
+kw_MK_EJECT = "MK_EJECT"
 kw_MK_PREV = "MK_PREV"
 kw_MK_NEXT = "MK_NEXT"
 kw_MK_PLAYPAUSE = "MK_PP"
 kw_MK_STOP = "MK_STOP"
 
+kw_RO = "RO"
 kw_KATAKANAHIRAGANA = "KATAKANAHIRAGANA"
+kw_YEN = "YEN"
 kw_HENKAN = "HENKAN"
 kw_MUHENKAN = "MUHENKAN"
+kw_KPJPCOMMA = "KPJPCOMMA"
+kw_HANGEUL = "HANGEUL"
+kw_HANJA = "HANJA"
 kw_KATAKANA = "KATAKANA"
 kw_HIRAGANA = "HIRAGANA"
 kw_ZENKAKUHANKAKU = "ZENKAKUHANKAKU"
@@ -234,17 +246,19 @@ KEY_MK_VOLDOWN = 0x80
 KEY_MK_VOLUP = 0x40
 KEY_MK_VOLMUTE = 0x20
 KEY_MK_PLAYPAUSE = 0x10
+KEY_MK_EJECT = 0x8
 KEY_MK_STOP = 0x4
 KEY_MK_PREV = 0x2
 KEY_MK_NEXT = 0x1
 
+KEY_RO = 0x87
 KEY_KATAKANAHIRAGANA = 0x88
 KEY_YEN = 0x89
 KEY_HENKAN = 0x8a
 KEY_MUHENKAN = 0x8b
-
-KEY_HANGEUL = 0x90 # korea
-KEY_HANJA = 0x91 # korea
+KEY_KPJPCOMMA = 0x8c
+KEY_HANGEUL = 0x90
+KEY_HANJA = 0x91
 KEY_KATAKANA = 0x92
 KEY_HIRAGANA = 0x93
 KEY_ZENKAKUHANKAKU = 0x94
@@ -262,6 +276,8 @@ ds_hid_keyname_dict = {
 kw_LMOUSE : (1, KEY_TYPE_MOUSE_BUTTON),
 kw_RMOUSE : (2, KEY_TYPE_MOUSE_BUTTON),
 kw_MMOUSE : (4, KEY_TYPE_MOUSE_BUTTON),
+kw_BMOUSE : (8, KEY_TYPE_MOUSE_BUTTON),
+kw_FMOUSE : (16, KEY_TYPE_MOUSE_BUTTON),
 kw_UP : (KEY_UP_ARROW, KEY_TYPE_SPECIAL),
 kw_DOWN : (KEY_DOWN_ARROW, KEY_TYPE_SPECIAL),
 kw_LEFT : (KEY_LEFT_ARROW, KEY_TYPE_SPECIAL),
@@ -307,12 +323,19 @@ kw_KPEQUAL : (KEY_KPEQUAL, KEY_TYPE_SPECIAL),
 kw_POWER : (KEY_POWER, KEY_TYPE_SPECIAL),
 kw_MENU : (KEY_MENU, KEY_TYPE_SPECIAL),
 kw_APP : (KEY_MENU, KEY_TYPE_SPECIAL),
+
+kw_RO : (KEY_RO, KEY_TYPE_SPECIAL),
 kw_KATAKANAHIRAGANA : (KEY_KATAKANAHIRAGANA, KEY_TYPE_SPECIAL),
+kw_YEN : (KEY_YEN, KEY_TYPE_SPECIAL),
 kw_HENKAN : (KEY_HENKAN, KEY_TYPE_SPECIAL),
 kw_MUHENKAN : (KEY_MUHENKAN, KEY_TYPE_SPECIAL),
+kw_KPJPCOMMA : (KEY_KPJPCOMMA, KEY_TYPE_SPECIAL),
+kw_HANGEUL : (KEY_HANGEUL, KEY_TYPE_SPECIAL),
+kw_HANJA : (KEY_HANJA, KEY_TYPE_SPECIAL),
 kw_KATAKANA : (KEY_KATAKANA, KEY_TYPE_SPECIAL),
 kw_HIRAGANA : (KEY_HIRAGANA, KEY_TYPE_SPECIAL),
 kw_ZENKAKUHANKAKU : (KEY_ZENKAKUHANKAKU, KEY_TYPE_SPECIAL),
+
 "F1" : (0x3A, KEY_TYPE_SPECIAL),
 "F2" : (0x3B, KEY_TYPE_SPECIAL),
 "F3" : (0x3C, KEY_TYPE_SPECIAL),
@@ -356,6 +379,7 @@ kw_RCONTROL : (KEY_RIGHT_CTRL, KEY_TYPE_MODIFIER),
 kw_MK_VOLUP : (KEY_MK_VOLUP, KEY_TYPE_MEDIA),
 kw_MK_VOLDOWN : (KEY_MK_VOLDOWN, KEY_TYPE_MEDIA),
 kw_MK_VOLMUTE : (KEY_MK_VOLMUTE, KEY_TYPE_MEDIA),
+kw_MK_EJECT : (KEY_MK_EJECT, KEY_TYPE_MEDIA),
 kw_MK_PREV : (KEY_MK_PREV, KEY_TYPE_MEDIA),
 kw_MK_NEXT : (KEY_MK_NEXT, KEY_TYPE_MEDIA),
 kw_MK_PLAYPAUSE : (KEY_MK_PLAYPAUSE, KEY_TYPE_MEDIA),
@@ -416,6 +440,7 @@ OP_DROP = Opcode("DROP", 16, 1)
 OP_DUP = Opcode("DUP", 17, 1)
 OP_RANDINT = Opcode("RANDINT", 18, 1)
 OP_PUSHC32 = Opcode("PUSHC32", 19, 5)
+OP_PUSHC8 = Opcode("PUSHC8", 20, 2)
 OP_VMVER = Opcode("VMVER", 255, 3)
 
 # Binary Operators
@@ -470,6 +495,7 @@ OP_SLEEP = Opcode("SLEEP", 85, 1)
 OP_RANDCHR = Opcode("RANDCHR", 86, 1)
 OP_PUTS = Opcode("PUTS", 87, 1)
 OP_PWMCTRL = Opcode("PWMCTRL", 88, 1)
+OP_HIDTX = Opcode("HIDTX", 89, 1)
 
 # Virtual Opcodes, to be resolved during compilation
 OP_PUSHSTR = Opcode("PUSHSTR", 128, 3, is_virtual=True)
@@ -616,7 +642,7 @@ ds_keypress_func_lookup = {
 ds_builtin_func_lookup = {
     kw_HALT : reserved_func_info(OP_HALT, 0),
     kw_DELAY : reserved_func_info(OP_DELAY, 1),
-    kw_MOUSE_WHEEL : reserved_func_info(OP_MSCL, 1),
+    kw_MOUSE_SCROLL : reserved_func_info(OP_MSCL, 2),
     kw_MOUSE_MOVE : reserved_func_info(OP_MMOV, 2),
     kw_SWCF : reserved_func_info(OP_SWCF, 3),
     kw_SWCC : reserved_func_info(OP_SWCC, 4),
@@ -637,13 +663,14 @@ ds_builtin_func_lookup = {
     kw_RANDINT : reserved_func_info(OP_RANDINT, 2, has_return_value=True),
     kw_PUTS : reserved_func_info(OP_PUTS, 1),
     kw_BUZZ : reserved_func_info(OP_PWMCTRL, 1),
+    kw_HIDTX : reserved_func_info(OP_HIDTX, 1),
 }
 
 ds_func_to_parse_as_str = ds_str_func_lookup | ds_keypress_func_lookup
 
 ds_reserved_funcs = ds_func_to_parse_as_str | ds_builtin_func_lookup 
 
-ds2py_ignored_cmds = {kw_END_IF, kw_END_WHILE, kw_END_FUNCTION, kw_END_FUN}
+ds2py_ignored_cmds = {kw_END_IF, kw_END_WHILE, kw_END_FUN}
 
 def get_pretty_ds_line_list(dslist):
     lines = []
@@ -758,6 +785,26 @@ def replace_operators(this_line):
     temp = temp.replace(op_placeholder, notequal_str)
     return temp
 
+def pack_to_one_byte(value: int) -> bytes:
+    if not isinstance(value, int):
+        raise TypeError(f"Input must be an integer, but received {type(value)}")
+    if value >= 0:
+        max_uint8 = 255
+        if value > max_uint8:
+            raise ValueError(
+                f"Value {value} is too large for uint8_t. Max allowed is {max_uint8}."
+            )
+        format_string = 'B'
+    else:
+        min_int8 = -128
+        max_int8 = 127
+        if not (min_int8 <= value <= max_int8):
+            raise ValueError(
+                f"Value {value} is outside the int8_t range. Range is {min_int8} to {max_int8}."
+            )
+        format_string = 'b'
+    return struct.pack(format_string, value)
+
 def pack_to_two_bytes(value: int) -> bytes:
     if not isinstance(value, int):
         raise TypeError(f"Input must be an integer, but received {type(value)}")
@@ -795,8 +842,6 @@ def pack_to_two_bytes(value: int) -> bytes:
     # The struct.pack function handles the conversion to two's complement 
     # for negative numbers automatically based on the format code 'h'.
     return struct.pack(format_string, value)
-
-import struct
 
 def pack_to_four_bytes(value: int) -> bytes:
     if not isinstance(value, int):

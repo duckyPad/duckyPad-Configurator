@@ -76,10 +76,6 @@ def run_all(program_listing):
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = f"while {this_line[len(kw_WHILE):].strip()}:"
             new_listing.append(new_obj)
-        elif first_word == kw_FUNCTION:
-            new_obj = copy.deepcopy(line_obj)
-            new_obj.content = f"def {this_line[len(kw_FUNCTION):].strip()}:"
-            new_listing.append(new_obj)
         elif first_word == kw_FUN:
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = f"def {this_line[len(kw_FUN):].strip()}:"

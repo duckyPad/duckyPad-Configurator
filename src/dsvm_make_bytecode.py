@@ -66,13 +66,13 @@ arith_lookup = {
 
 global_context_dict = {}
 
-def make_instruction_pushc32(value, comment: str = ""):
-    node_value_32b = int(value) & 0xFFFFFFFF
-    node_value_high = (int(value) & 0xFFFF0000) >> 16
-    node_value_low  = int(value) & 0xFFFF
-    if node_value_high:
-        return dsvm_instruction(opcode=OP_PUSHC32, payload=node_value_32b, comment=comment)
-    return dsvm_instruction(opcode=OP_PUSHC16, payload=node_value_low, comment=comment)
+def make_instruction_pushc(value, comment: str = ""):
+    val = int(value) & 0xFFFFFFFF
+    if val > 0xFFFF:
+        return dsvm_instruction(opcode=OP_PUSHC32, payload=val, comment=comment)
+    if val > 0xFF:
+        return dsvm_instruction(opcode=OP_PUSHC16, payload=val, comment=comment)
+    return dsvm_instruction(opcode=OP_PUSHC8, payload=val, comment=comment)
 
 def print_assembly_list(asmlist):
     if print_asm is False:
@@ -215,7 +215,7 @@ def visit_node(node, ctx_dict):
         elif isinstance(node.value, str) and caller_func_name in ds_keypress_func_lookup:
             emit(OP_PUSHC16, payload=get_key_combined_value(node.value))
         elif isinstance(node.value, int):
-            instruction_list.append(make_instruction_pushc32(node.value, og_ds_line))
+            instruction_list.append(make_instruction_pushc(node.value, og_ds_line))
         else:
             raise ValueError(f"Unsupported Constant: {node.value}")
 
@@ -537,7 +537,9 @@ def compile_to_bin(rdict):
         this_payload = this_inst.payload
         if this_payload is None:
             continue
-        if this_inst.opcode == OP_PUSHC32:
+        if this_inst.opcode == OP_PUSHC8:
+            output_bin_array += pack_to_one_byte(this_payload)
+        elif this_inst.opcode == OP_PUSHC32:
             output_bin_array += pack_to_four_bytes(this_payload)
         else:
             output_bin_array += pack_to_two_bytes(this_payload)
@@ -546,6 +548,8 @@ def compile_to_bin(rdict):
     if len(output_bin_array) > MAX_BIN_SIZE:
         raise ValueError("Binary size too large")
     return output_bin_array
+
+pushc_instructions = {OP_PUSHC8, OP_PUSHC16, OP_PUSHC32}
 
 def optimize_pass(instruction_list, arg_and_var_dict):
     optimized_list = []
@@ -572,11 +576,11 @@ def optimize_pass(instruction_list, arg_and_var_dict):
                 continue
 
         # PUSHC16 0 -> PUSH0
-        if current_instr.opcode == OP_PUSHC16 and current_instr.payload == 0:
+        if current_instr.opcode in pushc_instructions and current_instr.payload == 0:
             optimized_list.append(dsvm_instruction(opcode=OP_PUSH0, label=current_instr.label, comment=current_instr.comment))
             i += 1
             continue
-        if current_instr.opcode == OP_PUSHC16 and current_instr.payload == 1:
+        if current_instr.opcode in pushc_instructions and current_instr.payload == 1:
             optimized_list.append(dsvm_instruction(opcode=OP_PUSH1, label=current_instr.label, comment=current_instr.comment))
             i += 1
             continue
