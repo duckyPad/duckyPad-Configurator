@@ -245,6 +245,7 @@ def visit_node(node, ctx_dict):
             if fun_info.has_return_value is False:
                 emit(OP_PUSH0)
         else:
+            ctx_dict['func_visit_set'].add(func_name)
             emit(OP_CALL, payload=f"func_{func_name}")
 
     elif isinstance(node, ast.Return):
@@ -605,6 +606,9 @@ def replace_dummy_with_drop(instruction_list):
             this_instruction.opcode = OP_DROP
             this_instruction.payload = None
 
+def drop_unused_functions(ctx_dict):
+    ctx_dict['func_assembly_dict'] = {k: v for k, v in ctx_dict['func_assembly_dict'].items() if k in ctx_dict['func_visit_set']}
+
 def replace_dummy_with_drop_from_context_dict(ctx_dict):
     replace_dummy_with_drop(ctx_dict["root_assembly_list"])
     for key in ctx_dict['func_assembly_dict']:
@@ -653,6 +657,7 @@ def make_dsb_with_exception(program_listing, should_print=False):
     rdict['func_assembly_dict'] = {}
     rdict['func_args_dict'] = get_func_args(symtable_root)
     rdict['var_info_set'] = set()
+    rdict['func_visit_set'] = set()
 
     for statement in my_tree.body:
         rdict["func_def_name"] = None
@@ -662,7 +667,7 @@ def make_dsb_with_exception(program_listing, should_print=False):
     print("\n\n--------- Assembly Listing, Unoptimised, Unresolved: ---------")
     print_full_assembly_from_context_dict(rdict)
     rdict['func_arg_and_local_var_lookup'] = group_vars(rdict)
-
+    drop_unused_functions(rdict)
     replace_dummy_with_drop_from_context_dict(rdict)
     optimize_full_assembly_from_context_dict(rdict)
     rdict["root_assembly_list"].append(dsvm_instruction(OP_HALT))
