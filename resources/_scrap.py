@@ -1,3 +1,12 @@
+root_folder_lf
+
+edit_header_button_click
+
+ask_user_to_select_a_duckypad
+
+check_syntax
+
+script_textbox_modified
     
     for this_pf in profile_list:
         print(this_pf.name)
