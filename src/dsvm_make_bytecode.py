@@ -614,7 +614,7 @@ def replace_dummy_with_drop_from_context_dict(ctx_dict):
     for key in ctx_dict['func_assembly_dict']:
         replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
 
-def make_dsb_with_exception(program_listing, should_print=False):
+def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True):
     global global_context_dict
     global print_asm
     print_asm = should_print
@@ -667,7 +667,8 @@ def make_dsb_with_exception(program_listing, should_print=False):
     print("\n\n--------- Assembly Listing, Unoptimised, Unresolved: ---------")
     print_full_assembly_from_context_dict(rdict)
     rdict['func_arg_and_local_var_lookup'] = group_vars(rdict)
-    drop_unused_functions(rdict)
+    if remove_unused_func:
+        drop_unused_functions(rdict)
     replace_dummy_with_drop_from_context_dict(rdict)
     optimize_full_assembly_from_context_dict(rdict)
     rdict["root_assembly_list"].append(dsvm_instruction(OP_HALT))
@@ -679,7 +680,7 @@ def make_dsb_with_exception(program_listing, should_print=False):
     )
     return comp_result
 
-def make_dsb_no_exception(program_listing, should_print=False):
+def make_dsb_no_exception(program_listing, should_print=False, remove_unused_func=True):
     global print_asm
     print_asm = should_print
     try:

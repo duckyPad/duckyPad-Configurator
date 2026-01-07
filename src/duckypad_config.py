@@ -196,6 +196,8 @@ UI_SCALE = float(os.getenv("DUCKYPAD_UI_SCALE", default=1))
 USB_MSC_MOUNTPOINT = os.getenv("DUCKYPAD_MS_MOUNTPOINT", default=None)
 USB_MSC_SECONDS_TO_WAIT = int(os.getenv("DUCKYPAD_MS_TIMEOUT", default=20))
 
+this_global_setting = duck_objs.dp_global_settings()
+
 def scaled_size(size: int) -> int:
     return int(size * UI_SCALE)
 
@@ -218,6 +220,18 @@ PADDING = scaled_size(10)
 HEIGHT_ROOT_FOLDER_LF = scaled_size(50)
 INVALID_ROOT_FOLDER_STRING = "<---- Press to connect"
 last_rgb = (238,130,238)
+
+def get_monospace_font():
+    platform = sys.platform
+    if platform == "win32":
+        family = "Consolas" 
+    elif platform == "darwin":
+        family = "Menlo"
+    elif platform.startswith("linux"):
+        family = "Monospace"
+    else:
+        family = "Courier"
+    return (family, 10)
 
 def reset_key_button_relief():
     for item in key_button_list:
@@ -506,6 +520,7 @@ def enable_buttons():
     profile_export_button.config(state=NORMAL)
     # exp_page_plus_button.config(state=NORMAL)
     # exp_page_minus_button.config(state=NORMAL)
+    edit_header_button.config(state=NORMAL)
 
 def profile_shift_up():
     global profile_list
@@ -1044,10 +1059,41 @@ root_folder_path_label = Label(master=root_folder_lf, textvariable=dp_root_folde
 root_folder_path_label.place(x=scaled_size(90), y=0)
 
 save_button = Button(root_folder_lf, text="Save", command=save_click, state=DISABLED)
-save_button.place(x=scaled_size(630+270), y=0, width=scaled_size(65), height=scaled_size(25))
+save_button.place(x=scaled_size(630+170), y=0, width=scaled_size(65), height=scaled_size(25))
 
-backup_button = Button(root_folder_lf, text="Backup...", command=backup_button_click)
-backup_button.place(x=scaled_size(700+270), y=0, width=scaled_size(65), height=scaled_size(25))
+backup_button = Button(root_folder_lf, text="Backups", command=backup_button_click)
+backup_button.place(x=scaled_size(700+170), y=0, width=scaled_size(65), height=scaled_size(25))
+
+def edit_header_button_click():
+    header_edit_window = Toplevel(root)
+    header_edit_window.title("Edit Global Header")
+    header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
+    # "To include this header, add IMPORT GLOBAL_HEADER to your script."
+    top_label = Label(
+        header_edit_window, 
+        text="To include this header, add \"IMPORT GLOBAL_HEADER\" to your script.",
+        justify="center",
+        wraplength=scaled_size(600) # Optional: Wraps text if window is narrow
+    )
+    top_label.pack(side="top", pady=(10, 5))
+
+    bottom_label = Label(
+        header_edit_window, 
+        text="Sed do eiusmod tempor incididunt ut labore et dolore.",
+        justify="center"
+    )
+    bottom_label.pack(side="bottom", pady=(5, 10))
+
+    script_box_font = get_monospace_font()
+    char_width = font.Font(font=script_box_font).measure("0")
+    header_script_textbox = Text(header_edit_window, relief='solid', font=script_box_font, borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word", undo=True)
+    header_script_textbox.configure(font=script_box_font, tabs=(char_width * 2))
+    header_script_textbox.pack(side="top", fill="both", expand=True, padx=10)
+
+    header_edit_window.grab_set()
+
+edit_header_button = Button(root_folder_lf, text="Edit Header", command=edit_header_button_click, state=DISABLED)
+edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))
 
 # ------------- Profiles frame -------------
 
@@ -1551,19 +1597,6 @@ def script_textbox_event(event):
     script_textbox_modified()
     script_textbox.tk.call(script_textbox._w, 'edit', 'modified', 0)
 
-
-def get_monospace_font():
-    platform = sys.platform
-    if platform == "win32":
-        family = "Consolas" 
-    elif platform == "darwin":
-        family = "Menlo"
-    elif platform.startswith("linux"):
-        family = "Monospace"
-    else:
-        family = "Courier"
-    return (family, 10)
-
 script_box_font = get_monospace_font()
 char_width = font.Font(font=script_box_font).measure("0")
 script_textbox = Text(scripts_lf, relief='solid', font=script_box_font, borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word", undo=True)
@@ -1800,7 +1833,6 @@ def exp_page_minus_button_click():
     current_selected_expansion_module = (current_selected_expansion_module - 1) % MAX_EXPANSION_MODULE_COUNT
     exp_page_update()
 
-
 expansion_lf = LabelFrame(root, text="Expansion Modules", width=scaled_size(150), height=scaled_size(263))
 expansion_lf.place(x=scaled_size(590), y=scaled_size(260))
 root.update()
@@ -1870,8 +1902,9 @@ def repeat_func():
 root.after(500, repeat_func)
 
 
-# THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
-# select_root_folder("sample_dp24", is_dir_for_dp24=True)
+THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+select_root_folder("sample_dp24", is_dir_for_dp24=True)
+edit_header_button_click()
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()

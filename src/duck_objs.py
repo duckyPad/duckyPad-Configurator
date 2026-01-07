@@ -1,6 +1,7 @@
 import os
 import sys
 from shared import *
+# from dataclasses import dataclass
 
 class dp_key(object):
 	def __str__(self):
@@ -202,4 +203,9 @@ def import_profile_single(root_dir_path):
 	this_profile.load_from_path(root_dir_path)
 	return this_profile
 
-
+class dp_global_settings:
+    def __init__(self, global_header_lines=None):
+        if global_header_lines is None:
+            self.global_header_lines = []
+        else:
+            self.global_header_lines = global_header_lines
