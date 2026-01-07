@@ -831,6 +831,15 @@ def save_everything(save_path, dp_obj):
             pf_info_file.write(f"{index+1} {this_profile.name}\n")
         pf_info_file.close()
 
+        global_header_file_path = os.path.join(save_path, global_header_dot_txt)
+        print("global_header_file_path:", global_header_file_path)
+        if this_global_setting.global_header_line_list is not None:
+            global_header_file = open(global_header_file_path, "w")
+            global_header_file.writelines((line + '\n' for line in this_global_setting.global_header_line_list))
+            global_header_file.close()
+        else:
+            delete_path(global_header_file_path)
+
         for this_profile in profile_list:
             os.mkdir(this_profile.path)
             time.sleep(0.05)

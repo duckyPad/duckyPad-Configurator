@@ -106,6 +106,7 @@ MAX_PROFILE_COUNT = 64
 MAX_KEY_COUNT = (MECH_OBSW_COUNT + ROTARY_ENCODER_SW_COUNT + ONBOARD_SPARE_GPIO_COUNT + MAX_EXPANSION_CHANNEL)
 
 profile_info_dot_txt = "profile_info.txt"
+global_header_dot_txt = "global_header.txt"
 
 HID_COMMAND_READ_FILE = 11
 
