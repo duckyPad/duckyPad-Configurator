@@ -7,6 +7,78 @@ ask_user_to_select_a_duckypad
 check_syntax
 
 script_textbox_modified
+
+
+check_global_header_syntax
+
+FUN test()
+    RETURN
+END_FUN
+
+
+
+ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
+    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list) #result_dict, bin_arr 
+
+from tkinter import *
+from tkinter import font
+
+# Assuming root, scaled_size, and get_monospace_font are defined elsewhere
+# specific to your app context.
+
+def edit_header_button_click():
+    header_edit_window = Toplevel(root)
+    header_edit_window.title("Edit Global Header")
+    header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
+
+    # --- 1. Define the actual syntax check function ---
+    def check_syntax():
+        # Safety check: ensure widget still exists before running logic
+        if not header_script_textbox.winfo_exists():
+            return
+            
+        print("Checking syntax now...")
+        # Get current text content
+        content = header_script_textbox.get("1.0", "end-1c")
+        # Add your syntax checking logic here
+        
+    # --- 2. Define the scheduler (Debounce Logic) ---
+    def schedule_syntax_check(event=None):
+        # If a timer is already pending, cancel it
+        if hasattr(header_script_textbox, '_syntax_timer'):
+            header_edit_window.after_cancel(header_script_textbox._syntax_timer)
+        
+        # Schedule the new check for 500ms
+        header_script_textbox._syntax_timer = header_edit_window.after(500, check_syntax)
+
+    top_label = Label(
+        header_edit_window, 
+        text="To include this header, add \"IMPORT GLOBAL_HEADER\" to your script.",
+        justify="center",
+        wraplength=scaled_size(600)
+    )
+    top_label.pack(side="top", pady=(10, 5))
+
+    bottom_label = Label(
+        header_edit_window, 
+        text="Sed do eiusmod tempor incididunt ut labore et dolore.",
+        justify="center"
+    )
+    bottom_label.pack(side="bottom", pady=(5, 10))
+
+    script_box_font = get_monospace_font()
+    char_width = font.Font(font=script_box_font).measure("0")
+    header_script_textbox = Text(header_edit_window, relief='solid', font=script_box_font, borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word", undo=True)
+    header_script_textbox.configure(font=script_box_font, tabs=(char_width * 2))
+    header_script_textbox.pack(side="top", fill="both", expand=True, padx=10)
+
+    # --- 3. Bind the event ---
+    # Trigger on KeyRelease so it counts from when the user lifts their finger
+    header_script_textbox.bind("<KeyRelease>", schedule_syntax_check)
+
+    header_edit_window.grab_set()
+
+# ----------
     
     for this_pf in profile_list:
         print(this_pf.name)

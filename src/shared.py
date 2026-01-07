@@ -55,10 +55,10 @@ def open_duckypad_troubleshooting_url():
 def rgb_to_hex(rgb_tuple):
     return '#%02x%02x%02x' % rgb_tuple
 
-def make_list_of_ds_line_obj_from_str_listing(pgm_listing):
+def make_list_of_ds_line_obj_from_str_listing(pgm_listing, source_fn=None):
     obj_list = []
     for index, item in enumerate(pgm_listing):
-        obj_list.append(ds_line(item, index+1))
+        obj_list.append(ds_line(item, index+1, source_fn=source_fn))
     return obj_list
 
 def make_final_script(ds_key, pgm_listing):

@@ -591,15 +591,21 @@ reserved_variables_dict = {
     DUMMY_VAR_NAME: OP_DROP_REPLACEMENT_ADDR,
 }
 
+DSVM_DEFAULT_FN = "main"
+
 class ds_line:
-    def __init__(self, content, orig_lnum_sf1=0, indent_lvl=0):
+    def __init__(self, content, orig_lnum_sf1=0, indent_lvl=0, source_fn=None):
         self.orig_lnum_sf1 = orig_lnum_sf1
         self.content = content
         self.py_lnum_sf1 = None
         self.indent_level = indent_lvl
+        if source_fn is None:
+            self.source_fn = DSVM_DEFAULT_FN
+        else:
+            self.source_fn = source_fn
 
     def __repr__(self):
-        return f"ds_line({self.content!r}, ogl={self.orig_lnum_sf1!r}, pyl={self.py_lnum_sf1!r})"
+        return f"ds_line({self.content!r}, ogl={self.orig_lnum_sf1!r}, pyl={self.py_lnum_sf1!r}, sfn={self.source_fn!r})"
 
 PARSE_OK = 0
 PARSE_ERROR = 1

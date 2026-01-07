@@ -1068,6 +1068,20 @@ def edit_header_button_click():
     header_edit_window = Toplevel(root)
     header_edit_window.title("Edit Global Header")
     header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
+
+    def check_global_header_syntax():
+        if not header_script_textbox.winfo_exists():
+            return
+        print("Checking syntax now...")
+        program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
+        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn="global_header")
+        print(ds_line_obj_list)
+
+    def schedule_syntax_check(event=None):
+        if hasattr(header_script_textbox, '_syntax_timer'):
+            header_edit_window.after_cancel(header_script_textbox._syntax_timer)
+        header_script_textbox._syntax_timer = header_edit_window.after(500, check_global_header_syntax)
+
     # "To include this header, add IMPORT GLOBAL_HEADER to your script."
     top_label = Label(
         header_edit_window, 
@@ -1090,6 +1104,7 @@ def edit_header_button_click():
     header_script_textbox.configure(font=script_box_font, tabs=(char_width * 2))
     header_script_textbox.pack(side="top", fill="both", expand=True, padx=10)
 
+    header_script_textbox.bind("<KeyRelease>", schedule_syntax_check)
     header_edit_window.grab_set()
 
 edit_header_button = Button(root_folder_lf, text="Edit Header", command=edit_header_button_click, state=DISABLED)
