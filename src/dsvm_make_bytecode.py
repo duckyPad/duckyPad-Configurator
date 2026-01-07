@@ -160,7 +160,8 @@ def classify_name(name: str, current_function: str | None, ctx_dict) -> int:
                 
     if is_known_global(name, ctx_dict):
         return SymType.GLOBAL_VAR
-    raise ValueError(f'Unknown symbol "{name}" in function "{current_function}()"')
+    func_err_msg = f' in function "{current_function}()"' if current_function else ''
+    raise ValueError(f'Unknown symbol "{name}"{func_err_msg}')
 
 def visit_name_node(node, ctx_dict, inst_list):
     og_ds_line = ctx_dict["og_ds_line"]
@@ -634,7 +635,7 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
             is_success=False,
             error_comment=rdict.get("comments", ''),
             error_line_str = rdict.get('error_line_str', ''),
-            error_line_number_starting_from_1=rdict.get('error_line_number_starting_from_1', 0)
+            error_line_number_starting_from_1=rdict.get('error_line_number_starting_from_1', 0),
         )
         return comp_result
 
@@ -654,7 +655,7 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
             is_success = False,
             error_comment = e.msg,
             error_line_number_starting_from_1=get_orig_ds_lnumsf1_from_py_lnumsf1(rdict, e.lineno, onerr=0),
-            error_line_str = e.text
+            error_line_str = e.text,
         )
         return comp_result
     symtable_root = symtable.symtable(source, filename="ds2py", compile_type="exec")
@@ -698,7 +699,7 @@ def make_dsb_no_exception(program_listing, should_print=False, remove_unused_fun
             is_success=False,
             error_comment = str(e),
             error_line_number_starting_from_1 = global_context_dict.get('latest_orig_ds_lnum_sf1', 0),
-            error_line_str = get_orig_ds_line_from_orig_ds_lnum_sf1(global_context_dict, global_context_dict.get('latest_orig_ds_lnum_sf1', ''))
+            error_line_str = get_orig_ds_line_from_orig_ds_lnum_sf1(global_context_dict, global_context_dict.get('latest_orig_ds_lnum_sf1', '')),
         )
         return comp_result
 
@@ -727,12 +728,13 @@ if __name__ == "__main__":
         line = line.rstrip("\r\n")
         program_listing.append(ds_line(line, index + 1))
 
-    import_str_dict = {'IMPORT_GH': ['FUN test(a, b)', '    VAR test = 10', '    RETURN a+b*test', 'END_FUN']}
+    import_str_dict = {'IMPORT_GH': ['FUN test(a, b)', '    VAR test d= 10', '    RETURN a+b*test', 'END_FUN']}
 
     comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_strlist_dict=import_str_dict)
     if comp_result.is_success is False:
         error_msg = (f"Error on Line {comp_result.error_line_number_starting_from_1}: {comp_result.error_comment}\n\t{comp_result.error_line_str}")
         print(error_msg)
+        print(comp_result)
         exit()
 
     print_bin_output(comp_result.bin_array)

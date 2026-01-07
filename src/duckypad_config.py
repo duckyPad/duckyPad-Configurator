@@ -1106,6 +1106,13 @@ def edit_header_button_click(global_setting_obj):
     )
     top_label.pack(side="top", pady=(10, 5))
 
+    save_btn = Button(
+        header_edit_window, 
+        text="Save & Close", 
+        command=lambda: [check_global_header_syntax(), header_edit_window.destroy(), check_syntax(force=True)]
+    )
+    save_btn.pack(side="bottom", fill="x", padx=10, pady=(0, 10))
+
     bottom_label = Label(
         header_edit_window, 
         text="Initializing...", # Placeholder
@@ -1705,7 +1712,7 @@ on_release_rb.place(x=scaled_size(150), y=scaled_size(20))
 root.update()
 
 last_check_syntax_listing = []
-def check_syntax():
+def check_syntax(force=False):
     global last_check_syntax_listing
     if is_key_selected() == False:
         return
@@ -1715,7 +1722,7 @@ def check_syntax():
     program_listing = profile_list[profile_index].keylist[selected_key].script.split('\n')
     if on_press_release_rb_var.get() == 1:
         program_listing = profile_list[profile_index].keylist[selected_key].script_on_release.split('\n')
-    if program_listing == last_check_syntax_listing:
+    if force is False and program_listing == last_check_syntax_listing:
         # print("check_syntax: same")
         return
     import_name_to_strlist_dict = {global_header_source_tag_NO_SPACE:this_global_setting.global_header_line_list}
@@ -1728,7 +1735,10 @@ def check_syntax():
         return
     error_lnum = comp_result.error_line_number_starting_from_1
     error_text = comp_result.error_comment
-    script_textbox.tag_add("error", str(error_lnum)+".0", str(error_lnum)+".0 lineend")
+    if error_lnum >= 0:
+        script_textbox.tag_add("error", str(error_lnum)+".0", str(error_lnum)+".0 lineend")
+    else:
+        error_text = "Errors in IMPORT_GH!\nClick \"Edit Headers\" Button."
     check_syntax_label.config(text=error_text, fg='red')
 
 check_syntax_label = Label(scripts_lf, text="")

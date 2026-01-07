@@ -21,7 +21,8 @@ def line_has_unconsumed_stack_value(line_obj):
         nodes = ast.parse(line_obj.content).body
         return bool(nodes and isinstance(nodes[0], ast.Expr))
     except Exception as e:
-        print("line_has_unconsumed_stack_value:", e)
+        pass
+        # print("line_has_unconsumed_stack_value:", e)
     return False
 
 def run_all(program_listing):
