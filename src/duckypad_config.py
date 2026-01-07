@@ -444,6 +444,7 @@ def ask_user_to_select_a_duckypad(dp_info_list):
     dp_select_window.geometry(f"{scaled_size(360)}x{scaled_size(320)}")
     dp_select_window.resizable(width=FALSE, height=FALSE)
     dp_select_window.grab_set()
+    dp_select_window.focus_set()
 
     dp_select_text_label = Label(master=dp_select_window, text="Multiple duckyPads detected!\nDouble click to select one")
     dp_select_text_label.place(x=scaled_size(90), y=scaled_size(10))
@@ -1146,6 +1147,7 @@ def edit_header_button_click(global_setting_obj):
     header_edit_window = Toplevel(root)
     header_edit_window.title("Edit Global Header")
     header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
+    
 
     # 1. Setup UI elements first so the function below can reference them
     top_label = Label(
@@ -1204,6 +1206,11 @@ def edit_header_button_click(global_setting_obj):
             end_index = f"{line_no + 1}.0" # +1 to highlight the whole line
             header_script_textbox.tag_add("error_highlight", start_index, end_index)
 
+    def save_and_close(event=None):
+        check_global_header_syntax()
+        header_edit_window.destroy()
+        check_syntax(force=True)
+
     def schedule_syntax_check(event=None):
         if hasattr(header_script_textbox, '_syntax_timer'):
             header_edit_window.after_cancel(header_script_textbox._syntax_timer)
@@ -1214,10 +1221,13 @@ def edit_header_button_click(global_setting_obj):
     header_script_textbox.bind("<<Cut>>", schedule_syntax_check)
     header_script_textbox.bind("<<Undo>>", schedule_syntax_check)
     header_script_textbox.bind("<<Redo>>", schedule_syntax_check)
-    
+    header_edit_window.bind("<Escape>", save_and_close)
+    save_btn.config(command=save_and_close)
+
     # 4. Run the check immediately on window open
     check_global_header_syntax()
     header_edit_window.grab_set()
+    header_script_textbox.focus_set()
 
     root.wait_window(header_edit_window)
     update_header_button_color(edit_header_button, global_setting_obj)
@@ -1870,6 +1880,7 @@ def export_profile_click():
     pf_select_window.geometry(f"{scaled_size(256)}x{scaled_size(390)}")
     pf_select_window.resizable(width=FALSE, height=FALSE)
     pf_select_window.grab_set()
+    pf_select_window.focus_set()
 
     dp_select_text_label = Label(master=pf_select_window, text="Select the Profile(s) to Export:")
     dp_select_text_label.place(x=scaled_size(50), y=scaled_size(10))
