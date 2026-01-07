@@ -941,5 +941,11 @@ def is_ds_keyword(name):
         return True
     return False
 
+def make_list_of_ds_line_obj_from_str_listing(pgm_listing, source_fn=None):
+    obj_list = []
+    for index, item in enumerate(pgm_listing):
+        obj_list.append(ds_line(item, index+1, source_fn=source_fn))
+    return obj_list
+
 if __name__ == "__main__":
     generate_c_code()

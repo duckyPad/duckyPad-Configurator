@@ -384,7 +384,7 @@ def check_var_declare(pgm_line, var_dict, fss):
     return PARSE_OK, ''
 
 # this makes sure the code is suitable for converting into python
-def single_pass(program_listing, define_dict):
+def single_pass(program_listing, define_dict, import_name_to_line_obj_dict=None):
     loop_numbers = set()
     func_table = {}
     if_take_table = {}
@@ -612,10 +612,30 @@ def get_default_def_dict():
     }
     return default_dict
 
-def run_all(program_listing):
+def make_import_name_to_lineobj_dict(import_name_to_strlist_dict):
+    lineobj_dict = {}
+    if import_name_to_strlist_dict is None:
+        return lineobj_dict
+    for key in import_name_to_strlist_dict:
+        lineobj_dict[key] = make_list_of_ds_line_obj_from_str_listing(import_name_to_strlist_dict[key], source_fn=key)
+    return lineobj_dict
+
+already_imported_header_set = set()
+def get_import_lineobjs(first_word, import_name_to_line_obj_dict):
+    new_lineobj_list = []
+    if first_word in import_name_to_line_obj_dict:
+        if first_word in already_imported_header_set:
+            return True, []
+        new_lineobj_list += import_name_to_line_obj_dict[first_word]
+        already_imported_header_set.add(first_word)
+    return False, new_lineobj_list
+
+def run_all(program_listing, import_name_to_strlist_dict=None):
     all_def_dict = get_default_def_dict()
+    already_imported_header_set.clear()
+    import_name_to_line_obj_dict = make_import_name_to_lineobj_dict(import_name_to_strlist_dict)
     # ----------- expand STRING_BLOCK and STRINGLN_BLOCK, split STRING and STRINGLN ----------
-    rdict = single_pass(program_listing, all_def_dict)
+    rdict = single_pass(program_listing, all_def_dict, import_name_to_line_obj_dict)
     if rdict['is_success'] is False:
         return rdict
     
@@ -634,6 +654,13 @@ def run_all(program_listing):
             continue
 
         first_word = line_obj.content.split(" ")[0]
+        
+        is_already_imported, imported_lineobj_list = get_import_lineobjs(first_word, import_name_to_line_obj_dict)
+        if is_already_imported:
+            continue
+        if len(imported_lineobj_list):
+            new_program_listing += imported_lineobj_list
+            continue
 
         if first_word in [kw_STRINGLN_BLOCK, kw_END_STRINGLN, kw_STRING_BLOCK, kw_END_STRING]:
             continue
@@ -678,7 +705,7 @@ def run_all(program_listing):
 
     program_listing = new_program_listing
 
-    rdict = single_pass(program_listing, all_def_dict)
+    rdict = single_pass(program_listing, all_def_dict, import_name_to_line_obj_dict)
     if rdict['is_success'] is False:
         return rdict
 
@@ -766,7 +793,7 @@ def run_all(program_listing):
 
     second_pass_program_listing = new_program_listing
     # -----------------
-    return single_pass(second_pass_program_listing, all_def_dict)
+    return single_pass(second_pass_program_listing, all_def_dict, import_name_to_line_obj_dict)
 
 if __name__ == "__main__":
     # Require at least input and output arguments

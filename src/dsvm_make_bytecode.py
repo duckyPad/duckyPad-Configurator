@@ -102,7 +102,7 @@ AST_ARITH_NODES = (
     ast.unaryop,
 )
 
-def get_orig_ds_line_from_py_lnum(rdict, this_pylnum_sf1):
+def get_orig_ds_line_from_py_lnum_has_exception(rdict, this_pylnum_sf1):
     if this_pylnum_sf1 is None:
         return ""
     og_index_sf0 = None
@@ -113,6 +113,13 @@ def get_orig_ds_line_from_py_lnum(rdict, this_pylnum_sf1):
     if og_index_sf0 is None:
         return ""
     return rdict['orig_listing'][og_index_sf0].content
+
+def get_orig_ds_line_from_py_lnum(rdict, this_pylnum_sf1):
+    try:
+        return get_orig_ds_line_from_py_lnum_has_exception(rdict, this_pylnum_sf1)
+    except Exception as e:
+        print(f"get_orig_ds_line_from_py_lnum: {e}")
+    return ""
 
 def search_in_symtable(name: str, table: symtable.SymbolTable):
     try:
@@ -614,13 +621,13 @@ def replace_dummy_with_drop_from_context_dict(ctx_dict):
     for key in ctx_dict['func_assembly_dict']:
         replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
 
-def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True, header_dict=None):
+def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True, import_name_to_strlist_dict=None):
     global global_context_dict
     global print_asm
     print_asm = should_print
 
     orig_listing = copy.deepcopy(program_listing)
-    rdict = dsvm_preprocessor.run_all(program_listing)
+    rdict = dsvm_preprocessor.run_all(program_listing, import_name_to_strlist_dict=import_name_to_strlist_dict)
 
     if rdict['is_success'] is False:
         comp_result = compile_result(
@@ -680,11 +687,11 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
     )
     return comp_result
 
-def make_dsb_no_exception(program_listing, should_print=False, remove_unused_func=True, header_dict=None):
+def make_dsb_no_exception(program_listing, should_print=False, remove_unused_func=True, import_name_to_strlist_dict=None):
     global print_asm
     print_asm = should_print
     try:
-        return make_dsb_with_exception(program_listing, should_print, remove_unused_func, header_dict)
+        return make_dsb_with_exception(program_listing, should_print, remove_unused_func, import_name_to_strlist_dict)
     except Exception as e:
         print("MDNE:", traceback.format_exc())
         comp_result = compile_result(
@@ -720,7 +727,9 @@ if __name__ == "__main__":
         line = line.rstrip("\r\n")
         program_listing.append(ds_line(line, index + 1))
 
-    comp_result = make_dsb_no_exception(program_listing, should_print=True)
+    import_str_dict = {'IMPORT_GH': ['FUN test(a, b)', '    VAR test = 10', '    RETURN a+b*test', 'END_FUN']}
+
+    comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_strlist_dict=import_str_dict)
     if comp_result.is_success is False:
         error_msg = (f"Error on Line {comp_result.error_line_number_starting_from_1}: {comp_result.error_comment}\n\t{comp_result.error_line_str}")
         print(error_msg)

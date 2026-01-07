@@ -1101,7 +1101,7 @@ def edit_header_button_click(global_setting_obj):
     # 1. Setup UI elements first so the function below can reference them
     top_label = Label(
         header_edit_window, 
-        text="Add  \"IMPORT GLOBAL_HEADER\"  to your script to include this header AS-IS.",
+        text=f"To include this global header, add  \"{global_header_source_tag_NO_SPACE}\"  to your script.",
         justify="center",
     )
     top_label.pack(side="top", pady=(10, 5))
@@ -1135,7 +1135,7 @@ def edit_header_button_click(global_setting_obj):
 
         program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
         global_setting_obj.global_header_line_list = program_listing
-        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn=global_header_source_tag)
+        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn=global_header_source_tag_NO_SPACE)
         comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, remove_unused_func=False)
         
         if comp_result.is_success:
@@ -1718,11 +1718,10 @@ def check_syntax():
     if program_listing == last_check_syntax_listing:
         # print("check_syntax: same")
         return
-    header_dict = {global_header_source_tag:this_global_setting.global_header_line_list}
-    print(header_dict)
+    import_name_to_strlist_dict = {global_header_source_tag_NO_SPACE:this_global_setting.global_header_line_list}
     last_check_syntax_listing = program_listing.copy()
     ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
-    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, header_dict=header_dict)
+    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, import_name_to_strlist_dict=import_name_to_strlist_dict)
     script_textbox.tag_remove("error", '1.0', 'end')
     if comp_result.is_success:
         check_syntax_label.config(text="Code seems OK...", fg="green")       
