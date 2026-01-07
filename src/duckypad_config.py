@@ -237,6 +237,31 @@ def reset_key_button_relief():
     for item in key_button_list:
         item.config(borderwidth=1, relief="solid")
 
+def add_right_click_menu(text_widget):
+    menu = Menu(text_widget, tearoff=0)
+    menu.add_command(label="Cut", command=lambda: text_widget.event_generate("<<Cut>>"))
+    menu.add_command(label="Copy", command=lambda: text_widget.event_generate("<<Copy>>"))
+    menu.add_command(label="Paste", command=lambda: text_widget.event_generate("<<Paste>>"))
+    menu.add_separator()
+    menu.add_command(label="Select All", command=lambda: text_widget.event_generate("<<SelectAll>>"))
+
+    def show_menu(event):
+        try:
+            text_widget.get("sel.first", "sel.last")
+            state = "normal"
+        except TclError:
+            state = "disabled"
+        menu.entryconfig("Cut", state=state)
+        menu.entryconfig("Copy", state=state)
+        try:
+            menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            menu.grab_release()
+
+    text_widget.bind("<Button-3>", show_menu)
+    text_widget.bind("<Button-2>", show_menu)
+    text_widget.bind("<Control-Button-1>", show_menu)
+
 def ui_reset():
     global selected_key
     profile_add_button.config(state=DISABLED)
@@ -1125,7 +1150,7 @@ def edit_header_button_click(global_setting_obj):
     header_script_textbox = Text(header_edit_window, relief='solid', font=script_box_font, borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word", undo=True)
     header_script_textbox.configure(font=script_box_font, tabs=(char_width * 2))
     header_script_textbox.pack(side="top", fill="both", expand=True, padx=10)
-
+    add_right_click_menu(header_script_textbox)
     header_script_textbox.tag_config("error_highlight", background="yellow")
 
     # Preload the existing content
@@ -1684,31 +1709,7 @@ root.update()
 script_textbox.bind("<<Modified>>", script_textbox_event)
 script_textbox.tag_configure("error", background="#ffff00")
 
-context_menu = Menu(script_textbox, tearoff=0)
-context_menu.add_command(label="Cut", command=lambda: script_textbox.event_generate("<<Cut>>"))
-context_menu.add_command(label="Copy", command=lambda: script_textbox.event_generate("<<Copy>>"))
-context_menu.add_command(label="Paste", command=lambda: script_textbox.event_generate("<<Paste>>"))
-context_menu.add_separator()
-context_menu.add_command(label="Select All", command=lambda: script_textbox.event_generate("<<SelectAll>>"))
-
-def show_context_menu(event):
-    try:
-        try:
-            script_textbox.get("sel.first", "sel.last")
-            state = "normal"
-        except TclError:
-            state = "disabled"
-        # Update state of Cut/Copy dynamically
-        context_menu.entryconfig("Cut", state=state)
-        context_menu.entryconfig("Copy", state=state)
-        # Display the menu at the cursor position
-        context_menu.tk_popup(event.x_root, event.y_root)
-    finally:
-        # Release the grab to ensure the menu closes properly after selection
-        context_menu.grab_release()
-
-script_textbox.bind("<Button-3>", show_context_menu)
-script_textbox.bind("<Button-2>", show_context_menu)
+add_right_click_menu(script_textbox)
 
 def on_press_rb_click():
     profile_index = profile_lstbox.curselection()[0]
