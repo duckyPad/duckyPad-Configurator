@@ -11,9 +11,12 @@ script_textbox_modified
 
 check_global_header_syntax
 
-FUN test()
-    RETURN
+
+FUN test(a, b)
+    VAR test = 10
+    RETURN a+b*test
 END_FUN
+
 
 
 

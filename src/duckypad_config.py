@@ -1064,36 +1064,24 @@ save_button.place(x=scaled_size(630+170), y=0, width=scaled_size(65), height=sca
 backup_button = Button(root_folder_lf, text="Backups", command=backup_button_click)
 backup_button.place(x=scaled_size(700+170), y=0, width=scaled_size(65), height=scaled_size(25))
 
+from tkinter import Toplevel, Label, Text, Button, font, DISABLED
+
 def edit_header_button_click():
     header_edit_window = Toplevel(root)
     header_edit_window.title("Edit Global Header")
     header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
 
-    def check_global_header_syntax():
-        if not header_script_textbox.winfo_exists():
-            return
-        print("Checking syntax now...")
-        program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
-        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn="global_header")
-        print(ds_line_obj_list)
-
-    def schedule_syntax_check(event=None):
-        if hasattr(header_script_textbox, '_syntax_timer'):
-            header_edit_window.after_cancel(header_script_textbox._syntax_timer)
-        header_script_textbox._syntax_timer = header_edit_window.after(500, check_global_header_syntax)
-
-    # "To include this header, add IMPORT GLOBAL_HEADER to your script."
+    # 1. Setup UI elements first so the function below can reference them
     top_label = Label(
         header_edit_window, 
         text="To include this header, add \"IMPORT GLOBAL_HEADER\" to your script.",
         justify="center",
-        wraplength=scaled_size(600) # Optional: Wraps text if window is narrow
     )
     top_label.pack(side="top", pady=(10, 5))
 
     bottom_label = Label(
         header_edit_window, 
-        text="Sed do eiusmod tempor incididunt ut labore et dolore.",
+        text="Initializing...", # Placeholder
         justify="center"
     )
     bottom_label.pack(side="bottom", pady=(5, 10))
@@ -1104,8 +1092,43 @@ def edit_header_button_click():
     header_script_textbox.configure(font=script_box_font, tabs=(char_width * 2))
     header_script_textbox.pack(side="top", fill="both", expand=True, padx=10)
 
+    header_script_textbox.tag_config("error_highlight", background="yellow")
+
+    def check_global_header_syntax():
+        if not header_script_textbox.winfo_exists():
+            return
+            
+        print("Checking syntax now...")
+        
+        header_script_textbox.tag_remove("error_highlight", "1.0", "end")
+
+        program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
+        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn="global_header")
+        comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, remove_unused_func=False)
+        
+        if comp_result.is_success:
+            bottom_label.config(text="Code seems OK...", fg="green")
+        else:
+            bottom_label.config(text=comp_result.error_comment, fg="red")
+            line_no = comp_result.error_line_number_starting_from_1
+            start_index = f"{line_no}.0"
+            end_index = f"{line_no + 1}.0" # +1 to highlight the whole line
+            header_script_textbox.tag_add("error_highlight", start_index, end_index)
+
+    def schedule_syntax_check(event=None):
+        if hasattr(header_script_textbox, '_syntax_timer'):
+            header_edit_window.after_cancel(header_script_textbox._syntax_timer)
+        header_script_textbox._syntax_timer = header_edit_window.after(500, check_global_header_syntax)
+
     header_script_textbox.bind("<KeyRelease>", schedule_syntax_check)
+    
+    # 4. Run the check immediately on window open
+    check_global_header_syntax()
     header_edit_window.grab_set()
+
+# Button definition remains the same
+edit_header_button = Button(root_folder_lf, text="Edit Header", command=edit_header_button_click, state=DISABLED) # Note: Enabled elsewhere?
+edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))
 
 edit_header_button = Button(root_folder_lf, text="Edit Header", command=edit_header_button_click, state=DISABLED)
 edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))

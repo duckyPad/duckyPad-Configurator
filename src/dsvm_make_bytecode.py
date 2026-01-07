@@ -684,7 +684,7 @@ def make_dsb_no_exception(program_listing, should_print=False, remove_unused_fun
     global print_asm
     print_asm = should_print
     try:
-        return make_dsb_with_exception(program_listing, should_print)
+        return make_dsb_with_exception(program_listing, should_print, remove_unused_func)
     except Exception as e:
         print("MDNE:", traceback.format_exc())
         comp_result = compile_result(
