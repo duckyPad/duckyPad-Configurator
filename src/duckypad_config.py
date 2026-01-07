@@ -1150,6 +1150,7 @@ def edit_header_button_click(global_setting_obj):
         else:
             bottom_label.config(text=comp_result.error_comment, fg="red")
             line_no = comp_result.error_line_number_starting_from_1
+            line_no = abs(line_no)
             start_index = f"{line_no}.0"
             end_index = f"{line_no + 1}.0" # +1 to highlight the whole line
             header_script_textbox.tag_add("error_highlight", start_index, end_index)
