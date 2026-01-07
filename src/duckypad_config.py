@@ -1067,6 +1067,7 @@ backup_button.place(x=scaled_size(700+170), y=0, width=scaled_size(65), height=s
 from tkinter import Toplevel, Label, Text, Button, font, DISABLED
 
 def edit_header_button_click():
+    global this_global_setting
     header_edit_window = Toplevel(root)
     header_edit_window.title("Edit Global Header")
     header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
@@ -1103,6 +1104,7 @@ def edit_header_button_click():
         header_script_textbox.tag_remove("error_highlight", "1.0", "end")
 
         program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
+        this_global_setting.global_header_line_list = program_listing
         ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn="global_header")
         comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, remove_unused_func=False)
         
