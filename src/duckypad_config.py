@@ -233,6 +233,9 @@ def get_monospace_font():
         family = "Courier"
     return (family, 10)
 
+def get_import_name_to_strlist_dict():
+    return {global_header_source_tag_NO_SPACE:this_global_setting.global_header_line_list}
+
 def reset_key_button_relief():
     for item in key_button_list:
         item.config(borderwidth=1, relief="solid")
@@ -856,14 +859,15 @@ def compile_all_scripts():
                     continue
                 text_list = make_final_script(this_key, this_key.script.lstrip().split('\n'))
                 obj_list = make_list_of_ds_line_obj_from_str_listing(text_list)
-                comp_result = dsvm_make_bytecode.make_dsb_with_exception(obj_list)
+
+                comp_result = dsvm_make_bytecode.make_dsb_with_exception(obj_list, import_name_to_strlist_dict=get_import_name_to_strlist_dict())
                 if comp_result.is_success is False:
                     raise ValueError("Compile failed")
                 this_key.binary_array = comp_result.bin_array
                 if len(this_key.script_on_release.lstrip()) > 0:
                     tl_or = make_final_script(this_key, this_key.script_on_release.lstrip().split('\n'))
                     ol_or = make_list_of_ds_line_obj_from_str_listing(tl_or)
-                    comp_result = dsvm_make_bytecode.make_dsb_with_exception(ol_or)
+                    comp_result = dsvm_make_bytecode.make_dsb_with_exception(ol_or, import_name_to_strlist_dict=get_import_name_to_strlist_dict())
                     if comp_result.is_success is False:
                         raise ValueError("Compile failed")
                     this_key.binary_array_on_release = comp_result.bin_array
@@ -2049,10 +2053,9 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-
-THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
-select_root_folder("sample_dp24", is_dir_for_dp24=True)
-edit_header_button_click(this_global_setting)
+# THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+# select_root_folder("sample_dp24", is_dir_for_dp24=True)
+# edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
