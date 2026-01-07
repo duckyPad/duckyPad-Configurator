@@ -11,7 +11,8 @@ duckypad_file_whitelist = [
     "dpkm_",
     "config.txt",
     "key",
-    profile_info_dot_txt
+    profile_info_dot_txt,
+    global_header_dot_txt,
 ]
 
 duckypad_file_blacklist = [

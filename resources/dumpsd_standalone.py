@@ -115,7 +115,7 @@ def dump_sd(dp_path, dump_dir_path):
             raw_file_content_bytes = bytes(duckypad_to_pc_buf[file_name_end:file_content_end])
             save_to_file(current_dir, dump_dir_path, this_file_name, raw_file_content_bytes)
 
-    md5_miss_list.append(('', 'profile_info.txt'))
+    md5_miss_list.append(('', profile_info_dot_txt))
     for item in md5_miss_list:
         sd_dir = item[0]
         sd_file_name = item[1]

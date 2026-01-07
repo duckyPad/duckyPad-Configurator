@@ -305,6 +305,15 @@ def convert_key_order_dp20_to_dp24(profile_list):
             new_klist[dp24_index] = this_key
         this_profile.keylist = new_klist
 
+def load_global_header(path, setting_obj):
+    try:
+        with open(path, 'r') as f:
+            cleaned_lines = [line.rstrip('\r\n') for line in f]
+        setting_obj.global_header_line_list = cleaned_lines
+    except Exception as e:
+        print(f"load_global_header: {e}")
+        return
+
 def select_root_folder(root_path=None, is_dir_for_dp24=None):
     global profile_list
     global dp_root_folder_path
@@ -328,6 +337,8 @@ def select_root_folder(root_path=None, is_dir_for_dp24=None):
     dp_root_folder_path = root_path
     dp_root_folder_display.set("Selected: " + root_path)
     profile_list = duck_objs.build_profile(root_path)
+    global_header_file_path = os.path.join(root_path, global_header_dot_txt)
+    load_global_header(global_header_file_path, this_global_setting)
 
     if is_dir_for_dp24 is False:
         convert_key_order_dp20_to_dp24(profile_list)

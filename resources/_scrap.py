@@ -10,7 +10,7 @@ script_textbox_modified
 
 
 check_global_header_syntax
-
+select_root_folder
 
 FUN test(a, b)
     VAR test = 10
