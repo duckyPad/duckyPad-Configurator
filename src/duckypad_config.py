@@ -234,7 +234,7 @@ def get_monospace_font():
     return (family, 10)
 
 def get_import_name_to_strlist_dict():
-    return {global_header_source_tag_NO_SPACE:this_global_setting.global_header_line_list}
+    return {user_header_source_tag_NO_SPACE:this_global_setting.user_header_line_list}
 
 def reset_key_button_relief():
     for item in key_button_list:
@@ -357,13 +357,13 @@ def convert_key_order_dp20_to_dp24(profile_list):
             new_klist[dp24_index] = this_key
         this_profile.keylist = new_klist
 
-def load_global_header(path, setting_obj):
+def load_user_header(path, setting_obj):
     try:
         with open(path, 'r') as f:
             cleaned_lines = [line.rstrip('\r\n') for line in f]
-        setting_obj.global_header_line_list = cleaned_lines
+        setting_obj.user_header_line_list = cleaned_lines
     except Exception as e:
-        print(f"load_global_header: {e}")
+        print(f"load_user_header: {e}")
         return
 
 def select_root_folder(root_path=None, is_dir_for_dp24=None):
@@ -389,8 +389,8 @@ def select_root_folder(root_path=None, is_dir_for_dp24=None):
     dp_root_folder_path = root_path
     dp_root_folder_display.set("Selected: " + root_path)
     profile_list = duck_objs.build_profile(root_path)
-    global_header_file_path = os.path.join(root_path, global_header_dot_txt)
-    load_global_header(global_header_file_path, this_global_setting)
+    user_header_file_path = os.path.join(root_path, user_header_dot_txt)
+    load_user_header(user_header_file_path, this_global_setting)
 
     if is_dir_for_dp24 is False:
         convert_key_order_dp20_to_dp24(profile_list)
@@ -896,14 +896,14 @@ def save_everything(save_path, dp_obj):
             pf_info_file.write(f"{index+1} {this_profile.name}\n")
         pf_info_file.close()
 
-        global_header_file_path = os.path.join(save_path, global_header_dot_txt)
-        print("global_header_file_path:", global_header_file_path)
-        if this_global_setting.global_header_line_list is not None:
-            global_header_file = open(global_header_file_path, "w")
-            global_header_file.writelines((line + '\n' for line in this_global_setting.global_header_line_list))
-            global_header_file.close()
+        user_header_file_path = os.path.join(save_path, user_header_dot_txt)
+        print("user_header_file_path:", user_header_file_path)
+        if this_global_setting.user_header_line_list is not None:
+            user_header_file = open(user_header_file_path, "w")
+            user_header_file.writelines((line + '\n' for line in this_global_setting.user_header_line_list))
+            user_header_file.close()
         else:
-            delete_path(global_header_file_path)
+            delete_path(user_header_file_path)
 
         for this_profile in profile_list:
             os.mkdir(this_profile.path)
@@ -1140,8 +1140,8 @@ backup_button.place(x=scaled_size(700+170), y=0, width=scaled_size(65), height=s
 
 def update_header_button_color(btn_widget, setting_obj):
     has_content = False
-    if setting_obj.global_header_line_list:
-        has_content = any(line.strip() for line in setting_obj.global_header_line_list)
+    if setting_obj.user_header_line_list:
+        has_content = any(line.strip() for line in setting_obj.user_header_line_list)
     if has_content:
         btn_widget.configure(highlightbackground='PaleGreen3')
     else:
@@ -1155,7 +1155,7 @@ def edit_header_button_click(global_setting_obj):
     # 1. Setup UI elements first so the function below can reference them
     top_label = Label(
         header_edit_window, 
-        text=f"To include this header, add  \"{global_header_source_tag_NO_SPACE}\"  to your script.",
+        text=f"To include this header, add  \"{user_header_source_tag_NO_SPACE}\"  to your script.",
         justify="center",
     )
     top_label.pack(side="top", pady=(10, 5))
@@ -1163,7 +1163,7 @@ def edit_header_button_click(global_setting_obj):
     save_btn = Button(
         header_edit_window, 
         text="Save & Close", 
-        command=lambda: [check_global_header_syntax(), header_edit_window.destroy(), check_syntax(force=True)]
+        command=lambda: [check_user_header_syntax(), header_edit_window.destroy(), check_syntax(force=True)]
     )
     save_btn.pack(side="bottom", fill="x", padx=10, pady=(0, 10))
 
@@ -1183,20 +1183,23 @@ def edit_header_button_click(global_setting_obj):
     header_script_textbox.tag_config("error_highlight", background="yellow")
 
     # Preload the existing content
-    if global_setting_obj.global_header_line_list:
+    if global_setting_obj.user_header_line_list:
         # Join the list of lines into a single string with newlines
-        initial_content = "\n".join(global_setting_obj.global_header_line_list)
+        initial_content = "\n".join(global_setting_obj.user_header_line_list)
         header_script_textbox.insert("1.0", initial_content)
 
-    def check_global_header_syntax():
+    def check_user_header_syntax():
         if not header_script_textbox.winfo_exists():
             return
         
         header_script_textbox.tag_remove("error_highlight", "1.0", "end")
 
         program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
-        global_setting_obj.global_header_line_list = program_listing
-        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn=global_header_source_tag_NO_SPACE)
+        global_setting_obj.user_header_line_list = program_listing
+        # import_str_dict = {user_header_source_tag_NO_SPACE: program_listing}
+        # print(import_str_dict)
+        # exit()
+        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn=user_header_source_tag_NO_SPACE)
         comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, remove_unused_func=False)
         
         if comp_result.is_success:
@@ -1210,14 +1213,14 @@ def edit_header_button_click(global_setting_obj):
             header_script_textbox.tag_add("error_highlight", start_index, end_index)
 
     def save_and_close(event=None):
-        check_global_header_syntax()
+        check_user_header_syntax()
         header_edit_window.destroy()
         check_syntax(force=True)
 
     def schedule_syntax_check(event=None):
         if hasattr(header_script_textbox, '_syntax_timer'):
             header_edit_window.after_cancel(header_script_textbox._syntax_timer)
-        header_script_textbox._syntax_timer = header_edit_window.after(500, check_global_header_syntax)
+        header_script_textbox._syntax_timer = header_edit_window.after(500, check_user_header_syntax)
 
     header_script_textbox.bind("<KeyRelease>", schedule_syntax_check)
     header_script_textbox.bind("<<Paste>>", schedule_syntax_check)
@@ -1228,7 +1231,7 @@ def edit_header_button_click(global_setting_obj):
     save_btn.config(command=save_and_close)
 
     # 4. Run the check immediately on window open
-    check_global_header_syntax()
+    check_user_header_syntax()
     header_edit_window.grab_set()
     header_script_textbox.focus_set()
 
@@ -1794,7 +1797,7 @@ def check_syntax(force=False):
     if force is False and program_listing == last_check_syntax_listing:
         # print("check_syntax: same")
         return
-    import_name_to_strlist_dict = {global_header_source_tag_NO_SPACE:this_global_setting.global_header_line_list}
+    import_name_to_strlist_dict = {user_header_source_tag_NO_SPACE:this_global_setting.user_header_line_list}
     last_check_syntax_listing = program_listing.copy()
     ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
     comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, import_name_to_strlist_dict=import_name_to_strlist_dict)
@@ -1807,7 +1810,7 @@ def check_syntax(force=False):
     if error_lnum >= 0:
         script_textbox.tag_add("error", str(error_lnum)+".0", str(error_lnum)+".0 lineend")
     else:
-        error_text = "Errors in IMPORT_GH!\nClick \"Edit Headers\" Button."
+        error_text = f"Errors in {user_header_source_tag_NO_SPACE}!\nClick \"Edit Headers\" Button."
     check_syntax_label.config(text=error_text, fg='red')
 
 check_syntax_label = Label(scripts_lf, text="")
@@ -2052,9 +2055,9 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-# THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
-# select_root_folder("sample_dp24", is_dir_for_dp24=True)
-# edit_header_button_click(this_global_setting)
+THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+select_root_folder("sample_dp24", is_dir_for_dp24=True)
+edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()

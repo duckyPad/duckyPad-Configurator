@@ -728,7 +728,7 @@ if __name__ == "__main__":
         line = line.rstrip("\r\n")
         program_listing.append(ds_line(line, index + 1))
 
-    import_str_dict = {'IMPORT_GH': ['FUN test(a, b)', '    VAR test d= 10', '    RETURN a+b*test', 'END_FUN']}
+    import_str_dict = {'IMPORT_UH': ['FUN test(a, b)', '    VAR test d= 10', '    RETURN a+b*test', 'END_FUN']}
 
     comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_strlist_dict=import_str_dict)
     if comp_result.is_success is False:

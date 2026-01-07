@@ -204,5 +204,5 @@ def import_profile_single(root_dir_path):
 	return this_profile
 
 class dp_global_settings:
-    def __init__(self, global_header_line_list=None):
-        self.global_header_line_list = global_header_line_list
+    def __init__(self, user_header_line_list=None):
+        self.user_header_line_list = user_header_line_list
