@@ -1122,7 +1122,7 @@ dp_root_folder_display = StringVar()
 dp_root_folder_path= ''
 dp_root_folder_display.set(INVALID_ROOT_FOLDER_STRING)
 
-root_folder_lf = LabelFrame(root, text="Files", width=scaled_size(1050), height=HEIGHT_ROOT_FOLDER_LF)
+root_folder_lf = LabelFrame(root, text="Dashboard", width=scaled_size(1050), height=HEIGHT_ROOT_FOLDER_LF)
 root_folder_lf.place(x=PADDING, y=0)
 root.update()
 
@@ -1149,14 +1149,13 @@ def update_header_button_color(btn_widget, setting_obj):
 
 def edit_header_button_click(global_setting_obj):
     header_edit_window = Toplevel(root)
-    header_edit_window.title("Edit Global Header")
+    header_edit_window.title("Edit User Header")
     header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
     
-
     # 1. Setup UI elements first so the function below can reference them
     top_label = Label(
         header_edit_window, 
-        text=f"To include this global header, add  \"{global_header_source_tag_NO_SPACE}\"  to your script.",
+        text=f"To include this header, add  \"{global_header_source_tag_NO_SPACE}\"  to your script.",
         justify="center",
     )
     top_label.pack(side="top", pady=(10, 5))
@@ -1236,7 +1235,7 @@ def edit_header_button_click(global_setting_obj):
     root.wait_window(header_edit_window)
     update_header_button_color(edit_header_button, global_setting_obj)
 
-edit_header_button = Button(root_folder_lf, text="Edit Header", command=lambda: edit_header_button_click(this_global_setting), state=DISABLED)
+edit_header_button = Button(root_folder_lf, text="User Header", command=lambda: edit_header_button_click(this_global_setting), state=DISABLED)
 edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))
 update_header_button_color(edit_header_button, this_global_setting)
 
