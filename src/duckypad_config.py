@@ -1723,10 +1723,10 @@ def check_syntax():
         return
     last_check_syntax_listing = program_listing.copy()
     ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
-    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list) #result_dict, bin_arr 
+    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list)
     script_textbox.tag_remove("error", '1.0', 'end')
     if comp_result.is_success:
-        check_syntax_label.config(text="Code seems OK..", fg="green")       
+        check_syntax_label.config(text="Code seems OK...", fg="green")       
         return
     error_lnum = comp_result.error_line_number_starting_from_1
     error_text = comp_result.error_comment
