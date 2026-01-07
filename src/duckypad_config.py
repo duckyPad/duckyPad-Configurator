@@ -1064,10 +1064,17 @@ save_button.place(x=scaled_size(630+170), y=0, width=scaled_size(65), height=sca
 backup_button = Button(root_folder_lf, text="Backups", command=backup_button_click)
 backup_button.place(x=scaled_size(700+170), y=0, width=scaled_size(65), height=scaled_size(25))
 
-from tkinter import Toplevel, Label, Text, Button, font, DISABLED
+def update_header_button_color(btn_widget, setting_obj):
+    has_content = False
+    if setting_obj.global_header_line_list:
+        has_content = any(line.strip() for line in setting_obj.global_header_line_list)
+    if has_content:
+        btn_widget.configure(highlightbackground='PaleGreen3')
+    else:
+        btn_widget.configure(highlightbackground=default_button_color)
+    print("update_header_button_color:", has_content)
 
-def edit_header_button_click():
-    global this_global_setting
+def edit_header_button_click(global_setting_obj):
     header_edit_window = Toplevel(root)
     header_edit_window.title("Edit Global Header")
     header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
@@ -1095,6 +1102,12 @@ def edit_header_button_click():
 
     header_script_textbox.tag_config("error_highlight", background="yellow")
 
+    # Preload the existing content
+    if global_setting_obj.global_header_line_list:
+        # Join the list of lines into a single string with newlines
+        initial_content = "\n".join(global_setting_obj.global_header_line_list)
+        header_script_textbox.insert("1.0", initial_content)
+
     def check_global_header_syntax():
         if not header_script_textbox.winfo_exists():
             return
@@ -1104,7 +1117,7 @@ def edit_header_button_click():
         header_script_textbox.tag_remove("error_highlight", "1.0", "end")
 
         program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
-        this_global_setting.global_header_line_list = program_listing
+        global_setting_obj.global_header_line_list = program_listing
         ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn="global_header")
         comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, remove_unused_func=False)
         
@@ -1128,12 +1141,12 @@ def edit_header_button_click():
     check_global_header_syntax()
     header_edit_window.grab_set()
 
-# Button definition remains the same
-edit_header_button = Button(root_folder_lf, text="Edit Header", command=edit_header_button_click, state=DISABLED) # Note: Enabled elsewhere?
-edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))
+    root.wait_window(header_edit_window)
+    update_header_button_color(edit_header_button, global_setting_obj)
 
-edit_header_button = Button(root_folder_lf, text="Edit Header", command=edit_header_button_click, state=DISABLED)
+edit_header_button = Button(root_folder_lf, text="Edit Header", command=lambda: edit_header_button_click(this_global_setting), state=DISABLED)
 edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))
+update_header_button_color(edit_header_button, this_global_setting)
 
 # ------------- Profiles frame -------------
 
@@ -1944,7 +1957,7 @@ root.after(500, repeat_func)
 
 THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
 select_root_folder("sample_dp24", is_dir_for_dp24=True)
-edit_header_button_click()
+edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
