@@ -1684,6 +1684,32 @@ root.update()
 script_textbox.bind("<<Modified>>", script_textbox_event)
 script_textbox.tag_configure("error", background="#ffff00")
 
+context_menu = Menu(script_textbox, tearoff=0)
+context_menu.add_command(label="Cut", command=lambda: script_textbox.event_generate("<<Cut>>"))
+context_menu.add_command(label="Copy", command=lambda: script_textbox.event_generate("<<Copy>>"))
+context_menu.add_command(label="Paste", command=lambda: script_textbox.event_generate("<<Paste>>"))
+context_menu.add_separator()
+context_menu.add_command(label="Select All", command=lambda: script_textbox.event_generate("<<SelectAll>>"))
+
+def show_context_menu(event):
+    try:
+        try:
+            script_textbox.get("sel.first", "sel.last")
+            state = "normal"
+        except TclError:
+            state = "disabled"
+        # Update state of Cut/Copy dynamically
+        context_menu.entryconfig("Cut", state=state)
+        context_menu.entryconfig("Copy", state=state)
+        # Display the menu at the cursor position
+        context_menu.tk_popup(event.x_root, event.y_root)
+    finally:
+        # Release the grab to ensure the menu closes properly after selection
+        context_menu.grab_release()
+
+script_textbox.bind("<Button-3>", show_context_menu)
+script_textbox.bind("<Button-2>", show_context_menu)
+
 def on_press_rb_click():
     profile_index = profile_lstbox.curselection()[0]
     if profile_list[profile_index].keylist[selected_key] is None:
