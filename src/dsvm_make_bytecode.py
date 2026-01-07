@@ -614,7 +614,7 @@ def replace_dummy_with_drop_from_context_dict(ctx_dict):
     for key in ctx_dict['func_assembly_dict']:
         replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
 
-def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True):
+def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True, header_dict=None):
     global global_context_dict
     global print_asm
     print_asm = should_print
@@ -680,11 +680,11 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
     )
     return comp_result
 
-def make_dsb_no_exception(program_listing, should_print=False, remove_unused_func=True):
+def make_dsb_no_exception(program_listing, should_print=False, remove_unused_func=True, header_dict=None):
     global print_asm
     print_asm = should_print
     try:
-        return make_dsb_with_exception(program_listing, should_print, remove_unused_func)
+        return make_dsb_with_exception(program_listing, should_print, remove_unused_func, header_dict)
     except Exception as e:
         print("MDNE:", traceback.format_exc())
         comp_result = compile_result(

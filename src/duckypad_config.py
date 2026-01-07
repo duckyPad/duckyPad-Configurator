@@ -1092,7 +1092,6 @@ def update_header_button_color(btn_widget, setting_obj):
         btn_widget.configure(highlightbackground='PaleGreen3')
     else:
         btn_widget.configure(highlightbackground=default_button_color)
-    print("update_header_button_color:", has_content)
 
 def edit_header_button_click(global_setting_obj):
     header_edit_window = Toplevel(root)
@@ -1131,14 +1130,12 @@ def edit_header_button_click(global_setting_obj):
     def check_global_header_syntax():
         if not header_script_textbox.winfo_exists():
             return
-            
-        print("Checking syntax now...")
         
         header_script_textbox.tag_remove("error_highlight", "1.0", "end")
 
         program_listing = header_script_textbox.get("1.0", "end-1c").replace("\r", "").split("\n")
         global_setting_obj.global_header_line_list = program_listing
-        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn="global_header")
+        ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing, source_fn=global_header_source_tag)
         comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, remove_unused_func=False)
         
         if comp_result.is_success:
@@ -1721,9 +1718,11 @@ def check_syntax():
     if program_listing == last_check_syntax_listing:
         # print("check_syntax: same")
         return
+    header_dict = {global_header_source_tag:this_global_setting.global_header_line_list}
+    print(header_dict)
     last_check_syntax_listing = program_listing.copy()
     ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
-    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list)
+    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, header_dict=header_dict)
     script_textbox.tag_remove("error", '1.0', 'end')
     if comp_result.is_success:
         check_syntax_label.config(text="Code seems OK...", fg="green")       
