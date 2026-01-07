@@ -1102,7 +1102,7 @@ def edit_header_button_click(global_setting_obj):
     # 1. Setup UI elements first so the function below can reference them
     top_label = Label(
         header_edit_window, 
-        text="To include this header, add \"IMPORT GLOBAL_HEADER\" to your script.",
+        text="Add  \"IMPORT GLOBAL_HEADER\"  to your script to include this header AS-IS.",
         justify="center",
     )
     top_label.pack(side="top", pady=(10, 5))
