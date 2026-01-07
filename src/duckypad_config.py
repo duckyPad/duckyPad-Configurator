@@ -239,27 +239,51 @@ def reset_key_button_relief():
 
 def add_right_click_menu(text_widget):
     menu = Menu(text_widget, tearoff=0)
+
+    # --- Standard Clipboard ---
     menu.add_command(label="Cut", command=lambda: text_widget.event_generate("<<Cut>>"))
     menu.add_command(label="Copy", command=lambda: text_widget.event_generate("<<Copy>>"))
     menu.add_command(label="Paste", command=lambda: text_widget.event_generate("<<Paste>>"))
+    menu.add_command(label="Delete", command=lambda: text_widget.delete("sel.first", "sel.last"))
     menu.add_separator()
+
+    # --- Undo / Redo ---
+    menu.add_command(label="Undo", command=lambda: text_widget.event_generate("<<Undo>>"))
+    menu.add_command(label="Redo", command=lambda: text_widget.event_generate("<<Redo>>"))
+    menu.add_separator()
+    
+    # --- Selection ---
     menu.add_command(label="Select All", command=lambda: text_widget.event_generate("<<SelectAll>>"))
 
     def show_menu(event):
+        # 1. Check if there is a selection (for Cut, Copy, Delete)
         try:
             text_widget.get("sel.first", "sel.last")
-            state = "normal"
-        except TclError:
-            state = "disabled"
-        menu.entryconfig("Cut", state=state)
-        menu.entryconfig("Copy", state=state)
+            selection_state = "normal"
+        except Exception:
+            selection_state = "disabled"
+
+        # 2. Check if there is clipboard content (for Paste)
+        try:
+            text_widget.clipboard_get()
+            paste_state = "normal"
+        except Exception:
+            paste_state = "disabled"
+
+        # Update menu states
+        menu.entryconfig("Cut", state=selection_state)
+        menu.entryconfig("Copy", state=selection_state)
+        menu.entryconfig("Delete", state=selection_state)
+        menu.entryconfig("Paste", state=paste_state)
+        
         try:
             menu.tk_popup(event.x_root, event.y_root)
         finally:
             menu.grab_release()
 
+    # Bindings for various platforms (Right Click)
     text_widget.bind("<Button-3>", show_menu)
-    text_widget.bind("<Button-2>", show_menu)
+    text_widget.bind("<Button-2>", show_menu) # macOS specific often
     text_widget.bind("<Control-Button-1>", show_menu)
 
 def ui_reset():
@@ -1186,6 +1210,10 @@ def edit_header_button_click(global_setting_obj):
         header_script_textbox._syntax_timer = header_edit_window.after(500, check_global_header_syntax)
 
     header_script_textbox.bind("<KeyRelease>", schedule_syntax_check)
+    header_script_textbox.bind("<<Paste>>", schedule_syntax_check)
+    header_script_textbox.bind("<<Cut>>", schedule_syntax_check)
+    header_script_textbox.bind("<<Undo>>", schedule_syntax_check)
+    header_script_textbox.bind("<<Redo>>", schedule_syntax_check)
     
     # 4. Run the check immediately on window open
     check_global_header_syntax()
