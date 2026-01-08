@@ -207,7 +207,6 @@ ensure_dir(app_save_path)
 ensure_dir(backup_path)
 ensure_dir(hid_dump_path)
 
-ext_lib_path = "./"
 ensure_dpds_stdlib(ext_lib_path)
 this_global_setting.stdlib_line_list = get_latest_stdlib_lines(ext_lib_path)
 
@@ -239,7 +238,7 @@ def get_monospace_font():
     return (family, 10)
 
 def get_import_name_to_strlist_dict():
-    return {user_header_source_tag_NO_SPACE:this_global_setting.user_header_line_list}
+    return {user_header_source_tag_NO_SPACE:this_global_setting.user_header_line_list, stdlib_source_tag_NO_SPACE:this_global_setting.stdlib_line_list}
 
 def reset_key_button_relief():
     for item in key_button_list:
@@ -1162,25 +1161,54 @@ def update_header_button_color(btn_widget, setting_obj):
 def edit_header_button_click(global_setting_obj):
     header_edit_window = Toplevel(root)
     header_edit_window.title(edit_header_button_name)
-    header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
+
+    header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(600)}") 
     
-    # 1. Setup UI elements first so the function below can reference them
+    # pack the StdLib frame at the BOTTOM first, so it's always visible.
+    stdlib_frame = LabelFrame(header_edit_window, text="duckyPad Standard Library")
+    stdlib_frame.pack(side="bottom", fill="x", padx=10, pady=(0, 10))
+
+    # pack the User Header frame to fill the REST of the space.
+    user_header_frame = LabelFrame(header_edit_window, text="User Header")
+    user_header_frame.pack(side="top", fill="both", expand=True, padx=10, pady=10)
+
+    # --- 2. Populate "duckyPad Standard Library" Frame ---
+    
+    stdlib_info_label = Label(
+        stdlib_frame,
+        text="duckyPad StdLib contains handy functions to make coding easier.\nTo include, add \"USE_STDLIB\" to your script.    Click \"Docs\" button to learn more.",
+        justify="center"
+    )
+    stdlib_info_label.pack(side="top", pady=(5, 5))
+
+    # Container for buttons to ensure they are next to each other
+    stdlib_btn_container = Frame(stdlib_frame)
+    stdlib_btn_container.pack(side="bottom", fill="x", padx=5, pady=5)
+
+    btn_stdlib_docs = Button(stdlib_btn_container, text="Stdlib Docs")
+    btn_stdlib_docs.pack(side="left", fill="x", expand=True, padx=(0, 2))
+
+    btn_fetch_latest = Button(stdlib_btn_container, text="Fetch Latest")
+    btn_fetch_latest.pack(side="right", fill="x", expand=True, padx=(2, 0))
+
+    # --- 3. Populate "User Header" Frame (Existing UI Elements) ---
+    
     top_label = Label(
-        header_edit_window, 
+        user_header_frame, 
         text=f"To include this header, add  \"{user_header_source_tag_NO_SPACE}\"  to your script.",
         justify="center",
     )
-    top_label.pack(side="top", pady=(10, 5))
+    top_label.pack(side="top", pady=(5, 5))
 
     save_btn = Button(
-        header_edit_window, 
+        user_header_frame, 
         text="Save & Close", 
         command=lambda: [check_user_header_syntax(), header_edit_window.destroy(), check_syntax(force=True)]
     )
     save_btn.pack(side="bottom", fill="x", padx=10, pady=(0, 10))
 
     bottom_label = Label(
-        header_edit_window, 
+        user_header_frame, 
         text="Initializing...", # Placeholder
         justify="center"
     )
@@ -1188,11 +1216,13 @@ def edit_header_button_click(global_setting_obj):
 
     script_box_font = get_monospace_font()
     char_width = font.Font(font=script_box_font).measure("0")
-    header_script_textbox = Text(header_edit_window, relief='solid', font=script_box_font, borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word", undo=True)
+    header_script_textbox = Text(user_header_frame, relief='solid', font=script_box_font, borderwidth=1, padx=2, pady=2, spacing3=5, wrap="word", undo=True)
     header_script_textbox.configure(font=script_box_font, tabs=(char_width * 2))
     header_script_textbox.pack(side="top", fill="both", expand=True, padx=10)
     add_right_click_menu(header_script_textbox)
     header_script_textbox.tag_config("error_highlight", background="yellow")
+
+    # --- 4. Logic & Bindings (Unchanged, just layout updates) ---
 
     # Preload the existing content
     if global_setting_obj.user_header_line_list:
@@ -1242,7 +1272,7 @@ def edit_header_button_click(global_setting_obj):
     header_edit_window.bind("<Escape>", save_and_close)
     save_btn.config(command=save_and_close)
 
-    # 4. Run the check immediately on window open
+    # Run the check immediately on window open
     check_user_header_syntax()
     header_edit_window.grab_set()
     header_script_textbox.focus_set()
@@ -2073,7 +2103,5 @@ edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
-
-print(default_stdlib_code)
 
 root.mainloop()

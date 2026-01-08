@@ -102,7 +102,8 @@ MAX_KEY_COUNT = (MECH_OBSW_COUNT + ROTARY_ENCODER_SW_COUNT + ONBOARD_SPARE_GPIO_
 
 profile_info_dot_txt = "profile_info.txt"
 user_header_dot_txt = "user_header.txt"
-user_header_source_tag_NO_SPACE = "IMPORT_UH"
+stdlib_source_tag_NO_SPACE = "USE_STDLIB"
+user_header_source_tag_NO_SPACE = "USE_UH"
 edit_header_button_name = "Edit Headers"
 
 HID_COMMAND_READ_FILE = 11
