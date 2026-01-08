@@ -78,8 +78,8 @@ def new_define(pgm_line, dd):
     is_valid, comment = is_valid_var_name(define_source)
     if is_valid is False:
         return PARSE_ERROR, comment
-    # if define_source in dd and define_destination != dd[define_source]:
-    #     return PARSE_ERROR, f"{define_source} is already defined"
+    if define_source in dd and define_destination != dd[define_source]:
+        return PARSE_ERROR, f"{define_source} is already defined"
     dd[define_source] = define_destination
     return PARSE_OK, ''
 

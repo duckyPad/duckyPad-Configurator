@@ -26,12 +26,6 @@ hid_dump_path = os.path.join(app_save_path, "hid_dump")
 temp_dir_path = os.path.join(app_save_path, "temp_dir")
 ext_lib_path = os.path.join(app_save_path, "dpds_libs")
 
-std_lib_filename_prefix = "dpds_stdlib"
-
-# 
-def ensure_dpds_stdlib():
-    pass
-
 def open_discord_link():
     webbrowser.open("https://discord.gg/4sJCBx5")
 

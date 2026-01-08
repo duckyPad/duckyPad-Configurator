@@ -206,7 +206,10 @@ def scaled_size(size: int) -> int:
 ensure_dir(app_save_path)
 ensure_dir(backup_path)
 ensure_dir(hid_dump_path)
-ensure_dir(ext_lib_path)
+
+ext_lib_path = "./"
+ensure_dpds_stdlib(ext_lib_path)
+this_global_setting.stdlib_line_list = get_latest_stdlib_lines(ext_lib_path)
 
 print("\n\n--------------------------")
 print("\n\nWelcome to duckyPad Configurator!\n")
