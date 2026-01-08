@@ -1,11 +1,15 @@
 REM_BLOCK
     Should not have HARD CODED memory address
     Must be compatible with all duckyScript and duckyPad versions
+    
+    DPDSSTDLIB
 
     TODO:
     bitread, set, clear, toggle?
     math abs, min, max?
     memcpy?
+
+    show error and quit? for unsupported hardwares
 END_REM
 
 FUN WAITKEY(key_id)
