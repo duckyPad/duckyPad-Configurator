@@ -2,6 +2,7 @@ from enum import IntEnum
 from dataclasses import dataclass
 import struct
 import keyword
+import uuid
 
 DSVM_VERSION = 2
 
@@ -17,6 +18,8 @@ kw_PUTS = "PUTS"
 kw_BUZZ = "BUZZ"
 kw_HIDTX = "HIDTX"
 
+kw_TRUE = "TRUE"
+kw_FALSE = "FALSE"
 kw_RANDOM_LOWERCASE_LETTER = "RANDOM_LOWERCASE_LETTER"
 kw_RANDOM_UPPERCASE_LETTER = "RANDOM_UPPERCASE_LETTER"
 kw_RANDOM_LETTER = "RANDOM_LETTER"
@@ -778,16 +781,15 @@ def get_orig_ds_lnumsf1_from_py_lnumsf1(rdict, this_pylnum_sf1, onerr=None):
             break
     return og_index_sf1
 
-import uuid
 notequal_str = "!="
-op_placeholder = str(uuid.uuid4())
+uuid_placeholder_str = str(uuid.uuid4())
 
 def replace_operators(this_line):
     if this_line.lstrip().startswith(kw_DEFINE):
         return this_line
-    temp = this_line.replace(notequal_str, op_placeholder)
+    temp = this_line.replace(notequal_str, uuid_placeholder_str)
     temp = temp.replace(kw_VAR_PREFIX, "").replace("||", " or ").replace("&&", " and ").replace("!", " not ")
-    temp = temp.replace(op_placeholder, notequal_str)
+    temp = temp.replace(uuid_placeholder_str, notequal_str)
     return temp
 
 def pack_to_one_byte(value: int) -> bytes:

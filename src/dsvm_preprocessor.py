@@ -609,6 +609,8 @@ def get_default_def_dict():
         kw_MOUSE_WHEEL : f"{kw_MOUSE_SCROLL} 0",
         f"{kw_FUNCTION} " : f"{kw_FUN} ",
         kw_END_FUNCTION : kw_END_FUN,
+        kw_TRUE : "1",
+        kw_FALSE : "0",
     }
     return default_dict
 
@@ -784,13 +786,20 @@ def run_all(program_listing, import_name_to_line_obj_dict=None):
 
     second_pass_program_listing = new_program_listing
     # -----------------
-    return single_pass(second_pass_program_listing, all_def_dict)
+    rdict = single_pass(second_pass_program_listing, all_def_dict)
+    rdict['define_dict'] = all_def_dict
+    return rdict
 
 def preprocess_import_str_dict(import_str_dict):
     preprocessed_import_lineobj_dict = {}
     for key in import_str_dict:
         lineobj_list = make_list_of_ds_line_obj_from_str_listing(import_str_dict[key], key)
         rdict = run_all(lineobj_list)
+        user_define_dict = {k:v for k, v in rdict['define_dict'].items() if k not in get_default_def_dict()}
+        for defkey in user_define_dict:
+            user_def_lineobj = ds_line(f"DEFINE {defkey} {user_define_dict[defkey]}", orig_lnum_sf1=1)
+            lineobj_list.insert(0, user_def_lineobj)
+            rdict["dspp_listing_with_indent_level"].insert(0, user_def_lineobj)
         if rdict['is_success'] is False:
             preprocessed_import_lineobj_dict[key] = lineobj_list
         else:

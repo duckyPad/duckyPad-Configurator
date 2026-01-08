@@ -209,7 +209,6 @@ ensure_dir(hid_dump_path)
 print("\n\n--------------------------")
 print("\n\nWelcome to duckyPad Configurator!\n")
 print("This window prints debug information.")
-print("Used for troubleshooting if it crashes.\n\n")
 
 default_button_color = 'SystemButtonFace'
 if 'linux' in sys.platform:
@@ -1144,14 +1143,21 @@ def update_header_button_color(btn_widget, setting_obj):
     has_content = False
     if setting_obj.user_header_line_list:
         has_content = any(line.strip() for line in setting_obj.user_header_line_list)
+
     if has_content:
-        btn_widget.configure(highlightbackground='PaleGreen3')
+        if sys.platform == 'darwin':
+            btn_widget.configure(highlightbackground='PaleGreen3')
+        else:
+            btn_widget.configure(fg='green4')
     else:
-        btn_widget.configure(highlightbackground=default_button_color)
+        if sys.platform == 'darwin':
+            btn_widget.configure(highlightbackground=default_button_color)
+        else:
+            btn_widget.configure(fg='black')
 
 def edit_header_button_click(global_setting_obj):
     header_edit_window = Toplevel(root)
-    header_edit_window.title("Edit User Header")
+    header_edit_window.title(edit_header_button_name)
     header_edit_window.geometry(f"{scaled_size(640)}x{scaled_size(480)}")
     
     # 1. Setup UI elements first so the function below can reference them
@@ -1240,7 +1246,7 @@ def edit_header_button_click(global_setting_obj):
     root.wait_window(header_edit_window)
     update_header_button_color(edit_header_button, global_setting_obj)
 
-edit_header_button = Button(root_folder_lf, text="User Header", command=lambda: edit_header_button_click(this_global_setting), state=DISABLED)
+edit_header_button = Button(root_folder_lf, text=edit_header_button_name, command=lambda: edit_header_button_click(this_global_setting), state=DISABLED)
 edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))
 update_header_button_color(edit_header_button, this_global_setting)
 
@@ -1717,9 +1723,9 @@ root.update()
 # ------------- Scripts frame -------------
 scripts_lf = LabelFrame(root, text="Scripts", width=scaled_size(310), height=scaled_size(473))
 
-script_instruction = Label(master=scripts_lf, text="Read more about Duckyscript...", fg="blue", cursor="hand2")
+script_instruction = Label(master=scripts_lf, text="duckyScript Instructions", fg="blue", cursor="hand2")
 root.update()
-script_instruction.place(x=scaled_size(60), y=0)
+script_instruction.place(x=scaled_size(85), y=0)
 script_instruction.bind("<Button-1>", script_instruction_click)
 
 last_textbox_edit = 0
@@ -1812,7 +1818,7 @@ def check_syntax(force=False):
     if error_lnum >= 0:
         script_textbox.tag_add("error", str(error_lnum)+".0", str(error_lnum)+".0 lineend")
     else:
-        error_text = f"Errors in {user_header_source_tag_NO_SPACE}\nClick \"User Header\" Button."
+        error_text = f"Errors in {user_header_source_tag_NO_SPACE}\nClick \"{edit_header_button_name}\" Button."
     check_syntax_label.config(text=error_text, fg='red')
 
 check_syntax_label = Label(scripts_lf, text="")

@@ -118,7 +118,8 @@ def get_orig_ds_line_from_py_lnum(rdict, this_pylnum_sf1):
     try:
         return get_orig_ds_line_from_py_lnum_has_exception(rdict, this_pylnum_sf1)
     except Exception as e:
-        print(f"get_orig_ds_line_from_py_lnum: {e}")
+        # print(f"get_orig_ds_line_from_py_lnum: {e}")
+        pass
     return ""
 
 def search_in_symtable(name: str, table: symtable.SymbolTable):
@@ -737,7 +738,8 @@ if __name__ == "__main__":
         line = line.rstrip("\r\n")
         program_listing.append(ds_line(line, index + 1))
 
-    import_str_dict = {'IMPORT_UH': ['REM_BLOCK', '    Should not have HARD CODED memory address', '    Must be compatible with all duckyScript and duckyPad versions', '    ', '    DPDSSTDLIB', '    ', '    TODO:', '    bitread, set, clear, toggle?', '    math abs, min, max?', '    memcpy?', 'END_REM', 'ENTER UP']}
+    # import_str_dict = {'IMPORT_UH': ['REM_BLOCK', '    Should not have HARD CODED memory address', '    Must be compatible with all duckyScript and duckyPad versions', '    ', '    DPDSSTDLIB', '    ', '    TODO:', '    bitread, set, clear, toggle?', '    math abs, min, max?', '    memcpy?', 'END_REM', 'ENTER UP']}
+    import_str_dict = {'IMPORT_UH': ['DEFINE NAME abc', 'DEFINE AGE 67', 'FUN print_name()', 'STRING my name is NAME', 'END_FUN']}
     preprocessed_import_lineobj_dict = dsvm_preprocessor.preprocess_import_str_dict(import_str_dict)
     comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_line_obj_dict=preprocessed_import_lineobj_dict)
     if comp_result.is_success is False:
