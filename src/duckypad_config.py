@@ -1812,7 +1812,7 @@ def check_syntax(force=False):
     if error_lnum >= 0:
         script_textbox.tag_add("error", str(error_lnum)+".0", str(error_lnum)+".0 lineend")
     else:
-        error_text = f"Errors in {user_header_source_tag_NO_SPACE}!\nClick \"Edit Headers\" Button."
+        error_text = f"Errors in {user_header_source_tag_NO_SPACE}\nClick \"User Header\" Button."
     check_syntax_label.config(text=error_text, fg='red')
 
 check_syntax_label = Label(scripts_lf, text="")

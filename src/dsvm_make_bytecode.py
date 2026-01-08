@@ -622,10 +622,19 @@ def replace_dummy_with_drop_from_context_dict(ctx_dict):
     for key in ctx_dict['func_assembly_dict']:
         replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
 
+def flip_import_line_number(import_dict):
+    if import_dict is None:
+        return
+    for key in import_dict:
+        for line_obj in import_dict[key]:
+            line_obj.orig_lnum_sf1 *= -1
+
 def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True, import_name_to_line_obj_dict=None):
     global global_context_dict
     global print_asm
     print_asm = should_print
+
+    flip_import_line_number(import_name_to_line_obj_dict)
 
     orig_listing = copy.deepcopy(program_listing)
     rdict = dsvm_preprocessor.run_all(program_listing, import_name_to_line_obj_dict=import_name_to_line_obj_dict)

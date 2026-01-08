@@ -791,7 +791,10 @@ def preprocess_import_str_dict(import_str_dict):
     for key in import_str_dict:
         lineobj_list = make_list_of_ds_line_obj_from_str_listing(import_str_dict[key], key)
         rdict = run_all(lineobj_list)
-        preprocessed_import_lineobj_dict[key] = rdict["dspp_listing_with_indent_level"]
+        if rdict['is_success'] is False:
+            preprocessed_import_lineobj_dict[key] = lineobj_list
+        else:
+            preprocessed_import_lineobj_dict[key] = rdict["dspp_listing_with_indent_level"]
     return preprocessed_import_lineobj_dict
 
 if __name__ == "__main__":
