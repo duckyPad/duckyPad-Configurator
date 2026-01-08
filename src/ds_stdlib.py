@@ -1,21 +1,21 @@
 import os
 import time
 
+"""
+Should not have HARD CODED memory address
+Must be compatible with all duckyScript and duckyPad versions
+
+DPDSSTDLIB
+
+TODO:
+bitread, set, clear, toggle?
+math abs, min, max?
+memcpy?
+try_set_led?
+show error and quit? for unsupported hardwares
+"""
+
 default_stdlib_code = """
-
-REM_BLOCK
-    Should not have HARD CODED memory address
-    Must be compatible with all duckyScript and duckyPad versions
-    
-    DPDSSTDLIB
-
-    TODO:
-    bitread, set, clear, toggle?
-    math abs, min, max?
-    memcpy?
-
-    show error and quit? for unsupported hardwares
-END_REM
 
 FUN WAITKEY(key_id)
     WHILE 1
@@ -26,32 +26,38 @@ FUN WAITKEY(key_id)
     END_WHILE
 END_FUN
 
-FUN TRY_SET_LED(target_mask)
-    // --- Num Lock (Bit 0) ---
-    VAR want_num = target_mask & 1
-    IF want_num != _IS_NUMLOCK_ON
-        NUMLOCK
-    END_IF
-    // --- Caps Lock (Bit 1) ---
-    VAR want_caps = target_mask >> 1
-    want_caps = want_caps & 1
-    IF want_caps != _IS_CAPSLOCK_ON
-        CAPSLOCK
-    END_IF
-    // --- Scroll Lock (Bit 2) ---
-    VAR want_scroll = target_mask >> 2
-    want_scroll = want_scroll & 1
-    IF want_scroll != _IS_SCROLLLOCK_ON
-        SCROLLLOCK
-    END_IF
-END_FUN
-
 FUN MEMSET(addr, value, length)
     VAR i = 0
     WHILE i < length
         POKE8(addr + i, value)
         i = i + 1
     END_WHILE
+END_FUN
+
+FUN ABS(n)
+    IF _UNSIGNED_MATH == 1
+        RETURN n
+    END_IF
+    
+    IF n < 0
+        RETURN n * -1
+    END_IF
+    
+    RETURN n
+END_FUN
+
+FUN MIN(a, b)
+    IF a < b
+        RETURN a
+    END_IF
+    RETURN b
+END_FUN
+
+FUN MAX(a, b)
+    IF a > b
+        RETURN a
+    END_IF
+    RETURN b
 END_FUN
 
 """
