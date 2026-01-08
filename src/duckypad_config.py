@@ -20,6 +20,7 @@ import traceback
 import dp20_dumpsd
 from tkinter import font
 import dsvm_preprocessor
+from ds_stdlib import *
 
 """
 0.13.5
@@ -205,6 +206,7 @@ def scaled_size(size: int) -> int:
 ensure_dir(app_save_path)
 ensure_dir(backup_path)
 ensure_dir(hid_dump_path)
+ensure_dir(ext_lib_path)
 
 print("\n\n--------------------------")
 print("\n\nWelcome to duckyPad Configurator!\n")
@@ -544,7 +546,6 @@ def connect_button_click():
     THIS_DUCKYPAD.info_dict = user_selected_dp
     ui_reset()
 
-    # SET RTC HERE????????
     duckypad_sync_rtc(user_selected_dp['hid_path'])
     time.sleep(0.1)
 
@@ -2069,5 +2070,7 @@ edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()
+
+print(default_stdlib_code)
 
 root.mainloop()

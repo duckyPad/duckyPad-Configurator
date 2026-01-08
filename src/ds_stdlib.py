@@ -1,3 +1,5 @@
+default_stdlib_code = """
+
 REM_BLOCK
     Should not have HARD CODED memory address
     Must be compatible with all duckyScript and duckyPad versions
@@ -48,3 +50,5 @@ FUN MEMSET(addr, value, length)
         i = i + 1
     END_WHILE
 END_FUN
+
+"""
