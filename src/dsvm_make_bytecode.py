@@ -622,13 +622,13 @@ def replace_dummy_with_drop_from_context_dict(ctx_dict):
     for key in ctx_dict['func_assembly_dict']:
         replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
 
-def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True, import_name_to_strlist_dict=None):
+def make_dsb_with_exception(program_listing, should_print=False, remove_unused_func=True, import_name_to_line_obj_dict=None):
     global global_context_dict
     global print_asm
     print_asm = should_print
 
     orig_listing = copy.deepcopy(program_listing)
-    rdict = dsvm_preprocessor.run_all(program_listing, import_name_to_strlist_dict=import_name_to_strlist_dict)
+    rdict = dsvm_preprocessor.run_all(program_listing, import_name_to_line_obj_dict=import_name_to_line_obj_dict)
 
     if rdict['is_success'] is False:
         comp_result = compile_result(
@@ -688,11 +688,11 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
     )
     return comp_result
 
-def make_dsb_no_exception(program_listing, should_print=False, remove_unused_func=True, import_name_to_strlist_dict=None):
+def make_dsb_no_exception(program_listing, should_print=False, remove_unused_func=True, import_name_to_line_obj_dict=None):
     global print_asm
     print_asm = should_print
     try:
-        return make_dsb_with_exception(program_listing, should_print, remove_unused_func, import_name_to_strlist_dict)
+        return make_dsb_with_exception(program_listing, should_print, remove_unused_func, import_name_to_line_obj_dict)
     except Exception as e:
         print("MDNE:", traceback.format_exc())
         comp_result = compile_result(
@@ -728,9 +728,9 @@ if __name__ == "__main__":
         line = line.rstrip("\r\n")
         program_listing.append(ds_line(line, index + 1))
 
-    import_str_dict = {'IMPORT_UH': ['FUN test(a, b)', '    VAR test d= 10', '    RETURN a+b*test', 'END_FUN']}
-
-    comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_strlist_dict=import_str_dict)
+    import_str_dict = {'IMPORT_UH': ['REM_BLOCK', '    Should not have HARD CODED memory address', '    Must be compatible with all duckyScript and duckyPad versions', '    ', '    DPDSSTDLIB', '    ', '    TODO:', '    bitread, set, clear, toggle?', '    math abs, min, max?', '    memcpy?', 'END_REM', 'ENTER UP']}
+    preprocessed_import_lineobj_dict = dsvm_preprocessor.preprocess_import_str_dict(import_str_dict)
+    comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_line_obj_dict=preprocessed_import_lineobj_dict)
     if comp_result.is_success is False:
         error_msg = (f"Error on Line {comp_result.error_line_number_starting_from_1}: {comp_result.error_comment}\n\t{comp_result.error_line_str}")
         print(error_msg)

@@ -605,7 +605,7 @@ class ds_line:
             self.source_fn = source_fn
 
     def __repr__(self):
-        return f"ds_line({self.content!r}, ogl={self.orig_lnum_sf1!r}, pyl={self.py_lnum_sf1!r}, sfn={self.source_fn!r})"
+        return f"ds_line({self.content!r}, ogl={self.orig_lnum_sf1!r}, pyl={self.py_lnum_sf1!r})" #, sfn={self.source_fn!r}
 
 PARSE_OK = 0
 PARSE_ERROR = 1
@@ -944,10 +944,7 @@ def is_ds_keyword(name):
 def make_list_of_ds_line_obj_from_str_listing(pgm_listing, source_fn=None):
     obj_list = []
     for index, item in enumerate(pgm_listing):
-        this_index = index+1
-        if source_fn is not None:
-            this_index *= -1
-        obj_list.append(ds_line(item, this_index, source_fn=source_fn))
+        obj_list.append(ds_line(item, index+1, source_fn=source_fn))
     return obj_list
 
 if __name__ == "__main__":

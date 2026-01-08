@@ -19,6 +19,7 @@ import my_compare
 import traceback
 import dp20_dumpsd
 from tkinter import font
+import dsvm_preprocessor
 
 """
 0.13.5
@@ -860,14 +861,15 @@ def compile_all_scripts():
                 text_list = make_final_script(this_key, this_key.script.lstrip().split('\n'))
                 obj_list = make_list_of_ds_line_obj_from_str_listing(text_list)
 
-                comp_result = dsvm_make_bytecode.make_dsb_with_exception(obj_list, import_name_to_strlist_dict=get_import_name_to_strlist_dict())
+                import_to_lineobj_dict = dsvm_preprocessor.preprocess_import_str_dict(get_import_name_to_strlist_dict())
+                comp_result = dsvm_make_bytecode.make_dsb_with_exception(obj_list, import_name_to_line_obj_dict=import_to_lineobj_dict)
                 if comp_result.is_success is False:
                     raise ValueError("Compile failed")
                 this_key.binary_array = comp_result.bin_array
                 if len(this_key.script_on_release.lstrip()) > 0:
                     tl_or = make_final_script(this_key, this_key.script_on_release.lstrip().split('\n'))
                     ol_or = make_list_of_ds_line_obj_from_str_listing(tl_or)
-                    comp_result = dsvm_make_bytecode.make_dsb_with_exception(ol_or, import_name_to_strlist_dict=get_import_name_to_strlist_dict())
+                    comp_result = dsvm_make_bytecode.make_dsb_with_exception(ol_or, import_name_to_line_obj_dict=import_to_lineobj_dict)
                     if comp_result.is_success is False:
                         raise ValueError("Compile failed")
                     this_key.binary_array_on_release = comp_result.bin_array
@@ -1797,10 +1799,10 @@ def check_syntax(force=False):
     if force is False and program_listing == last_check_syntax_listing:
         # print("check_syntax: same")
         return
-    import_name_to_strlist_dict = {user_header_source_tag_NO_SPACE:this_global_setting.user_header_line_list}
+    import_to_lineobj_dict = dsvm_preprocessor.preprocess_import_str_dict(get_import_name_to_strlist_dict())
     last_check_syntax_listing = program_listing.copy()
     ds_line_obj_list = make_list_of_ds_line_obj_from_str_listing(program_listing)
-    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, import_name_to_strlist_dict=import_name_to_strlist_dict)
+    comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, import_name_to_line_obj_dict=import_to_lineobj_dict)
     script_textbox.tag_remove("error", '1.0', 'end')
     if comp_result.is_success:
         check_syntax_label.config(text="Code seems OK...", fg="green")       
