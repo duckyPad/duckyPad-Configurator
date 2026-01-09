@@ -1176,7 +1176,7 @@ def edit_header_button_click(global_setting_obj):
     
     stdlib_info_label = Label(
         stdlib_frame,
-        text="duckyPad StdLib contains handy functions to make coding easier.\nTo include, add \"USE_STDLIB\" to your script.    Click \"Docs\" button to learn more.",
+        text="duckyPad STDLIB contains many handy helper functions.\nTo include, add \"USE_STDLIB\" to your script.\nClick \"Docs\" button to learn more.  Updates checked daily.",
         justify="center"
     )
     stdlib_info_label.pack(side="top", pady=(5, 5))
@@ -1185,7 +1185,7 @@ def edit_header_button_click(global_setting_obj):
     stdlib_btn_container = Frame(stdlib_frame)
     stdlib_btn_container.pack(side="bottom", fill="x", padx=5, pady=5)
 
-    btn_stdlib_docs = Button(stdlib_btn_container, text="Stdlib Docs")
+    btn_stdlib_docs = Button(stdlib_btn_container, text="StdLib Docs")
     btn_stdlib_docs.pack(side="left", fill="x", expand=True, padx=(0, 2))
 
     btn_fetch_latest = Button(stdlib_btn_container, text="Fetch Latest")
@@ -1198,7 +1198,7 @@ def edit_header_button_click(global_setting_obj):
         text=f"To include this header, add  \"{user_header_source_tag_NO_SPACE}\"  to your script.",
         justify="center",
     )
-    top_label.pack(side="top", pady=(5, 5))
+    top_label.pack(side="top", pady=(0, 0))
 
     save_btn = Button(
         user_header_frame, 

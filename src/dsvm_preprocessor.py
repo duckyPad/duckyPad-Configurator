@@ -795,6 +795,7 @@ def preprocess_import_str_dict(import_str_dict):
     for key in import_str_dict:
         lineobj_list = make_list_of_ds_line_obj_from_str_listing(import_str_dict[key], key)
         rdict = run_all(lineobj_list)
+        # after run_all(), DEFINEs would have been replaced. This add them back to be included in other scripts.
         user_define_dict = {k:v for k, v in rdict['define_dict'].items() if k not in get_default_def_dict()}
         for defkey in user_define_dict:
             user_def_lineobj = ds_line(f"DEFINE {defkey} {user_define_dict[defkey]}", orig_lnum_sf1=1)

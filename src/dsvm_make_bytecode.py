@@ -9,6 +9,7 @@ import copy
 from collections import defaultdict
 import traceback
 import re
+import dsvm_optimizer
 
 """
 duckyscript VM changelog
@@ -254,7 +255,6 @@ def visit_node(node, ctx_dict):
             if fun_info.has_return_value is False:
                 emit(OP_PUSH0)
         else:
-            ctx_dict['func_visit_set'].add(func_name)
             emit(OP_CALL, payload=f"func_{func_name}")
 
     elif isinstance(node, ast.Return):
@@ -559,70 +559,6 @@ def compile_to_bin(rdict):
         raise ValueError("Binary size too large")
     return output_bin_array
 
-pushc_instructions = {OP_PUSHC8, OP_PUSHC16, OP_PUSHC32}
-
-def optimize_pass(instruction_list, arg_and_var_dict):
-    optimized_list = []
-    i = 0
-    while i < len(instruction_list):
-        current_instr = instruction_list[i]
-        
-        # Lookahead for peephole optimizations
-        if i + 1 < len(instruction_list):
-            next_instr = instruction_list[i + 1]
-            
-            # PUSH0 + DROP -> Remove both
-            if current_instr.opcode == OP_PUSH0 and next_instr.opcode == OP_DROP:
-                i += 2
-                continue
-
-            # POPI/POPR [X] + PUSHI/PUSHR [X] -> DUP + POPI/POPR [X]
-            # This handles both Global (POPI) and Local (POPR) variables
-            is_same_mem_save_load = (current_instr.opcode == OP_POPI and next_instr.opcode == OP_PUSHI) or (current_instr.opcode == OP_POPR and next_instr.opcode == OP_PUSHR)
-            if is_same_mem_save_load and current_instr.payload == next_instr.payload:
-                optimized_list.append(dsvm_instruction(opcode=OP_DUP))
-                optimized_list.append(current_instr)
-                i += 2
-                continue
-
-        # PUSHC16 0 -> PUSH0
-        if current_instr.opcode in pushc_instructions and current_instr.payload == 0:
-            optimized_list.append(dsvm_instruction(opcode=OP_PUSH0, label=current_instr.label, comment=current_instr.comment))
-            i += 1
-            continue
-        if current_instr.opcode in pushc_instructions and current_instr.payload == 1:
-            optimized_list.append(dsvm_instruction(opcode=OP_PUSH1, label=current_instr.label, comment=current_instr.comment))
-            i += 1
-            continue
-        if current_instr.opcode == OP_ALLOC and current_instr.payload in arg_and_var_dict and len(arg_and_var_dict[current_instr.payload]['locals']) == 0:
-            i += 1
-            continue
-
-        optimized_list.append(current_instr)
-        i += 1
-    
-    return optimized_list
-
-def optimize_full_assembly_from_context_dict(ctx_dict):
-    arg_and_var_dict = ctx_dict['func_arg_and_local_var_lookup']
-    ctx_dict["root_assembly_list"] = optimize_pass(ctx_dict["root_assembly_list"], arg_and_var_dict)
-    for key in ctx_dict['func_assembly_dict']:
-        ctx_dict['func_assembly_dict'][key] = optimize_pass(ctx_dict['func_assembly_dict'][key], arg_and_var_dict)
-
-def replace_dummy_with_drop(instruction_list):
-    for this_instruction in instruction_list:
-        if this_instruction.opcode == OP_POPI and this_instruction.payload == DUMMY_VAR_NAME:
-            this_instruction.opcode = OP_DROP
-            this_instruction.payload = None
-
-def drop_unused_functions(ctx_dict):
-    ctx_dict['func_assembly_dict'] = {k: v for k, v in ctx_dict['func_assembly_dict'].items() if k in ctx_dict['func_visit_set']}
-
-def replace_dummy_with_drop_from_context_dict(ctx_dict):
-    replace_dummy_with_drop(ctx_dict["root_assembly_list"])
-    for key in ctx_dict['func_assembly_dict']:
-        replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
-
 def flip_import_line_number(import_dict):
     if import_dict is None:
         return
@@ -660,6 +596,7 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
     source = dsline_to_source(pyout)
     try:
         my_tree = ast.parse(source, mode="exec")
+        my_tree = dsvm_optimizer.optimize_ast(my_tree, remove_unused_func)
     except SyntaxError as e:
         comp_result = compile_result(
             is_success = False,
@@ -675,7 +612,6 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
     rdict['func_assembly_dict'] = {}
     rdict['func_args_dict'] = get_func_args(symtable_root)
     rdict['var_info_set'] = set()
-    rdict['func_visit_set'] = set()
 
     for statement in my_tree.body:
         rdict["func_def_name"] = None
@@ -685,10 +621,8 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
     print("\n\n--------- Assembly Listing, Unoptimised, Unresolved: ---------")
     print_full_assembly_from_context_dict(rdict)
     rdict['func_arg_and_local_var_lookup'] = group_vars(rdict)
-    if remove_unused_func:
-        drop_unused_functions(rdict)
-    replace_dummy_with_drop_from_context_dict(rdict)
-    optimize_full_assembly_from_context_dict(rdict)
+    dsvm_optimizer.replace_dummy_with_drop_from_context_dict(rdict)
+    dsvm_optimizer.optimize_full_assembly_from_context_dict(rdict)
     rdict["root_assembly_list"].append(dsvm_instruction(OP_HALT))
 
     bin_array = compile_to_bin(rdict)
@@ -739,9 +673,10 @@ if __name__ == "__main__":
         program_listing.append(ds_line(line, index + 1))
 
     # import_str_dict = {'IMPORT_UH': ['REM_BLOCK', '    Should not have HARD CODED memory address', '    Must be compatible with all duckyScript and duckyPad versions', '    ', '    DPDSSTDLIB', '    ', '    TODO:', '    bitread, set, clear, toggle?', '    math abs, min, max?', '    memcpy?', 'END_REM', 'ENTER UP']}
-    import_str_dict = {'IMPORT_UH': ['DEFINE NAME abc', 'DEFINE AGE 67', 'FUN print_name()', 'STRING my name is NAME', 'END_FUN']}
-    preprocessed_import_lineobj_dict = dsvm_preprocessor.preprocess_import_str_dict(import_str_dict)
-    comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_line_obj_dict=preprocessed_import_lineobj_dict)
+    # import_str_dict = {'IMPORT_UH': ['DEFINE NAME abc', 'DEFINE AGE 67', 'FUN print_name()', 'STRING my name is NAME', 'END_FUN']}
+    # preprocessed_import_lineobj_dict = dsvm_preprocessor.preprocess_import_str_dict(import_str_dict)
+    # comp_result = make_dsb_no_exception(program_listing, should_print=True, import_name_to_line_obj_dict=preprocessed_import_lineobj_dict)
+    comp_result = make_dsb_no_exception(program_listing, should_print=True)
     if comp_result.is_success is False:
         error_msg = (f"Error on Line {comp_result.error_line_number_starting_from_1}: {comp_result.error_comment}\n\t{comp_result.error_line_str}")
         print(error_msg)

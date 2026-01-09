@@ -502,6 +502,8 @@ OP_HIDTX = Opcode("HIDTX", 89, 1)
 # Virtual Opcodes, to be resolved during compilation
 OP_PUSHSTR = Opcode("PUSHSTR", 128, 3, is_virtual=True)
 
+pushc_instructions = {OP_PUSHC8, OP_PUSHC16, OP_PUSHC32}
+
 MEM_END_ADDR = 0xFFFF
 USER_VAR_START_ADDRESS = 0xF800
 USER_VAR_BYTE_WIDTH = 4
