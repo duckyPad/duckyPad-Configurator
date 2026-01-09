@@ -1,5 +1,7 @@
 import os
 import time
+import requests
+from enum import IntEnum
 
 """
 Should not have HARD CODED memory address
@@ -108,3 +110,70 @@ def get_latest_stdlib_lines(lib_dir_path):
     except Exception as e:
         print("get_latest_stdlib_lines:", e)
     return default_stdlib_code.splitlines()
+
+class stdlib_fetch_result(IntEnum):
+    SUCCESS = 0
+    TOO_SOON = 1
+    NETWORK_ERROR = 2
+    OTHER_ERROR = 3
+
+stdlib_url = 'https://raw.githubusercontent.com/duckyPad/DuckStack/refs/heads/master/README.md'
+STDLIB_CHECK_INTERVAL_HOURS = 12
+
+def fetch_update(stdlib_path, force_fetch=False):
+    """
+    Downloads a copy of the latest stdlib source from a URL, if enough time has elapsed since last check, or if force_fetch is True.
+    """
+    try:
+        current_time = int(time.time())
+        existing_files = []
+        latest_timestamp = 0
+
+        # 1. Identify existing files and find the latest timestamp
+        if os.path.exists(stdlib_path):
+            for filename in os.listdir(stdlib_path):
+                if filename.startswith(std_lib_filename_prefix) and filename.endswith(".txt"):
+                    existing_files.append(filename)
+                    try:
+                        # Extract timestamp: remove prefix (len + 1 for underscore) and suffix (.txt is 4 chars)
+                        ts_part = filename[len(std_lib_filename_prefix) + 1 : -4]
+                        ts = int(ts_part)
+                        if ts > latest_timestamp:
+                            latest_timestamp = ts
+                    except ValueError:
+                        continue
+        
+        # 2. Check if we should download
+        if not force_fetch and latest_timestamp > 0:
+            hours_elapsed = (current_time - latest_timestamp) / 3600
+            if hours_elapsed < STDLIB_CHECK_INTERVAL_HOURS:
+                return stdlib_fetch_result.TOO_SOON
+
+        # 3. Perform Download
+        response = requests.get(stdlib_url, timeout=30)
+        response.raise_for_status()
+
+        # 4. Cleanup old files
+        for filename in existing_files:
+            file_path = os.path.join(stdlib_path, filename)
+            try:
+                os.remove(file_path)
+            except OSError:
+                pass # Best effort deletion
+
+        # 5. Save new file
+        new_filename = f"{std_lib_filename_prefix}_{current_time}.txt"
+        new_file_path = os.path.join(stdlib_path, new_filename)
+        
+        with open(new_file_path, 'w', encoding='utf-8') as f:
+            f.write(response.text)
+
+        return stdlib_fetch_result.SUCCESS
+
+    except requests.exceptions.RequestException:
+        return stdlib_fetch_result.NETWORK_ERROR
+    except Exception:
+        return stdlib_fetch_result.OTHER_ERROR
+    
+result = fetch_update("./test")
+print(result)
