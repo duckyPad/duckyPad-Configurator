@@ -2,20 +2,7 @@ import os
 import time
 import requests
 from enum import IntEnum
-
-"""
-Should not have HARD CODED memory address
-Must be compatible with all duckyScript and duckyPad versions
-
-DPDSSTDLIB
-
-TODO:
-bitread, set, clear, toggle?
-math abs, min, max?
-memcpy?
-try_set_led?
-show error and quit? for unsupported hardwares
-"""
+import webbrowser
 
 default_stdlib_code = """
 
@@ -117,7 +104,12 @@ class stdlib_fetch_result(IntEnum):
     NETWORK_ERROR = 2
     OTHER_ERROR = 3
 
-stdlib_url = 'https://raw.githubusercontent.com/duckyPad/DuckStack/refs/heads/master/README.md'
+stdlib_readme_url = "https://github.com/duckyPad/DPDS-Standard-Library/blob/master/README.md"
+
+def open_stdlib_doc_url():
+    webbrowser.open(stdlib_readme_url)
+
+stdlib_url = 'https://raw.githubusercontent.com/duckyPad/DPDS-Standard-Library/refs/heads/master/releases/duckypad_stdlib_latest.txt'
 STDLIB_CHECK_INTERVAL_HOURS = 12
 
 def fetch_update(stdlib_path, force_fetch=False):
@@ -175,5 +167,5 @@ def fetch_update(stdlib_path, force_fetch=False):
     except Exception:
         return stdlib_fetch_result.OTHER_ERROR
     
-result = fetch_update("./test")
-print(result)
+# result = fetch_update("./test")
+# print(result)

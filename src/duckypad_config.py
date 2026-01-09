@@ -20,7 +20,7 @@ import traceback
 import dp20_dumpsd
 from tkinter import font
 import dsvm_preprocessor
-from ds_stdlib import *
+import ds_stdlib
 
 """
 0.13.5
@@ -207,8 +207,8 @@ ensure_dir(app_save_path)
 ensure_dir(backup_path)
 ensure_dir(hid_dump_path)
 
-ensure_dpds_stdlib(ext_lib_path)
-this_global_setting.stdlib_line_list = get_latest_stdlib_lines(ext_lib_path)
+ds_stdlib.ensure_dpds_stdlib(ext_lib_path)
+this_global_setting.stdlib_line_list = ds_stdlib.get_latest_stdlib_lines(ext_lib_path)
 
 print("\n\n--------------------------")
 print("\n\nWelcome to duckyPad Configurator!\n")
@@ -1185,7 +1185,7 @@ def edit_header_button_click(global_setting_obj):
     stdlib_btn_container = Frame(stdlib_frame)
     stdlib_btn_container.pack(side="bottom", fill="x", padx=5, pady=5)
 
-    btn_stdlib_docs = Button(stdlib_btn_container, text="StdLib Docs")
+    btn_stdlib_docs = Button(stdlib_btn_container, text="StdLib Docs", command=ds_stdlib.open_stdlib_doc_url)
     btn_stdlib_docs.pack(side="left", fill="x", expand=True, padx=(0, 2))
 
     btn_fetch_latest = Button(stdlib_btn_container, text="Fetch Latest")
