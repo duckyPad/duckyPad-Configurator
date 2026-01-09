@@ -5,6 +5,7 @@ from platformdirs import *
 from pathlib import Path
 from hid_common import *
 from dsvm_common import *
+import dsvm_make_bytecode
 
 print("NOTE TO MYSELF: Don't forget to include latest DSVM compiler!")
 

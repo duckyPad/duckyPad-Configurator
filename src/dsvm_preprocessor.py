@@ -614,18 +614,22 @@ def get_default_def_dict():
     }
     return default_dict
 
+class import_result(IntEnum):
+    NOT_IMPORT_COMMAND = 0
+    ALREADY_IMPORTED = 1
+    NEW_IMPORT = 2
+
 already_imported_header_set = set()
-# returns: is_already_imported, imported_lineobj_list
 def get_import_lineobjs(first_word, import_name_to_line_obj_dict):
-    new_lineobj_list = []
     if import_name_to_line_obj_dict is None:
-        return False, new_lineobj_list
+        return import_result.NOT_IMPORT_COMMAND, []
+    new_lineobj_list = []
     if first_word in import_name_to_line_obj_dict:
         if first_word in already_imported_header_set:
-            return True, []
+            return import_result.ALREADY_IMPORTED, []
         new_lineobj_list += import_name_to_line_obj_dict[first_word]
         already_imported_header_set.add(first_word)
-    return False, new_lineobj_list
+    return import_result.NEW_IMPORT, new_lineobj_list
 
 def run_all(program_listing, import_name_to_line_obj_dict=None):
     all_def_dict = get_default_def_dict()
@@ -652,10 +656,10 @@ def run_all(program_listing, import_name_to_line_obj_dict=None):
 
         first_word = line_obj.content.split(" ")[0]
         
-        is_already_imported, imported_lineobj_list = get_import_lineobjs(first_word, import_name_to_line_obj_dict)
-        if is_already_imported:
+        imp_result, imported_lineobj_list = get_import_lineobjs(first_word, import_name_to_line_obj_dict)
+        if imp_result == import_result.ALREADY_IMPORTED:
             continue
-        if len(imported_lineobj_list):
+        if imp_result == import_result.NEW_IMPORT:
             new_program_listing += imported_lineobj_list
             continue
 
