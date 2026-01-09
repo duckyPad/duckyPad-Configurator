@@ -207,9 +207,6 @@ ensure_dir(app_save_path)
 ensure_dir(backup_path)
 ensure_dir(hid_dump_path)
 
-ds_stdlib.ensure_dpds_stdlib(ext_lib_path)
-this_global_setting.stdlib_line_list = ds_stdlib.get_latest_stdlib_lines(ext_lib_path)
-
 print("\n\n--------------------------")
 print("\n\nWelcome to duckyPad Configurator!\n")
 print("This window prints debug information.")
@@ -224,6 +221,10 @@ PADDING = scaled_size(10)
 HEIGHT_ROOT_FOLDER_LF = scaled_size(50)
 INVALID_ROOT_FOLDER_STRING = "<---- Press to connect"
 last_rgb = (238,130,238)
+
+ds_stdlib.ensure_dpds_stdlib(ext_lib_path)
+ds_stdlib.fetch_update(ext_lib_path)
+this_global_setting.stdlib_line_list = ds_stdlib.get_latest_stdlib_lines(ext_lib_path)
 
 def get_monospace_font():
     platform = sys.platform
@@ -1158,6 +1159,13 @@ def update_header_button_color(btn_widget, setting_obj):
         else:
             btn_widget.configure(fg='black')
 
+def stdlib_fetch_click():
+    fetch_result = ds_stdlib.fetch_update(ext_lib_path, force_fetch=True)
+    result_string = f"Fetch result: {fetch_result.name}\n\nSee fetched file?"
+    this_global_setting.stdlib_line_list = ds_stdlib.get_latest_stdlib_lines(ext_lib_path)
+    if messagebox.askyesno("Info", result_string):
+        open_directory_in_file_browser(ext_lib_path)
+
 def edit_header_button_click(global_setting_obj):
     header_edit_window = Toplevel(root)
     header_edit_window.title(edit_header_button_name)
@@ -1173,7 +1181,6 @@ def edit_header_button_click(global_setting_obj):
     user_header_frame.pack(side="top", fill="both", expand=True, padx=10, pady=10)
 
     # --- 2. Populate "duckyPad Standard Library" Frame ---
-    
     stdlib_info_label = Label(
         stdlib_frame,
         text="duckyPad STDLIB contains many handy helper functions.\nTo include, add \"USE_STDLIB\" to your script.\nClick \"Docs\" button to learn more.  Updates checked daily.",
@@ -1188,7 +1195,7 @@ def edit_header_button_click(global_setting_obj):
     btn_stdlib_docs = Button(stdlib_btn_container, text="StdLib Docs", command=ds_stdlib.open_stdlib_doc_url)
     btn_stdlib_docs.pack(side="left", fill="x", expand=True, padx=(0, 2))
 
-    btn_fetch_latest = Button(stdlib_btn_container, text="Fetch Latest")
+    btn_fetch_latest = Button(stdlib_btn_container, text="Fetch Latest", command=stdlib_fetch_click)
     btn_fetch_latest.pack(side="right", fill="x", expand=True, padx=(2, 0))
 
     # --- 3. Populate "User Header" Frame (Existing UI Elements) ---
