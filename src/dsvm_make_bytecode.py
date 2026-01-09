@@ -590,9 +590,6 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
     post_pp_listing = rdict["dspp_listing_with_indent_level"]
     pyout = dsvm_ds2py.run_all(post_pp_listing)
     rdict["ds2py_listing"] = pyout
-    if should_print:
-        save_lines_to_file(post_pp_listing, "ppds.txt")
-        save_lines_to_file(pyout, "pyds.py")
     source = dsline_to_source(pyout)
     try:
         my_tree = ast.parse(source, mode="exec")
@@ -605,6 +602,12 @@ def make_dsb_with_exception(program_listing, should_print=False, remove_unused_f
             error_line_str = e.text,
         )
         return comp_result
+    if should_print:
+        save_lines_to_file(post_pp_listing, "pgmlst0_preprocessed.txt")
+        save_lines_to_file(pyout, "pgmlst1_unoptimized.py")
+        optimized_filename = "pgmlst2_optimized.py"
+        with open(optimized_filename, "w") as file:
+            file.write(ast.unparse(my_tree))
     symtable_root = symtable.symtable(source, filename="ds2py", compile_type="exec")
     rdict["root_assembly_list"] = []
     rdict["root_assembly_list"].append(dsvm_instruction(OP_VMVER, payload=DS_VM_VERSION))

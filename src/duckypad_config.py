@@ -902,7 +902,7 @@ def save_everything(save_path, dp_obj):
 
         user_header_file_path = os.path.join(save_path, user_header_dot_txt)
         print("user_header_file_path:", user_header_file_path)
-        if this_global_setting.user_header_line_list is not None:
+        if len(this_global_setting.user_header_line_list):
             user_header_file = open(user_header_file_path, "w")
             user_header_file.writelines((line + '\n' for line in this_global_setting.user_header_line_list))
             user_header_file.close()
@@ -2097,9 +2097,9 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
-select_root_folder("sample_dp24", is_dir_for_dp24=True)
-edit_header_button_click(this_global_setting)
+# THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+# select_root_folder("sample_dp24", is_dir_for_dp24=True)
+# edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()
 # import_profile_click()

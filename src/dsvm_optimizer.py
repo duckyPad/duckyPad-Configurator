@@ -26,7 +26,6 @@ def optimize_pass(instruction_list, arg_and_var_dict):
                 i += 2
                 continue
 
-        # PUSHC16 0 -> PUSH0
         if current_instr.opcode in pushc_instructions and current_instr.payload == 0:
             optimized_list.append(dsvm_instruction(opcode=OP_PUSH0, label=current_instr.label, comment=current_instr.comment))
             i += 1
@@ -61,16 +60,11 @@ def replace_dummy_with_drop_from_context_dict(ctx_dict):
     for key in ctx_dict['func_assembly_dict']:
         replace_dummy_with_drop(ctx_dict['func_assembly_dict'][key])
 
+"""
+Performs dead function elimination and constant folding
+Only on operators unaffected by `_UNSIGNED_MODE`
+"""
 def optimize_ast(tree, remove_unused_func=True):
-    """
-    Main entry point to optimize the duckyScript AST.
-    
-    Args:
-        tree (ast.AST): The AST to optimize.
-        remove_unused_func (bool): If True, performs Dead Code Elimination 
-                                    on functions. Default is True.
-    """
-    
     # --- Step 1: Reachability Analysis (Conditional) ---
     live_funcs = set()
     
@@ -83,10 +77,8 @@ def optimize_ast(tree, remove_unused_func=True):
         }
 
         # Queue for BFS/DFS traversal. Start with the "Main" body.
-        # "Main" consists of all nodes in the module that AREN'T FunctionDefs.
         worklist = [node for node in tree.body if not isinstance(node, ast.FunctionDef)]
         
-        # Helper to find all function calls within a list of nodes
         def get_calls_from_nodes(nodes):
             calls = []
             for node in nodes:
@@ -110,7 +102,7 @@ def optimize_ast(tree, remove_unused_func=True):
 
     class DuckyOptimizer(ast.NodeTransformer):
         def visit_FunctionDef(self, node):
-            # 1. Dead Code Elimination (Controlled by flag)
+            # 1. Dead Code Elimination
             if remove_unused_func and node.name not in live_funcs:
                 return None
             return self.generic_visit(node)
@@ -119,26 +111,60 @@ def optimize_ast(tree, remove_unused_func=True):
             # Optimize children first
             self.generic_visit(node)
 
-            # 2. Constant Folding (Runs regardless of flag)
+            # 2. Constant Folding for Binary Operators
             if isinstance(node.left, ast.Constant) and isinstance(node.right, ast.Constant):
-                if isinstance(node.left.value, (int, float)) and isinstance(node.right.value, (int, float)):
+                if isinstance(node.left.value, int) and isinstance(node.right.value, int):
                     try:
-                        val = self._apply_op(node.op, node.left.value, node.right.value)
-                        return ast.Constant(value=val)
+                        val = self._apply_bin_op(node.op, node.left.value, node.right.value)
+                        # Check if optimization was possible (val is not None)
+                        if val is not None:
+                            return ast.Constant(value=int(val))
                     except (ZeroDivisionError, OverflowError):
                         pass
             return node
 
-        def _apply_op(self, op, left, right):
+        def visit_Compare(self, node):
+            # Optimize children first
+            self.generic_visit(node)
+            
+            # 3. Constant Folding for Comparisons
+            if len(node.ops) == 1 and len(node.comparators) == 1:
+                left = node.left
+                right = node.comparators[0]
+                op = node.ops[0]
+                
+                if isinstance(left, ast.Constant) and isinstance(right, ast.Constant):
+                     if isinstance(left.value, int) and isinstance(right.value, int):
+                        try:
+                            val = self._apply_cmp_op(op, left.value, right.value)
+                            if val is not None:
+                                return ast.Constant(value=int(val)) 
+                        except Exception:
+                            pass
+            return node
+
+        def visit_BoolOp(self, node):
+            self.generic_visit(node)
+            # Constant Folding for Logical Operators
+            if all(isinstance(v, ast.Constant) for v in node.values):
+                raw_values = [v.value for v in node.values]
+                final_val = 0
+                if isinstance(node.op, ast.And):
+                    final_val = 1 if all(raw_values) else 0
+                elif isinstance(node.op, ast.Or):
+                    final_val = 1 if any(raw_values) else 0
+                return ast.Constant(value=final_val)
+            return node
+        
+        # --- Operator Mapping Helpers ---
+
+        def _apply_bin_op(self, op, left, right):
             ops = {
                 ast.Add: operator.add,
                 ast.Sub: operator.sub,
                 ast.Mult: operator.mul,
-                ast.Div: operator.floordiv,
-                ast.Mod: operator.mod,
                 ast.Pow: operator.pow,
                 ast.LShift: operator.lshift,
-                ast.RShift: operator.rshift,
                 ast.BitOr: operator.or_,
                 ast.BitXor: operator.xor,
                 ast.BitAnd: operator.and_,
@@ -146,7 +172,17 @@ def optimize_ast(tree, remove_unused_func=True):
             op_type = type(op)
             if op_type in ops:
                 return ops[op_type](left, right)
-            raise NotImplementedError
+            return None
+
+        def _apply_cmp_op(self, op, left, right):
+            ops = {
+                ast.Eq: operator.eq,
+                ast.NotEq: operator.ne,
+            }
+            op_type = type(op)
+            if op_type in ops:
+                return ops[op_type](left, right)
+            return None
 
     optimizer = DuckyOptimizer()
     new_tree = optimizer.visit(tree)

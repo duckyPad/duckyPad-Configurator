@@ -204,6 +204,6 @@ def import_profile_single(root_dir_path):
     return this_profile
 
 class dp_global_settings:
-    def __init__(self, user_header_line_list=None, stdlib_line_list=None):
+    def __init__(self, user_header_line_list=[], stdlib_line_list=[]):
         self.user_header_line_list = user_header_line_list
         self.stdlib_line_list = stdlib_line_list
