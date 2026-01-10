@@ -322,6 +322,8 @@ def group_vars(global_context_dict):
     return dict(grouped_data)
 
 def needs_resolving(inst):
+    if inst.opcode.is_virtual:
+        return True
     if inst.opcode.length == 1:
         return False
     if isinstance(inst.payload, str):
@@ -488,6 +490,8 @@ def compile_to_bin(rdict):
             bytestr = bytes(bytestr)
             this_inst.payload = bytestr
             user_strings_dict[bytestr] = None
+        elif this_inst.opcode == OP_HCF:
+            raise ValueError("I'm on fire!")
         elif this_inst.payload in label_to_addr_dict:
             this_inst.payload = label_to_addr_dict[this_inst.payload]
         elif this_inst.opcode == OP_ALLOC:

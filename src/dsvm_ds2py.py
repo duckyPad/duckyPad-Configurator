@@ -26,6 +26,7 @@ def line_has_unconsumed_stack_value(line_obj):
     return False
 
 def run_all(program_listing):
+    # print("Transpiling Started")
     new_listing = []
     for line_obj in program_listing:
         line_obj.content = line_obj.content.lstrip(' \t')
@@ -38,7 +39,17 @@ def run_all(program_listing):
 
         this_line = line_obj.content
 
-        if first_word in ds_func_to_parse_as_str:
+        if first_word == kw_OLED_LPRINT:
+            new_obj = copy.deepcopy(line_obj)
+            str_content = this_line[len(first_word)+1:]
+            new_obj.content = f"{kw_OLED_OPTPRINT}(0, {repr(str_content)})"
+            new_listing.append(new_obj)
+        elif first_word == kw_OLED_CPRINT:
+            new_obj = copy.deepcopy(line_obj)
+            str_content = this_line[len(first_word)+1:]
+            new_obj.content = f"{kw_OLED_OPTPRINT}(1, {repr(str_content)})"
+            new_listing.append(new_obj)
+        elif first_word in ds_func_to_parse_as_str:
             new_obj = copy.deepcopy(line_obj)
             new_obj.content = make_str_func(first_word, this_line)
             new_listing.append(new_obj)
@@ -88,6 +99,7 @@ def run_all(program_listing):
         line_obj.py_lnum_sf1 = index+1
         if line_has_unconsumed_stack_value(line_obj):
             line_obj.content = f"{DUMMY_VAR_NAME} = " + line_obj.content
+    # print("Transpiling Done!")
     return new_listing
 
 if __name__ == "__main__":

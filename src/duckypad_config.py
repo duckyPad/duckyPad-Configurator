@@ -1289,7 +1289,6 @@ def edit_header_button_click(global_setting_obj):
 
 edit_header_button = Button(root_folder_lf, text=edit_header_button_name, command=lambda: edit_header_button_click(this_global_setting), state=DISABLED)
 edit_header_button.place(x=scaled_size(770+170), y=0, width=scaled_size(100), height=scaled_size(25))
-update_header_button_color(edit_header_button, this_global_setting)
 
 # ------------- Profiles frame -------------
 
@@ -2100,12 +2099,13 @@ root.update()
 def repeat_func():
     if time.time() - last_textbox_edit >= 0.75:
         check_syntax()
+    update_header_button_color(edit_header_button, this_global_setting)
     root.after(500, repeat_func)
 
 root.after(500, repeat_func)
 
-# THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
-# select_root_folder("sample_dp24", is_dir_for_dp24=True)
+THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+select_root_folder("sample_dp24", is_dir_for_dp24=True)
 # edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()

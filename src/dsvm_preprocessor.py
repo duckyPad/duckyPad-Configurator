@@ -611,6 +611,7 @@ def get_default_def_dict():
         kw_END_FUNCTION : kw_END_FUN,
         kw_TRUE : "1",
         kw_FALSE : "0",
+        kw_OLED_PRINT : kw_OLED_LPRINT,
     }
     return default_dict
 

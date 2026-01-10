@@ -51,6 +51,9 @@ kw_SWCF = "SWC_FILL"
 kw_SWCR = "SWC_RESET"
 
 kw_OLED_PRINT = "OLED_PRINT"
+kw_OLED_LPRINT = "OLED_LPRINT"
+kw_OLED_CPRINT = "OLED_CPRINT"
+kw_OLED_OPTPRINT = "OLED_OPTPRINT"
 kw_OLED_UPDATE = "OLED_UPDATE"
 kw_OLED_CURSOR = "OLED_CURSOR"
 kw_OLED_CLEAR = "OLED_CLEAR"
@@ -501,6 +504,7 @@ OP_HIDTX = Opcode("HIDTX", 89, 1)
 
 # Virtual Opcodes, to be resolved during compilation
 OP_PUSHSTR = Opcode("PUSHSTR", 128, 3, is_virtual=True)
+OP_HCF = Opcode("HCF", 129, 0, is_virtual=True)
 
 pushc_instructions = {OP_PUSHC8, OP_PUSHC16, OP_PUSHC32}
 
@@ -640,8 +644,12 @@ class reserved_func_info:
 ds_str_func_lookup = {
     kw_STRING : reserved_func_info(OP_STR, 1),
     kw_STRINGLN : reserved_func_info(OP_STRLN, 1),
-    kw_OLED_PRINT : reserved_func_info(OP_OLED_PRNT, 1),
+    kw_OLED_OPTPRINT : reserved_func_info(OP_OLED_PRNT, 2),
     kw_GOTO_PROFILE : reserved_func_info(OP_GOTOP, 1),
+    # shouldnt happen, those keywords should have been preprocessed into OLED_OPT_PRINT
+    kw_OLED_PRINT : reserved_func_info(OP_HCF, 1),
+    kw_OLED_LPRINT : reserved_func_info(OP_HCF, 1),
+    kw_OLED_CPRINT : reserved_func_info(OP_HCF, 1),
     }
 
 ds_keypress_func_lookup = {
