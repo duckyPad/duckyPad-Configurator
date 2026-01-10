@@ -660,7 +660,7 @@ def run_all(program_listing, import_name_to_line_obj_dict=None):
         imp_result, imported_lineobj_list = get_import_lineobjs(first_word, import_name_to_line_obj_dict)
         if imp_result == import_result.ALREADY_IMPORTED:
             continue
-        if imp_result == import_result.NEW_IMPORT:
+        if imp_result == import_result.NEW_IMPORT and len(imported_lineobj_list) > 0:
             new_program_listing += imported_lineobj_list
             continue
 

@@ -861,7 +861,7 @@ def compile_all_scripts():
             for this_key in this_profile.keylist:
                 if this_key is None:
                     continue
-                text_list = make_final_script(this_key, this_key.script.lstrip().split('\n'))
+                text_list = make_final_script(this_key, this_key.script.lstrip(" \t").split('\n'))
                 obj_list = make_list_of_ds_line_obj_from_str_listing(text_list)
 
                 import_to_lineobj_dict = dsvm_preprocessor.preprocess_import_str_dict(get_import_name_to_strlist_dict())
@@ -869,8 +869,8 @@ def compile_all_scripts():
                 if comp_result.is_success is False:
                     raise ValueError("Compile failed")
                 this_key.binary_array = comp_result.bin_array
-                if len(this_key.script_on_release.lstrip()) > 0:
-                    tl_or = make_final_script(this_key, this_key.script_on_release.lstrip().split('\n'))
+                if len(this_key.script_on_release.lstrip(" \t")) > 0:
+                    tl_or = make_final_script(this_key, this_key.script_on_release.lstrip(" \t").split('\n'))
                     ol_or = make_list_of_ds_line_obj_from_str_listing(tl_or)
                     comp_result = dsvm_make_bytecode.make_dsb_with_exception(ol_or, import_name_to_line_obj_dict=import_to_lineobj_dict)
                     if comp_result.is_success is False:
@@ -1045,8 +1045,8 @@ on_press_release_rb_var.set(0)
 
 def get_correct_script_text(key_obj):
     if on_press_release_rb_var.get() == 1:
-        return key_obj.script_on_release.lstrip().rstrip('\r\n')
-    return key_obj.script.lstrip().rstrip('\r\n')
+        return key_obj.script_on_release.lstrip(" \t").rstrip('\r\n')
+    return key_obj.script.lstrip(" \t").rstrip('\r\n')
 
 def key_button_click(button_widget):
     global last_rgb
@@ -1782,7 +1782,7 @@ def script_textbox_modified():
         on_release_rb.configure(fg='green4')
     else:
         on_release_rb.configure(fg='gray20')
-    current_text = script_textbox.get(1.0, END).lstrip()
+    current_text = script_textbox.get(1.0, END).lstrip(" \t")
     if on_press_release_rb_var.get():
         thissss_key.script_on_release = current_text
     else:
@@ -1809,7 +1809,7 @@ def on_press_rb_click():
         return
     script_textbox.delete(1.0, 'end')
     # script_textbox.tag_remove("error", '1.0', 'end')
-    script_textbox.insert(1.0, profile_list[profile_index].keylist[selected_key].script.lstrip().rstrip('\r\n'))
+    script_textbox.insert(1.0, profile_list[profile_index].keylist[selected_key].script.lstrip(" \t").rstrip('\r\n'))
 
 is_onrelease_warning_shown = 0
 
@@ -1823,7 +1823,7 @@ def on_release_rb_click():
         is_onrelease_warning_shown = 1
     script_textbox.delete(1.0, 'end')
     # script_textbox.tag_remove("error", '1.0', 'end')
-    script_textbox.insert(1.0, profile_list[profile_index].keylist[selected_key].script_on_release.lstrip().rstrip('\r\n'))
+    script_textbox.insert(1.0, profile_list[profile_index].keylist[selected_key].script_on_release.lstrip(" \t").rstrip('\r\n'))
 
 on_press_rb = Radiobutton(scripts_lf, text="On Press", variable=on_press_release_rb_var, value=0, command=on_press_rb_click)
 on_press_rb.place(x=scaled_size(50), y=scaled_size(20))
