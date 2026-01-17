@@ -88,24 +88,11 @@ def get_timestamp_and_utc_offset():
     utc_offset_minutes = int(now.utcoffset().total_seconds() // 60)
     return unix_timestamp, utc_offset_minutes
 
-def u32_to_u8_list_be(value):
-    return [
-        (value >> 24) & 0xFF,
-        (value >> 16) & 0xFF,
-        (value >> 8) & 0xFF,
-        value & 0xFF]
-
-def i16_to_u8_list_be(value):
-    value &= 0xFFFF
-    return [
-        (value >> 8) & 0xFF,
-        value & 0xFF ]
-
 def duckypad_sync_rtc(hid_path):
     pc_to_duckypad_buf = get_empty_pc_to_duckypad_buf()
     unix_ts, utc_offset_minutes = get_timestamp_and_utc_offset()
-    unix_ts_u8_list = u32_to_u8_list_be(unix_ts)
-    utc_offset_u8_list = i16_to_u8_list_be(utc_offset_minutes)
+    unix_ts_u8_list = list(unix_ts.to_bytes(4, 'little', signed=False))
+    utc_offset_u8_list = list(utc_offset_minutes.to_bytes(2, 'little', signed=True))
     pc_to_duckypad_buf[2] = 0x1A    # Command: Set RTC
     pc_to_duckypad_buf[3] = unix_ts_u8_list[0]
     pc_to_duckypad_buf[4] = unix_ts_u8_list[1]

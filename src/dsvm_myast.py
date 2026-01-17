@@ -64,14 +64,14 @@ def postorder_walk(node, action, ctx_dict):
     if isinstance(node, ast.Expr):
         postorder_walk(node.value, action, ctx_dict)
     elif isinstance(node, ast.BinOp):
-        postorder_walk(node.left, action, ctx_dict)
+        # Push args right-to-left
         postorder_walk(node.right, action, ctx_dict)
+        postorder_walk(node.left, action, ctx_dict)
         postorder_walk(node.op, action, ctx_dict)
     elif isinstance(node, ast.BoolOp):
-        # Consecutive operations with the same operator, such as a or b or c, are collapsed into one node with several values.
         if len(node.values) > 2:
             raise ValueError("Ambiguous expr, add parentheses.")
-        for item in node.values:
+        for item in reversed(node.values):
             postorder_walk(item, action, ctx_dict)
         postorder_walk(node.op, action, ctx_dict)
     elif isinstance(node, ast.UnaryOp):
@@ -80,8 +80,9 @@ def postorder_walk(node, action, ctx_dict):
     elif isinstance(node, ast.Compare):
         if len(node.comparators) > 1 or len(node.ops) > 1:
             raise ValueError("Multiple Comparators")
-        postorder_walk(node.left, action, ctx_dict)
+        print_node_info(node)
         postorder_walk(node.comparators[0], action, ctx_dict)
+        postorder_walk(node.left, action, ctx_dict)
         postorder_walk(node.ops[0], action, ctx_dict)
     elif isinstance(node, ast.Assign):
         postorder_walk(node.value, action, ctx_dict)
@@ -93,7 +94,9 @@ def postorder_walk(node, action, ctx_dict):
         this_func_label = f"func_{func_name}"
         this_arg_count = how_many_args(func_name, ctx_dict)
         if this_arg_count is None:
-            raise ValueError("Invalid args:", func_name)
+            raise ValueError(f"Invalid args")
+        if this_arg_count > DSVM_FUNC_ARG_MAX_SIZE:
+            raise ValueError(f"Too many args")
         ctx_dict['func_def_name'] = func_name
         action(add_nop(this_func_label), ctx_dict)
         action(add_alloc(func_name), ctx_dict)
@@ -110,11 +113,10 @@ def postorder_walk(node, action, ctx_dict):
         print_node_info(node) # target op value
         target_load = copy.deepcopy(node.target)
         target_load.ctx = ast.Load()
-        postorder_walk(target_load, action, ctx_dict)
         postorder_walk(node.value, action, ctx_dict)
+        postorder_walk(target_load, action, ctx_dict)
         postorder_walk(node.op, action, ctx_dict)
-        postorder_walk(node.target, action, ctx_dict) # store
-        # raise ValueError(f"{node.__class__.__name__}: To Be Implemented")
+        postorder_walk(node.target, action, ctx_dict)
     elif isinstance(node, ast.If):
         if_skip_label = f"{node.__class__.__name__}_skip@{this_orig_ds_lnum_sf1}"
         if_end_label = f"{node.__class__.__name__}_end@{this_orig_ds_lnum_sf1}"

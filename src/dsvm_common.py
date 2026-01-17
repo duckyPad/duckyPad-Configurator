@@ -6,16 +6,33 @@ import uuid
 
 DSVM_VERSION = 2
 
+DSVM_FUNC_ARG_MAX_SIZE = 255
+
 kw_REPEAT = "REPEAT"
 kw_REM = "REM"
 kw_C_COMMENT = "//"
 
 kw_PEEK8 = "PEEK8"
-kw_POKE8 = "POKE8" # POKE8(addr, val)
+kw_PEEKU8 = "PEEKU8"
+kw_PEEK16 = "PEEK16"
+kw_PEEKU16 = "PEEKU16"
+kw_PEEK32 = "PEEK32"
+kw_POKE8 = "POKE8"
+kw_POKE16 = "POKE16"
+kw_POKE32 = "POKE32"
+
+kw_ULT = "ULT"
+kw_ULTE = "ULTE"
+kw_UGT = "UGT"
+kw_UGTE = "UGTE"
+kw_UDIV = "UDIV"
+kw_UMOD = "UMOD"
+kw_LSR = "LSR"
+
 kw_RANDCHR = "RANDCHR"
 kw_RANDINT = "RANDINT"
+kw_RANDUINT = "RANDUINT"
 kw_PUTS = "PUTS"
-kw_BUZZ = "BUZZ"
 kw_HIDTX = "HIDTX"
 
 kw_TRUE = "TRUE"
@@ -196,6 +213,16 @@ kw_END_STRINGLN = "END_STRINGLN"
 
 kw_STRING_BLOCK = "STRING_BLOCK"
 kw_END_STRING = "END_STRING"
+
+kw_PASS = "PASS"
+
+# rv = reserved variable
+rv_IS_NUMLOCK_ON = "_IS_NUMLOCK_ON"
+rv_IS_CAPSLOCK_ON = "_IS_CAPSLOCK_ON"
+rv_IS_SCROLLLOCK_ON = "_IS_SCROLLLOCK_ON"
+rv_KBLED_BITFIELD = "_KBLED_BITFIELD"
+kw_STR_PRINT_FORMAT = "_STR_PRINT_FORMAT"
+kw_STR_PRINT_PADDING = "_STR_PRINT_PADDING"
 
 KEY_LEFT_CTRL =  0x01
 KEY_LEFT_SHIFT = 0x02
@@ -437,16 +464,25 @@ OP_ALLOC = Opcode("ALLOC", 8, 3)
 OP_CALL = Opcode("CALL", 9, 3)
 OP_RET = Opcode("RET", 10, 3)
 OP_HALT = Opcode("HALT", 11, 1)
-OP_PEEK8 = Opcode("PEEK8", 12, 1)
-OP_POKE8 = Opcode("POKE8", 13, 1)
-OP_PUSH0 = Opcode("PUSH0", 14, 1)
-OP_PUSH1 = Opcode("PUSH1", 15, 1)
-OP_DROP = Opcode("DROP", 16, 1)
-OP_DUP = Opcode("DUP", 17, 1)
-OP_RANDINT = Opcode("RANDINT", 18, 1)
-OP_PUSHC32 = Opcode("PUSHC32", 19, 5)
-OP_PUSHC8 = Opcode("PUSHC8", 20, 2)
+OP_PUSH0 = Opcode("PUSH0", 12, 1)
+OP_PUSH1 = Opcode("PUSH1", 13, 1)
+OP_DROP = Opcode("DROP", 14, 1)
+OP_DUP = Opcode("DUP", 15, 1)
+OP_RANDINT = Opcode("RANDINT", 16, 1)
+OP_RANDUINT = Opcode("RANDUINT", 17, 1)
+OP_PUSHC32 = Opcode("PUSHC32", 18, 5)
+OP_PUSHC8 = Opcode("PUSHC8", 19, 2)
 OP_VMVER = Opcode("VMVER", 255, 3)
+
+# Memory Access
+OP_PEEK8 = Opcode("PEEK8", 24, 1)
+OP_PEEKU8 = Opcode("PEEKU8", 25, 1)
+OP_PEEK16 = Opcode("PEEK16", 26, 1)
+OP_PEEKU16 = Opcode("PEEKU16", 27, 1)
+OP_PEEK32 = Opcode("PEEK32", 28, 1)
+OP_POKE8 = Opcode("POKE8", 29, 1)
+OP_POKE16 = Opcode("POKE16", 30, 1)
+OP_POKE32 = Opcode("POKE32", 31, 1)
 
 # Binary Operators
 OP_EQ = Opcode("EQ", 32, 1)
@@ -461,18 +497,27 @@ OP_MULT = Opcode("MULT", 40, 1)
 OP_DIV = Opcode("DIV", 41, 1)
 OP_MOD = Opcode("MOD", 42, 1)
 OP_POW = Opcode("POW", 43, 1)
-OP_LSHIFT = Opcode("LSHIFT", 44, 1)
-OP_RSHIFT = Opcode("RSHIFT", 45, 1)
+OP_LSHIFT = Opcode("LSL", 44, 1)
+OP_RSHIFT = Opcode("ASR", 45, 1)
 OP_BITOR = Opcode("BITOR", 46, 1)
 OP_BITXOR = Opcode("BITXOR", 47, 1)
 OP_BITAND = Opcode("BITAND", 48, 1)
 OP_LOGIAND = Opcode("LOGIAND", 49, 1)
 OP_LOGIOR = Opcode("LOGIOR", 50, 1)
 
+# Unsigned Binops
+OP_ULT = Opcode("ULT", 51, 1)
+OP_ULTE = Opcode("ULTE", 52, 1)
+OP_UGT = Opcode("UGT", 53, 1)
+OP_UGTE = Opcode("UGTE", 54, 1)
+OP_UDIV = Opcode("UDIV", 55, 1)
+OP_UMOD = Opcode("UMOD", 56, 1)
+OP_LSR = Opcode("LSR", 57, 1)
+
 # Unary Operators
-OP_BITINV = Opcode("BITINV", 55, 1)
-OP_LOGINOT = Opcode("LOGINOT", 56, 1)
-OP_USUB = Opcode("USUB", 57, 1)
+OP_BITINV = Opcode("BITINV", 60, 1)
+OP_LOGINOT = Opcode("LOGINOT", 61, 1)
+OP_USUB = Opcode("USUB", 62, 1)
 
 # duckyScript Commands
 OP_DELAY = Opcode("DELAY", 64, 1)
@@ -499,8 +544,7 @@ OP_GOTOP = Opcode("GOTOP", 84, 1)
 OP_SLEEP = Opcode("SLEEP", 85, 1)
 OP_RANDCHR = Opcode("RANDCHR", 86, 1)
 OP_PUTS = Opcode("PUTS", 87, 1)
-OP_PWMCTRL = Opcode("PWMCTRL", 88, 1)
-OP_HIDTX = Opcode("HIDTX", 89, 1)
+OP_HIDTX = Opcode("HIDTX", 88, 1)
 
 # Virtual Opcodes, to be resolved during compilation
 OP_PUSHSTR = Opcode("PUSHSTR", 128, 3, is_virtual=True)
@@ -509,13 +553,11 @@ OP_HCF = Opcode("HCF", 129, 0, is_virtual=True)
 pushc_instructions = {OP_PUSHC8, OP_PUSHC16, OP_PUSHC32}
 
 MEM_END_ADDR = 0xFFFF
-USER_VAR_START_ADDRESS = 0xF800
+USER_VAR_START_ADDRESS = 0xF000
 USER_VAR_BYTE_WIDTH = 4
-USER_VAR_END_ADDRESS_INCLUSIVE = 0xF9FF
+USER_VAR_END_ADDRESS_INCLUSIVE = 0xF3FF
 MAX_UDV_COUNT = (USER_VAR_END_ADDRESS_INCLUSIVE - USER_VAR_START_ADDRESS + 1) // USER_VAR_BYTE_WIDTH
-
-PGV_COUNT = 32
-PGV_START_ADDRESS = 0xFD00
+PGV_START_ADDRESS = 0xFC00
 PGV_BYTE_WIDTH = 4
 PGV_END_ADDRESS_INCLUSIVE = 0xFDFF
 
@@ -524,9 +566,9 @@ INTERAL_VAR_BYTE_WIDTH = 4
 INTERAL_VAR_END_ADDRESS_INCLUSIVE = MEM_END_ADDR
 OP_DROP_REPLACEMENT_ADDR = MEM_END_ADDR
 
-STACK_BASE_ADDR = 0xF7FF
+STACK_BASE_ADDR = 0xEFFF
 MIN_STACK_SIZE_BYTES = 512
-STACK_MOAT_BYTES = 32
+STACK_MOAT_BYTES = 16
 MAX_BIN_SIZE = STACK_BASE_ADDR - MIN_STACK_SIZE_BYTES - STACK_MOAT_BYTES
 DUMMY_VAR_NAME = "_DSVM_DUMMY"
 
@@ -545,25 +587,22 @@ reserved_variables_dict = {
     "_TIME_S": (INTERAL_VAR_START_ADDRESS + 11 * INTERAL_VAR_BYTE_WIDTH),
     "_ALLOW_ABORT": (INTERAL_VAR_START_ADDRESS + 12 * INTERAL_VAR_BYTE_WIDTH),
     "_BLOCKING_READKEY": (INTERAL_VAR_START_ADDRESS + 13 * INTERAL_VAR_BYTE_WIDTH),
-    "_IS_NUMLOCK_ON": (INTERAL_VAR_START_ADDRESS + 14 * INTERAL_VAR_BYTE_WIDTH),
-    "_IS_CAPSLOCK_ON": (INTERAL_VAR_START_ADDRESS + 15 * INTERAL_VAR_BYTE_WIDTH),
-    "_IS_SCROLLLOCK_ON": (INTERAL_VAR_START_ADDRESS + 16 * INTERAL_VAR_BYTE_WIDTH),
-    "_DONT_REPEAT": (INTERAL_VAR_START_ADDRESS + 17 * INTERAL_VAR_BYTE_WIDTH),
-    "_THIS_KEYID": (INTERAL_VAR_START_ADDRESS + 18 * INTERAL_VAR_BYTE_WIDTH),
-    "_DP_MODEL": (INTERAL_VAR_START_ADDRESS + 19 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_IS_VALID": (INTERAL_VAR_START_ADDRESS + 20 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_UTC_OFFSET": (INTERAL_VAR_START_ADDRESS + 21 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_YEAR": (INTERAL_VAR_START_ADDRESS + 22 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_MONTH": (INTERAL_VAR_START_ADDRESS + 23 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_DAY": (INTERAL_VAR_START_ADDRESS + 24 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_HOUR": (INTERAL_VAR_START_ADDRESS + 25 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_MINUTE": (INTERAL_VAR_START_ADDRESS + 26 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_SECOND": (INTERAL_VAR_START_ADDRESS + 27 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_WDAY": (INTERAL_VAR_START_ADDRESS + 28 * INTERAL_VAR_BYTE_WIDTH),
-    "_RTC_YDAY": (INTERAL_VAR_START_ADDRESS + 29 * INTERAL_VAR_BYTE_WIDTH),
-    "_UNSIGNED_MATH": (INTERAL_VAR_START_ADDRESS + 30 * INTERAL_VAR_BYTE_WIDTH),
-    "_SW_BITFIELD": (INTERAL_VAR_START_ADDRESS + 31 * INTERAL_VAR_BYTE_WIDTH),
-    
+    "_KBLED_BITFIELD": (INTERAL_VAR_START_ADDRESS + 14 * INTERAL_VAR_BYTE_WIDTH),
+    "_DONT_REPEAT": (INTERAL_VAR_START_ADDRESS + 15 * INTERAL_VAR_BYTE_WIDTH),
+    "_THIS_KEYID": (INTERAL_VAR_START_ADDRESS + 16 * INTERAL_VAR_BYTE_WIDTH),
+    "_DP_MODEL": (INTERAL_VAR_START_ADDRESS + 17 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_IS_VALID": (INTERAL_VAR_START_ADDRESS + 18 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_UTC_OFFSET": (INTERAL_VAR_START_ADDRESS + 19 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_YEAR": (INTERAL_VAR_START_ADDRESS + 20 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_MONTH": (INTERAL_VAR_START_ADDRESS + 21 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_DAY": (INTERAL_VAR_START_ADDRESS + 22 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_HOUR": (INTERAL_VAR_START_ADDRESS + 23 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_MINUTE": (INTERAL_VAR_START_ADDRESS + 24 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_SECOND": (INTERAL_VAR_START_ADDRESS + 25 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_WDAY": (INTERAL_VAR_START_ADDRESS + 26 * INTERAL_VAR_BYTE_WIDTH),
+    "_RTC_YDAY": (INTERAL_VAR_START_ADDRESS + 27 * INTERAL_VAR_BYTE_WIDTH),
+    "_SW_BITFIELD": (INTERAL_VAR_START_ADDRESS + 28 * INTERAL_VAR_BYTE_WIDTH),
+
     "_GV0": (PGV_START_ADDRESS + 0 * PGV_BYTE_WIDTH),
     "_GV1": (PGV_START_ADDRESS + 1 * PGV_BYTE_WIDTH),
     "_GV2": (PGV_START_ADDRESS + 2 * PGV_BYTE_WIDTH),
@@ -675,13 +714,28 @@ ds_builtin_func_lookup = {
     kw_BCLR : reserved_func_info(OP_BCLR, 0),
     kw_SKIP_PROFILE : reserved_func_info(OP_SKIPP, 1),
     kw_DP_SLEEP : reserved_func_info(OP_SLEEP, 0),
-    kw_PEEK8 : reserved_func_info(OP_PEEK8, 1, has_return_value=True),
-    kw_POKE8 : reserved_func_info(OP_POKE8, 2),
     kw_RANDCHR : reserved_func_info(OP_RANDCHR, 1),
     kw_RANDINT : reserved_func_info(OP_RANDINT, 2, has_return_value=True),
+    kw_RANDUINT : reserved_func_info(OP_RANDUINT, 2, has_return_value=True),
     kw_PUTS : reserved_func_info(OP_PUTS, 1),
-    kw_BUZZ : reserved_func_info(OP_PWMCTRL, 1),
     kw_HIDTX : reserved_func_info(OP_HIDTX, 1),
+    # Memory Ops
+    kw_PEEK8 : reserved_func_info(OP_PEEK8, 1, has_return_value=True),
+    kw_PEEKU8 : reserved_func_info(OP_PEEKU8, 1, has_return_value=True),
+    kw_PEEK16 : reserved_func_info(OP_PEEK16, 1, has_return_value=True),
+    kw_PEEKU16 : reserved_func_info(OP_PEEKU16, 1, has_return_value=True),
+    kw_PEEK32 : reserved_func_info(OP_PEEK32, 1, has_return_value=True),
+    kw_POKE8 : reserved_func_info(OP_POKE8, 2),
+    kw_POKE16 : reserved_func_info(OP_POKE16, 2),
+    kw_POKE32 : reserved_func_info(OP_POKE32, 2),
+    # Unsigned Ops
+    kw_ULT : reserved_func_info(OP_ULT, 2, has_return_value=True),
+    kw_ULTE : reserved_func_info(OP_ULTE, 2, has_return_value=True),
+    kw_UGT : reserved_func_info(OP_UGT, 2, has_return_value=True),
+    kw_UGTE : reserved_func_info(OP_UGTE, 2, has_return_value=True),
+    kw_UDIV : reserved_func_info(OP_UDIV, 2, has_return_value=True),
+    kw_UMOD : reserved_func_info(OP_UMOD, 2, has_return_value=True),
+    kw_LSR : reserved_func_info(OP_LSR, 2, has_return_value=True),
 }
 
 ds_func_to_parse_as_str = ds_str_func_lookup | ds_keypress_func_lookup

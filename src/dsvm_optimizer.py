@@ -64,6 +64,14 @@ def replace_dummy_with_drop_from_context_dict(ctx_dict):
 Performs dead function elimination and constant folding
 Only on operators unaffected by `_UNSIGNED_MODE`
 """
+
+
+def c_style_div(a, b):
+    return int(a / b)
+
+def c_style_mod(a, b):
+    return int(math.fmod(a, b))
+
 def optimize_ast(tree, remove_unused_func=True):
     # --- Step 1: Reachability Analysis (Conditional) ---
     live_funcs = set()
@@ -118,8 +126,10 @@ def optimize_ast(tree, remove_unused_func=True):
                         val = self._apply_bin_op(node.op, node.left.value, node.right.value)
                         # Check if optimization was possible (val is not None)
                         if val is not None:
+                            # Cast to int to ensure type consistency (e.g. for division)
                             return ast.Constant(value=int(val))
                     except (ZeroDivisionError, OverflowError):
+                        # Leave the node as is if it causes a runtime error (let the runtime handle it)
                         pass
             return node
 
@@ -138,6 +148,7 @@ def optimize_ast(tree, remove_unused_func=True):
                         try:
                             val = self._apply_cmp_op(op, left.value, right.value)
                             if val is not None:
+                                # Convert boolean result to integer (1 or 0)
                                 return ast.Constant(value=int(val)) 
                         except Exception:
                             pass
@@ -145,7 +156,7 @@ def optimize_ast(tree, remove_unused_func=True):
 
         def visit_BoolOp(self, node):
             self.generic_visit(node)
-            # Constant Folding for Logical Operators
+            # Constant Folding for Logical Operators (LOGIAND, LOGIOR)
             if all(isinstance(v, ast.Constant) for v in node.values):
                 raw_values = [v.value for v in node.values]
                 final_val = 0
@@ -160,14 +171,21 @@ def optimize_ast(tree, remove_unused_func=True):
 
         def _apply_bin_op(self, op, left, right):
             ops = {
+                # Arithmetic
                 ast.Add: operator.add,
                 ast.Sub: operator.sub,
                 ast.Mult: operator.mul,
                 ast.Pow: operator.pow,
-                ast.LShift: operator.lshift,
-                ast.BitOr: operator.or_,
-                ast.BitXor: operator.xor,
-                ast.BitAnd: operator.and_,
+                ast.Div: c_style_div,     
+                ast.FloorDiv: c_style_div,
+                ast.Mod: c_style_mod,         
+                
+                # Bitwise / Shifts
+                ast.LShift: operator.lshift,   # LSL
+                ast.RShift: operator.rshift,   # ASR (Python >> is arithmetic on signed ints)
+                ast.BitOr: operator.or_,       # BITOR
+                ast.BitXor: operator.xor,      # BITXOR
+                ast.BitAnd: operator.and_,     # BITAND
             }
             op_type = type(op)
             if op_type in ops:
@@ -176,8 +194,12 @@ def optimize_ast(tree, remove_unused_func=True):
 
         def _apply_cmp_op(self, op, left, right):
             ops = {
-                ast.Eq: operator.eq,
+                ast.Eq: operator.eq,   
                 ast.NotEq: operator.ne,
+                ast.Lt: operator.lt,   
+                ast.LtE: operator.le,  
+                ast.Gt: operator.gt,   
+                ast.GtE: operator.ge,  
             }
             op_type = type(op)
             if op_type in ops:

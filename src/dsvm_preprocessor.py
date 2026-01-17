@@ -597,12 +597,12 @@ def single_pass(program_listing, define_dict):
 
 def get_default_def_dict():
     default_dict = {
-        kw_RANDOM_LOWERCASE_LETTER : f"{kw_RANDCHR}(0x10001)",
-        kw_RANDOM_UPPERCASE_LETTER : f"{kw_RANDCHR}(0x10002)",
-        kw_RANDOM_LETTER : f"{kw_RANDCHR}(0x10003)",
-        kw_RANDOM_NUMBER : f"{kw_RANDCHR}(0x10004)",
-        kw_RANDOM_SPECIAL : f"{kw_RANDCHR}(0x10008)",
-        kw_RANDOM_CHAR : f"{kw_RANDCHR}(0x1000f)",
+        kw_RANDOM_LOWERCASE_LETTER : f"{kw_RANDCHR}(0x101)",
+        kw_RANDOM_UPPERCASE_LETTER : f"{kw_RANDCHR}(0x102)",
+        kw_RANDOM_LETTER : f"{kw_RANDCHR}(0x103)",
+        kw_RANDOM_NUMBER : f"{kw_RANDCHR}(0x104)",
+        kw_RANDOM_SPECIAL : f"{kw_RANDCHR}(0x108)",
+        kw_RANDOM_CHAR : f"{kw_RANDCHR}(0x10f)",
         kw_DEFAULTDELAY : "_DEFAULTDELAY =",
         kw_DEFAULTCHARDELAY : "_DEFAULTCHARDELAY =",
         kw_CHARJITTER : "_CHARJITTER =",
@@ -612,6 +612,12 @@ def get_default_def_dict():
         kw_TRUE : "1",
         kw_FALSE : "0",
         kw_OLED_PRINT : kw_OLED_LPRINT,
+        rv_IS_NUMLOCK_ON : f"(({rv_KBLED_BITFIELD} & 0x1)!=0)",
+        rv_IS_CAPSLOCK_ON : f"(({rv_KBLED_BITFIELD} & 0x2)!=0)",
+        rv_IS_SCROLLLOCK_ON : f"(({rv_KBLED_BITFIELD} & 0x4)!=0)",
+        kw_PASS : "pass",
+        kw_STR_PRINT_FORMAT : DUMMY_VAR_NAME,
+        kw_STR_PRINT_PADDING : DUMMY_VAR_NAME,
     }
     return default_dict
 
