@@ -7,7 +7,7 @@ from hid_common import *
 from dsvm_common import *
 import dsvm_make_bytecode
 
-print("NOTE TO MYSELF: Don't forget to include latest DSVM compiler!")
+print("NOTE TO MYSELF: Don't forget to include latest DSVM compiler! Copy and replace.")
 
 MAX_PROFILE_NAME_LEN = 16
 MAX_EXPANSION_MODULE_COUNT = 4

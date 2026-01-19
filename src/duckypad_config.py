@@ -189,7 +189,7 @@ New HID command format
 
 """
 
-THIS_VERSION_NUMBER = '4.0.0'
+THIS_VERSION_NUMBER = '4.0.1'
 
 THIS_DUCKYPAD = dp_type()
 
@@ -2108,8 +2108,8 @@ def repeat_func():
 
 root.after(500, repeat_func)
 
-THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
-select_root_folder("sample_dp24", is_dir_for_dp24=True)
+# THIS_DUCKYPAD.device_type = THIS_DUCKYPAD.dp24
+# select_root_folder("sample_dp24", is_dir_for_dp24=True)
 # edit_header_button_click(this_global_setting)
 # connect_button_click()
 # export_profile_click()

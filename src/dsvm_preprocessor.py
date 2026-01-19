@@ -67,6 +67,7 @@ def is_valid_var_name(varname):
     return True, ''
 
 def new_define(pgm_line, dd):
+    pgm_line = pgm_line.rsplit(kw_C_COMMENT, 1)[0].rstrip()
     define_source_start = skip_whitespace(pgm_line)
     if define_source_start == -1:
         return PARSE_ERROR, "DEFINE content not found"
