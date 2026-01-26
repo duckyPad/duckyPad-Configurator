@@ -31,7 +31,6 @@ new opcode values
 single stack
 32 bit stack width and arithmetics
 a lot more look at notes
-
 """
 DS_VM_VERSION = 2
 print_asm = False
@@ -567,7 +566,7 @@ def compile_to_bin(rdict):
     for key in user_strings_dict:
         output_bin_array += key
     if len(output_bin_array) > MAX_BIN_SIZE:
-        raise ValueError("Binary size too large")
+        raise ValueError(f"Bin size too large!\nThis: {len(output_bin_array)}, Max: {MAX_BIN_SIZE}")
     return output_bin_array
 
 def flip_import_line_number(import_dict):

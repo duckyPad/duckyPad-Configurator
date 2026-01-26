@@ -753,7 +753,7 @@ def get_pretty_ds_line_list(dslist):
 def print_ds_line_list(dslist):
     print("OG PY")
     for item in dslist:
-        print(f"{item.orig_lnum_sf1:02} {item.py_lnum_sf1:02} {"    "*item.indent_level} {item.content}")
+        print(f"{item.orig_lnum_sf1:02} {item.py_lnum_sf1:02} {'    '*item.indent_level} {item.content}")
 
 def save_lines_to_file(dslist, filename):
     line_list = get_pretty_ds_line_list(dslist)

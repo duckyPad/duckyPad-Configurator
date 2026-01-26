@@ -69,11 +69,10 @@ def postorder_walk(node, action, ctx_dict):
         postorder_walk(node.left, action, ctx_dict)
         postorder_walk(node.op, action, ctx_dict)
     elif isinstance(node, ast.BoolOp):
-        if len(node.values) > 2:
-            raise ValueError("Ambiguous expr, add parentheses.")
         for item in reversed(node.values):
             postorder_walk(item, action, ctx_dict)
-        postorder_walk(node.op, action, ctx_dict)
+        for x in range(len(node.values) - 1):
+            postorder_walk(node.op, action, ctx_dict)
     elif isinstance(node, ast.UnaryOp):
         postorder_walk(node.operand, action, ctx_dict)
         postorder_walk(node.op, action, ctx_dict)

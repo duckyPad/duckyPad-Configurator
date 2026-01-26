@@ -23,7 +23,7 @@ def replace_DEFINE_once(pgm_line, def_dict):
     for key in def_dict_list_longest_first:
         value = str(def_dict[key])
         pattern = r'\b' + re.escape(key) + r'\b'
-        pgm_line, sub_count = re.subn(pattern, value, pgm_line)
+        pgm_line, sub_count = re.subn(pattern, lambda _: value, pgm_line)
         if sub_count > 0:
             break
     return pgm_line
@@ -604,18 +604,18 @@ def get_default_def_dict():
         kw_RANDOM_NUMBER : f"{kw_RANDCHR}(0x104)",
         kw_RANDOM_SPECIAL : f"{kw_RANDCHR}(0x108)",
         kw_RANDOM_CHAR : f"{kw_RANDCHR}(0x10f)",
-        kw_DEFAULTDELAY : "_DEFAULTDELAY =",
-        kw_DEFAULTCHARDELAY : "_DEFAULTCHARDELAY =",
-        kw_CHARJITTER : "_CHARJITTER =",
+        kw_DEFAULTDELAY : "_DEFAULTDELAY=",
+        kw_DEFAULTCHARDELAY : "_DEFAULTCHARDELAY=",
+        kw_CHARJITTER : "_CHARJITTER=",
         kw_MOUSE_WHEEL : f"{kw_MOUSE_SCROLL} 0",
         f"{kw_FUNCTION} " : f"{kw_FUN} ",
         kw_END_FUNCTION : kw_END_FUN,
         kw_TRUE : "1",
         kw_FALSE : "0",
         kw_OLED_PRINT : kw_OLED_LPRINT,
-        rv_IS_NUMLOCK_ON : f"(({rv_KBLED_BITFIELD} & 0x1)!=0)",
-        rv_IS_CAPSLOCK_ON : f"(({rv_KBLED_BITFIELD} & 0x2)!=0)",
-        rv_IS_SCROLLLOCK_ON : f"(({rv_KBLED_BITFIELD} & 0x4)!=0)",
+        rv_IS_NUMLOCK_ON : f"(({rv_KBLED_BITFIELD}&0x1)!=0)",
+        rv_IS_CAPSLOCK_ON : f"(({rv_KBLED_BITFIELD}&0x2)!=0)",
+        rv_IS_SCROLLLOCK_ON : f"(({rv_KBLED_BITFIELD}&0x4)!=0)",
         kw_PASS : "pass",
         kw_STR_PRINT_FORMAT : DUMMY_VAR_NAME,
         kw_STR_PRINT_PADDING : DUMMY_VAR_NAME,

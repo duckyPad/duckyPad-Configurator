@@ -25,6 +25,36 @@ def line_has_unconsumed_stack_value(line_obj):
         # print("line_has_unconsumed_stack_value:", e)
     return False
 
+def ensure_valid_python_blocks(lines):
+    """
+    Scans transpiled lines and inserts 'pass' into empty blocks
+    to prevent Python IndentationErrors.
+    """
+    fixed_lines = []
+    
+    for i, line in enumerate(lines):
+        fixed_lines.append(line)
+        clean_content = line.content.rstrip() # line.content.split('#')[0].strip()
+        
+        if clean_content.endswith(':'):
+            current_indent = line.indent_level
+            next_indent = -1
+            if i + 1 < len(lines):
+                next_indent = lines[i+1].indent_level
+            
+            if next_indent <= current_indent:
+                pass_line = ds_line(
+                    content='pass', 
+                    orig_lnum_sf1=line.orig_lnum_sf1, 
+                    indent_lvl=current_indent + 1,
+                    source_fn=line.source_fn
+                )
+                pass_line.py_lnum_sf1 = line.py_lnum_sf1 
+                
+                fixed_lines.append(pass_line)
+                
+    return fixed_lines
+
 def run_all(program_listing):
     # print("Transpiling Started")
     new_listing = []
@@ -100,6 +130,9 @@ def run_all(program_listing):
         if line_has_unconsumed_stack_value(line_obj):
             line_obj.content = f"{DUMMY_VAR_NAME} = " + line_obj.content
     # print("Transpiling Done!")
+
+    new_listing = ensure_valid_python_blocks(new_listing)
+
     return new_listing
 
 if __name__ == "__main__":
