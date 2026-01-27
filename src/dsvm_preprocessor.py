@@ -619,6 +619,7 @@ def get_default_def_dict():
         kw_PASS : "pass",
         kw_STR_PRINT_FORMAT : DUMMY_VAR_NAME,
         kw_STR_PRINT_PADDING : DUMMY_VAR_NAME,
+        kw_SWCOLOR : f"{kw_SWCC} 0",
     }
     return default_dict
 
