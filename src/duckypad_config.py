@@ -336,9 +336,9 @@ def ui_reset():
 
 def fw_update_click(event, dp_info_dict):
     if dp_info_dict['dp_model'] == DP_MODEL_OG_DUCKYPAD:
-        webbrowser.open("https://dekunukem.github.io/duckyPad/firmware_updates_and_version_history.html")
+        open_url_safe("https://dekunukem.github.io/duckyPad/firmware_updates_and_version_history.html")
     elif dp_info_dict['dp_model'] == DP_MODEL_DUCKYPAD_PRO:
-        webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/fw_update.html')
+        open_url_safe('https://dekunukem.github.io/duckyPad-Pro/doc/fw_update.html')
 
 def print_fw_update_label(dp_info_dict):
     this_version = dp_info_dict["fw_version"]
@@ -1033,7 +1033,7 @@ def backup_button_click():
     elif 'linux' in sys.platform:
         subprocess.Popen(["xdg-open", backup_path])
     else:
-        webbrowser.open(backup_path)
+        open_url_safe(backup_path)
 
 def key_button_click_event(event):
     key_button_click(event.widget)

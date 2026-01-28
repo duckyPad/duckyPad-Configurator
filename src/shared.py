@@ -25,32 +25,42 @@ hid_dump_path = os.path.join(app_save_path, "hid_dump")
 temp_dir_path = os.path.join(app_save_path, "temp_dir")
 ext_lib_path = os.path.join(app_save_path, "dpds_libs")
 
+def open_url_safe(url):
+    if sys.platform.startswith('linux') and os.geteuid() == 0:
+        if os.environ.get('SUDO_USER'):
+            try:
+                subprocess.Popen(['sudo', '-u', sudo_user, 'xdg-open', url])
+                return
+            except OSError:
+                pass
+    webbrowser.open(url)
+
 def open_discord_link():
-    webbrowser.open("https://discord.gg/4sJCBx5")
+    open_url_safe("https://discord.gg/4sJCBx5")
 
 def app_update_click(event):
-    webbrowser.open('https://github.com/duckyPad/duckyPad-Configurator/releases/latest')
+    open_url_safe('https://github.com/duckyPad/duckyPad-Configurator/releases/latest')
 
 def open_profile_autoswitcher_url():
-    webbrowser.open('https://github.com/duckyPad/duckyPad-profile-autoswitcher/blob/master/README.md')
+    open_url_safe('https://github.com/duckyPad/duckyPad-profile-autoswitcher/blob/master/README.md')
 
 def open_tindie_store():
-    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/store_links.html')
+    open_url_safe('https://dekunukem.github.io/duckyPad-Pro/doc/store_links.html')
 
 def open_mac_linux_instruction():
-    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/linux_macos_notes.html')
+    open_url_safe('https://dekunukem.github.io/duckyPad-Pro/doc/linux_macos_notes.html')
 
 def script_instruction_click(event):
-    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/duckyscript_info.html')
+    open_url_safe('https://dekunukem.github.io/duckyPad-Pro/doc/duckyscript_info.html')
 
 def open_dpp_page(event):
-    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/README.html')
+    open_url_safe('https://dekunukem.github.io/duckyPad-Pro/README.html')
 
 def open_duckypad_user_manual_url():
-    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html')
+    open_url_safe('https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html')
 
 def open_duckypad_troubleshooting_url():
-    webbrowser.open('https://dekunukem.github.io/duckyPad-Pro/doc/troubleshooting.html')
+    open_url_safe('https://dekunukem.github.io/duckyPad-Pro/doc/troubleshooting.html')
 
 def rgb_to_hex(rgb_tuple):
     return '#%02x%02x%02x' % rgb_tuple

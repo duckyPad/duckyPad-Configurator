@@ -3,6 +3,7 @@ import time
 import requests
 from enum import IntEnum
 import webbrowser
+from shared import *
 
 default_stdlib_code = """
 
@@ -107,7 +108,7 @@ class stdlib_fetch_result(IntEnum):
 stdlib_readme_url = "https://github.com/duckyPad/DPDS-Standard-Library/blob/master/README.md"
 
 def open_stdlib_doc_url():
-    webbrowser.open(stdlib_readme_url)
+    open_url_safe(stdlib_readme_url)
 
 stdlib_url = 'https://raw.githubusercontent.com/duckyPad/DPDS-Standard-Library/refs/heads/master/releases/duckypad_stdlib_latest.txt'
 STDLIB_CHECK_INTERVAL_HOURS = 12
