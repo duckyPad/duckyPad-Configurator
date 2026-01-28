@@ -26,8 +26,8 @@ temp_dir_path = os.path.join(app_save_path, "temp_dir")
 ext_lib_path = os.path.join(app_save_path, "dpds_libs")
 
 def open_url_safe(url):
-    if sys.platform.startswith('linux') and os.geteuid() == 0:
-        print(f"\nPlease open this URL manually ------>   {url}\n")
+    if 'linux' in sys.platform.lower() and os.geteuid() == 0:
+        print(f"\nOpen this URL manually ------>   {url}\n")
         try:
             from tkinter import messagebox
             messagebox.showinfo(title="Info",message="Cannot open webbrowser as root.\n\nPlease click the link printed in your terminal manually.")
