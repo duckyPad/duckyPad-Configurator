@@ -27,7 +27,8 @@ ext_lib_path = os.path.join(app_save_path, "dpds_libs")
 
 def open_url_safe(url):
     if sys.platform.startswith('linux') and os.geteuid() == 0:
-        if os.environ.get('SUDO_USER'):
+        sudo_user = os.environ.get('SUDO_USER')
+        if sudo_user:
             try:
                 subprocess.Popen(['sudo', '-u', sudo_user, 'xdg-open', url])
                 return
