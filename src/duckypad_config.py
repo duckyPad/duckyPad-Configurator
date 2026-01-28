@@ -187,9 +187,15 @@ Supports DSVM2
 2026 01 17
 New HID command format
 
+4.0.2
+2026 01 28
+Allows empty IF, WHILE, and FUN block
+allows '\' in DEFINEs
+chained boolops working
+
 """
 
-THIS_VERSION_NUMBER = '4.0.1'
+THIS_VERSION_NUMBER = '4.0.2'
 
 THIS_DUCKYPAD = dp_type()
 
