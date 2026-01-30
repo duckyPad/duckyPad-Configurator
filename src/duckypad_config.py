@@ -1099,6 +1099,7 @@ def key_button_click(button_widget):
         # script_textbox.tag_remove("error", '1.0', 'end')
         script_text = get_correct_script_text(thissss_key)
         script_textbox.insert(1.0, script_text)
+        print("??????", len(thissss_key.script_on_release))
         if len(thissss_key.script_on_release) > 4:
             on_release_rb.configure(fg=color_green_both_light_and_dark_mode)
         else:
@@ -1804,6 +1805,7 @@ def script_textbox_modified():
     thissss_key = profile_list[profile_index].keylist[selected_key]
     if thissss_key is None:
         return
+    print("??????", len(thissss_key.script_on_release))
     if len(thissss_key.script_on_release) > 4:
         on_release_rb.configure(fg=color_green_both_light_and_dark_mode)
     else:
