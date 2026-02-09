@@ -9,39 +9,45 @@ if 'win32' not in sys.platform:
     exit()
 
 def clean(additional=None):
-	removethese = ['__pycache__','build','dist','*.spec']
-	if additional:
-		removethese.append(additional)
-	for _object in removethese:
-		target=glob(os.path.join('.', _object))
-		for _target in target:
-			try:
-				if os.path.isdir(_target):
-					shutil.rmtree(_target)
-				else:
-					os.remove(_target)
-			except:
-				print(f'Error deleting {_target}.')
+    removethese = ['__pycache__','build','dist','*.spec']
+    if additional:
+        removethese.append(additional)
+    for _object in removethese:
+        target=glob(os.path.join('.', _object))
+        for _target in target:
+            try:
+                if os.path.isdir(_target):
+                    shutil.rmtree(_target)
+                else:
+                    os.remove(_target)
+            except:
+                print(f'Error deleting {_target}.')
 
 
 THIS_VERSION = None
 try:
-	mainfile = open('duckypad_config.py')
-	for line in mainfile:
-		if "THIS_VERSION_NUMBER =" in line:
-			THIS_VERSION = line.replace('\n', '').replace('\r', '').split("'")[-2]
-	mainfile.close()
+    mainfile = open('duckypad_config.py')
+    for line in mainfile:
+        if "THIS_VERSION_NUMBER =" in line:
+            THIS_VERSION = line.replace('\n', '').replace('\r', '').split("'")[-2]
+    mainfile.close()
 except Exception as e:
-	print('build_windows exception:', e)
-	exit()
+    print('build_windows exception:', e)
+    exit()
 
 if THIS_VERSION is None:
-	print('could not find version number!')
-	exit()
+    print('could not find version number!')
+    exit()
 
 # --noconsole
 clean(additional='duckypad*.zip')
-PyInstaller.__main__.run(['duckypad_config.py','--icon=_icon.ico'])
+
+# Using --collect-all=certifi to automatically grab all certs and modules
+PyInstaller.__main__.run([
+    'duckypad_config.py',
+    '--icon=_icon.ico',
+    '--collect-all=certifi'
+])
 
 output_folder_path = os.path.join('.', "dist")
 original_name = os.path.join(output_folder_path, "duckypad_config")

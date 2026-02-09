@@ -1,5 +1,7 @@
 import os
 import shutil
+import certifi
+os.environ["SSL_CERT_FILE"] = certifi.where()
 import webbrowser
 from platformdirs import *
 from pathlib import Path

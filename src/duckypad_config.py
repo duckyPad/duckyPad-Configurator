@@ -192,7 +192,7 @@ New HID command format
 Allows empty IF, WHILE, and FUN block
 allows '\' in DEFINEs
 chained boolops working
-
+fixed SSL certificate not found error
 """
 
 THIS_VERSION_NUMBER = '4.0.2'
