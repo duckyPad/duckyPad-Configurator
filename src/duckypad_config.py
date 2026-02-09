@@ -21,6 +21,7 @@ import dp20_dumpsd
 from tkinter import font
 import dsvm_preprocessor
 import ds_stdlib
+import darkdetect
 
 """
 0.13.5
@@ -192,7 +193,12 @@ New HID command format
 Allows empty IF, WHILE, and FUN block
 allows '\' in DEFINEs
 chained boolops working
+<<<<<<< HEAD
 fixed SSL certificate not found error
+
+4.0.3
+2026 01 30
+Dark mode detect
 """
 
 THIS_VERSION_NUMBER = '4.0.2'
@@ -212,6 +218,18 @@ this_global_setting = duck_objs.dp_global_settings()
 
 def scaled_size(size: int) -> int:
     return int(size * UI_SCALE)
+
+color_blue_both_light_and_dark_mode = 'blue'
+if darkdetect.isDark():
+    color_blue_both_light_and_dark_mode = "skyblue1"
+
+color_green_both_light_and_dark_mode = 'green'
+if darkdetect.isDark():
+    color_green_both_light_and_dark_mode = "palegreen"
+
+text_color_both_light_and_dark_mode = 'black'
+if darkdetect.isDark():
+    text_color_both_light_and_dark_mode = "white"
 
 ensure_dir(app_save_path)
 ensure_dir(backup_path)
@@ -333,7 +351,7 @@ def ui_reset():
     dont_repeat_checkbox.config(state=DISABLED)
     script_textbox.delete(1.0, 'end')
     profile_lstbox.place_forget()
-    check_syntax_label.config(text="", fg="green")
+    check_syntax_label.config(text="", fg=color_green_both_light_and_dark_mode)
     profile_import_button.config(state=DISABLED)
     profile_export_button.config(state=DISABLED)
     # exp_page_plus_button.config(state=DISABLED)
@@ -678,7 +696,7 @@ def update_profile_display():
     allow_abort_checkbox.config(state=DISABLED)
     dont_repeat_checkbox.config(state=DISABLED)
     script_textbox.delete(1.0, 'end')
-    check_syntax_label.config(text="", fg="green")
+    check_syntax_label.config(text="", fg=color_green_both_light_and_dark_mode)
 
 def make_key_button_text_from_two_lines(line1, line2):
     if line1 is None:
@@ -1083,10 +1101,10 @@ def key_button_click(button_widget):
         # script_textbox.tag_remove("error", '1.0', 'end')
         script_text = get_correct_script_text(thissss_key)
         script_textbox.insert(1.0, script_text)
-        if len(thissss_key.script_on_release) > 0:
-            on_release_rb.configure(fg='green4')
+        if len(thissss_key.script_on_release) > 1:
+            on_release_rb.configure(fg=color_green_both_light_and_dark_mode)
         else:
-            on_release_rb.configure(fg='gray20')
+            on_release_rb.configure(fg=text_color_both_light_and_dark_mode)
     else:
         scripts_lf.place_forget()
         empty_script_label.place(x=scaled_size(800), y=scaled_size(200))
@@ -1144,7 +1162,7 @@ root.update()
 root_folder_select_button = Button(root_folder_lf, text="Connect", command=connect_button_click)
 root_folder_select_button.place(x=scaled_size(5), y=0, width=scaled_size(75), height=scaled_size(25))
 
-root_folder_path_label = Label(master=root_folder_lf, textvariable=dp_root_folder_display, foreground='blue')
+root_folder_path_label = Label(master=root_folder_lf, textvariable=dp_root_folder_display, foreground=color_blue_both_light_and_dark_mode)
 root_folder_path_label.place(x=scaled_size(90), y=0)
 
 save_button = Button(root_folder_lf, text="Save", command=save_click, state=DISABLED)
@@ -1160,9 +1178,9 @@ def update_header_button_color(btn_widget, setting_obj):
 
     if has_content:
         if sys.platform == 'darwin':
-            btn_widget.configure(highlightbackground='PaleGreen3')
+            btn_widget.configure(highlightbackground=color_green_both_light_and_dark_mode)
         else:
-            btn_widget.configure(fg='green4')
+            btn_widget.configure(fg=color_green_both_light_and_dark_mode)
     else:
         if sys.platform == 'darwin':
             btn_widget.configure(highlightbackground=default_button_color)
@@ -1262,7 +1280,7 @@ def edit_header_button_click(global_setting_obj):
         comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, remove_unused_func=False)
         
         if comp_result.is_success:
-            bottom_label.config(text="Code seems OK...", fg="green")
+            bottom_label.config(text="Code seems OK...", fg=color_green_both_light_and_dark_mode)
         else:
             bottom_label.config(text=comp_result.error_comment, fg="red")
             line_no = comp_result.error_line_number_starting_from_1
@@ -1380,7 +1398,7 @@ re_tease_lf = LabelFrame(root, text="Rotary Encoders", width=scaled_size(150), h
 key_instruction_label = Label(master=re_tease_lf, text="None on this duckyPad :(")
 key_instruction_label.place(x=scaled_size(2), y=scaled_size(60))
 
-script_instruction = Label(master=re_tease_lf, text="Check out duckyPad Pro", fg="blue", cursor="hand2")
+script_instruction = Label(master=re_tease_lf, text="Check out duckyPad Pro", fg=color_blue_both_light_and_dark_mode, cursor="hand2")
 script_instruction.place(x=scaled_size(5), y=scaled_size(80))
 script_instruction.bind("<Button-1>", open_dpp_page)
 
@@ -1773,7 +1791,7 @@ root.update()
 # ------------- Scripts frame -------------
 scripts_lf = LabelFrame(root, text="Scripts", width=scaled_size(310), height=scaled_size(473))
 
-script_instruction = Label(master=scripts_lf, text="duckyScript Instructions", fg="blue", cursor="hand2")
+script_instruction = Label(master=scripts_lf, text="duckyScript Instructions", fg=color_blue_both_light_and_dark_mode, cursor="hand2")
 root.update()
 script_instruction.place(x=scaled_size(85), y=0)
 script_instruction.bind("<Button-1>", script_instruction_click)
@@ -1788,10 +1806,10 @@ def script_textbox_modified():
     thissss_key = profile_list[profile_index].keylist[selected_key]
     if thissss_key is None:
         return
-    if len(thissss_key.script_on_release) > 0:
-        on_release_rb.configure(fg='green4')
+    if len(thissss_key.script_on_release) > 1:
+        on_release_rb.configure(fg=color_green_both_light_and_dark_mode)
     else:
-        on_release_rb.configure(fg='gray20')
+        on_release_rb.configure(fg=text_color_both_light_and_dark_mode)
     current_text = script_textbox.get(1.0, END).lstrip(" \t")
     if on_press_release_rb_var.get():
         thissss_key.script_on_release = current_text
@@ -1861,7 +1879,7 @@ def check_syntax(force=False):
     comp_result = dsvm_make_bytecode.make_dsb_no_exception(ds_line_obj_list, import_name_to_line_obj_dict=import_to_lineobj_dict)
     script_textbox.tag_remove("error", '1.0', 'end')
     if comp_result.is_success:
-        check_syntax_label.config(text="Code seems OK...", fg="green")       
+        check_syntax_label.config(text="Code seems OK...", fg=color_green_both_light_and_dark_mode)       
         return
     error_lnum = comp_result.error_line_number_starting_from_1
     error_text = comp_result.error_comment
