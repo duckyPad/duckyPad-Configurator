@@ -3,3 +3,5 @@ hidapi
 psutil
 pyinstaller
 requests
+darkdetect
+certifi
