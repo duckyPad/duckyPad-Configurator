@@ -1,6 +1,6 @@
 # duckyPad Configurator
 
-This is the software that configures [duckyPad Macropads](duckypad.com)!
+This is the software that configures [duckyPad Macropads](https://duckypad.com)!
 
 ### How to Use
 
