@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "duckypad-configurator"
+version = "3.4.0"
+description = "Configurator and firmware utility for duckyPad devices."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "dekuNukem" }]
+dependencies = [
+    "platformdirs",
+    "hidapi",
+    "pywin32; sys_platform == 'win32'",
+    "psutil",
+    "pyinstaller",
+]
+
+[project.scripts]
+duckypad_config = "duckypad_config:main"
+
+[project.urls]
+Homepage = "https://duckypad.com"
+Repository = "https://github.com/duckyPad/duckyPad-Configurator"
+Documentation = "https://dekunukem.github.io/duckyPad-Pro/doc/getting_started.html"
+

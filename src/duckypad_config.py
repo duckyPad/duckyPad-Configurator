@@ -2139,4 +2139,8 @@ root.after(500, repeat_func)
 # export_profile_click()
 # import_profile_click()
 
-root.mainloop()
+def main():
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
